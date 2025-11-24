@@ -6,6 +6,7 @@ type User struct {
 	Name     string `json:"name"`
 	Username int    `json:"username"`
 	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func (User) TableName() string {
