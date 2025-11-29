@@ -14,6 +14,9 @@ func SetupRouters(app *gin.Engine) {
 		authRoute := route.Group("auth")
 		authRoute.POST("/login-admin", controllers.LoginUserAdmin)
 		authRoute.GET("/verify/:email/:token", controllers.VerifyEmail)
+		authRoute.POST("/forgot-password", controllers.ForgotPassword)
+		authRoute.GET("/send-reset-password/:email/:token", controllers.SendResetPassword)
+		authRoute.POST("/reset-password/:email/:token", controllers.ResetPassword)
 
 		// Drop Email Verified At
 		route.GET("/drop-email-verified-at/:username", controllers.DropEmailVerifiedAt)

@@ -9,11 +9,11 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-func SendVerificationEmail(to string, data interface{}) {
+func SendResetPassword(to string, data interface{}) {
 
 	mailer := config.EmailConfig()
 	// Load HTML template
-	body, err := template.LoadHTMLTemplate("./templates/mail/verify_email.html", data)
+	body, err := template.LoadHTMLTemplate("./templates/mail/reset_password.html", data)
 	if err != nil {
 		return
 	}
@@ -22,7 +22,7 @@ func SendVerificationEmail(to string, data interface{}) {
 	mail.SetHeader("From", os.Getenv("MAIL_USERNAME"))
 	mail.SetHeader("Name", "Administrator")
 	mail.SetHeader("To", to)
-	mail.SetHeader("Subject", "Email Verification")
+	mail.SetHeader("Subject", "Forgot Password")
 
 	mail.SetBody("text/html", body)
 	if err := mailer.DialAndSend(mail); err != nil {
