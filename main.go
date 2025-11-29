@@ -19,6 +19,7 @@ func main() {
 	router := gin.Default()
 	// 1. Koneksi ke database
 	config.ConnectDatabase()
+	config.EmailConfig()
 
 	routes.SetupRouters(router)
 	router.Run(os.Getenv("APP_URL"))

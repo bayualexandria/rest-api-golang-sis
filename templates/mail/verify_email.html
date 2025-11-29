@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" style="margin: 0; padding: 0;">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #f5f7fa; font-family: Arial, sans-serif;">
+
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="padding: 40px 0; background-color: #f5f7fa;">
+        <tr>
+            <td align="center">
+
+                <!-- CARD -->
+                <table width="600" cellspacing="0" cellpadding="0"
+                    style="background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+
+                    <!-- HEADER -->
+                    <tr>
+                        <td
+                            style="background: #4f46e5; padding: 22px; text-align: center; color: #fff; font-size: 22px; font-weight: bold;">
+                            Verifikasi Email Anda
+                        </td>
+                    </tr>
+
+                    <!-- BODY -->
+                    <tr>
+                        <td style="padding: 30px 40px;">
+
+                            <h2 style="margin: 0; color: #333; font-size: 20px;">Halo {{.Name}},</h2>
+
+                            <p style="color: #555; font-size: 15px; line-height: 1.6; margin-top: 18px;">
+                                Terima kasih telah mendaftar di layanan kami.<br>
+                                Untuk melanjutkan proses, silakan klik tombol di bawah untuk memverifikasi email Anda.
+                            </p>
+
+                            <!-- BUTTON -->
+                            <table cellspacing="0" cellpadding="0" style="margin: 28px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{.VerificationLink}}" target="_blank"
+                                            style="background-color: #4f46e5; padding: 14px 28px; color: #fff; 
+                                              text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">
+                                            Verifikasi Email
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="color: #777; font-size: 14px; line-height: 1.6;">
+                                Jika tombol tidak berfungsi, silakan salin link berikut ke browser Anda:
+                            </p>
+
+                            <p style="word-break: break-all; font-size: 14px; color: #4f46e5;">
+                                {{.VerificationLink}}
+                            </p>
+
+                            <p style="color: #999; font-size: 14px; margin-top: 40px;">
+                                Email ini otomatis. Mohon tidak membalas.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td
+                            style="background: #f1f1f1; padding: 18px; text-align: center; font-size: 13px; color: #777;">
+                            © 2025 Your App Name — All Rights Reserved
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+
+</html>
