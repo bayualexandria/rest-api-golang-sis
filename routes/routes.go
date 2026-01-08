@@ -17,12 +17,16 @@ func SetupRouters(app *gin.Engine) {
 		authRoute.POST("/forgot-password", controllers.ForgotPassword)
 		authRoute.GET("/send-reset-password/:email/:token", controllers.SendResetPassword)
 		authRoute.POST("/reset-password/:email/:token", controllers.ResetPassword)
+		authRoute.POST("/logout", middleware.AuthMiddleware(), controllers.LogoutUser)
 
 		// Drop Email Verified At
 		route.GET("/drop-email-verified-at/:username", controllers.DropEmailVerifiedAt)
 
+		// Login Social Media Routes
+		route.GET("/login/google/:email/:idGoogle/:nameGoogle", controllers.LoginUserSocialMedia)
+
+		// Endpoint Routes
 		route.GET("/", controllers.HomeHandler)
-		authRoute.POST("/logout", middleware.AuthMiddleware(), controllers.LogoutUser)
 		route.GET("/user", middleware.AuthMiddleware(), controllers.GetUsers)
 		route.GET("/siswa", middleware.AuthMiddleware(), controllers.GetSiswa)
 		route.GET("/guru", middleware.AuthMiddleware(), controllers.GetGuru)
