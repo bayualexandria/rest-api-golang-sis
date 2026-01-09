@@ -30,6 +30,12 @@ func LoginUserAdmin(c *gin.Context) {
 		return
 	}
 
+	if config.DB.Where("status_id != ?", "4").First(&user).Error != nil {
+		c.JSON(403, gin.H{"error": "User ini tidak memiliki akses login!"})
+		return
+
+	}
+
 	if !utils.CheckPasswordHash(input.Password, user.Password) {
 		c.JSON(403, gin.H{"error": "Password yang anda masukan salah"})
 		return
@@ -59,6 +65,48 @@ func LoginUserAdmin(c *gin.Context) {
 	inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
 	config.DB.Create(&inputToken)
 
+	c.JSON(http.StatusOK, gin.H{"data": user, "token": token})
+}
+
+func LoginUser(c *gin.Context) {
+	var input validations.LoginValidation
+	if err := c.ShouldBindJSON(&input); err != nil {
+		msg := validations.TranslateError(err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": msg})
+		return
+	}
+	var user models.User
+
+	if err := config.DB.Where("username = ?", input.Username).First(&user).Error; err != nil {
+		c.JSON(403, gin.H{"error": "Username belum terdaftar"})
+		return
+	}
+
+	if err := config.DB.Where("status_id = ?", "4").First(&user).Error; err != nil {
+		c.JSON(403, gin.H{"error": "User ini tidak memiliki akses login!"})
+		return
+
+	}
+
+	if !utils.CheckPasswordHash(input.Password, user.Password) {
+		c.JSON(403, gin.H{"error": "Password yang anda masukan salah"})
+		return
+	}
+	token, err := utils.GenerateJWT(user.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal memuat token"})
+		return
+	}
+	var inputToken models.PersonalAccessToken
+	inputToken.Token = token
+	inputToken.TokenableType = "User"
+	inputToken.TokenableID = user.ID
+	inputToken.Name = "Personal Access Token"
+	inputToken.Abilities = "*"
+	inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
+	inputToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
+	inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+	config.DB.Create(&inputToken)
 	c.JSON(http.StatusOK, gin.H{"data": user, "token": token})
 }
 

@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddlewareAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 		var idToken models.PersonalAccessToken
@@ -25,7 +25,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 
 		}
-		if err := config.DB.Where("status_id = ?", "4").First(&user).Error; err != nil {
+		if err := config.DB.Where("status_id = ?", "3").Where("status_id = ?", "2").Where("status_id = ?", "1").First(&user).Error; err != nil {
 			c.JSON(403, gin.H{"error": "User ini tidak memiliki akses!"})
 			c.Abort()
 			return

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend API</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body>
+    <div class="min-h-screen bg-gray-100 flex flex-col">
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <h1 class="text-3xl font-bold text-gray-900">Backend API Sistem Informasi Siswa</h1>
+            </div>
+        </header>
+        <main class="flex-grow">
+            <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                <div class="px-4 py-6 sm:px-0">
+                    <div
+                        class="border-4 border-dashed border-gray-200 rounded-lg h-full flex items-center justify-center flex-col bg-white shadow p-6 ">
+                        <p class="text-sky-500 text-2xl font-bold">Selamat datang di Backend API Sistem Informasi Siswa.
+                        </p>
+
+                        <div class="flex flex-col">
+                            <div class="flex flex-col mt-4 mb-4">
+                                <h2 class="text-xl font-semibold mb-2">Dokumentasi API:</h2>
+                                <p class="text-base text-gray-500">Aplikasi Rest API ini menggunakan bahasa pemrograman
+                                    Golang. Gunakan aplikasi seperti Postman atau curl untuk
+                                    mengakses
+                                    API ini.</p>
+                                <p class="text-base text-gray-500">Diperuntukan yang sudah ahli di bidang Rest Full API.
+                                    Untuk pemula harus pelajari dahulu basic tentang Rest Full API</p>
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <div class="p-3 shadow-md bg-gray-50 font-mono font-semibold rounded">
+                                    <h6>Authentication Login</h6>
+                                    <div class="flex flex-col">
+                                        <div class="flex flex-col py-3">
+                                            <div class="flex flex-row">
+                                                <span class="text-grey-600">Username:</span>
+                                                <div class="flex flex-row">5304750710990872</div>
+                                            </div>
+                                            <div class="flex flex-row">
+                                                <span class="text-grey-600">Password:</span>
+                                                <div class="flex flex-row">admin123</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Base URL:</span>
+                                            <div class="flex flex-row"><a class="text-blue-600 hover:text-blue-800"
+                                                    href="/api/auth/login">
+                                                    /api/auth/login</a></div>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Method:</span>
+                                            <div class="flex flex-row">POST</div>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Description:</span>
+                                            <div class="flex flex-row">Login untuk mendapatkan token
+                                                autentikasi</div>
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+                                <div class="p-3 shadow-md bg-gray-50 font-mono font-semibold rounded">
+                                    <h6>Get All Students</h6>
+                                    <div class="flex flex-col">
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Base URL:</span>
+                                            <div class="flex flex-row"><a class="text-blue-600 hover:text-blue-800"
+                                                    href="/api/siswa">
+                                                    /api/siswa</a></div>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Method:</span>
+                                            <div class="flex flex-row">GET</div>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Description:</span>
+                                            <div class="flex flex-row">Mengambil semua data siswa (memerlukan token
+                                                autentikasi)</div>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Headers:</span>
+                                            <div class="flex flex-row">Authorization: Bearer &lt;token&gt;</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="text-gray-500 text-sm text-center py-5">Maaf endpoint untuk API nya hanya ini saja
+                                untuk uji
+                                coba(testing), demi keamanan atau
+                                siapa tau ada yang bisa hack saya persilahkan program aplikasi ini ada di server local
+                                ubuntu-server saya yang terpublish menggunakan VPN &#x1F601;</p>
+                        </div>
+                    </div>
+                </div>
+        </main>
+
+        <footer class="bg-white shadow mt-auto">
+            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+                &copy; 2026 Your Company. b4yu@lex@ndr!4.
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>
