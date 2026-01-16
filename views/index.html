@@ -68,7 +68,7 @@
 
                                 </div>
                                 <div class="p-3 shadow-md bg-gray-50 font-mono font-semibold rounded">
-                                    <h6>Get All Students</h6>
+                                    <h6>Menampilkan Semua Data Siswa</h6>
                                     <div class="flex flex-col">
                                         <div class="flex flex-row">
                                             <span class="text-green-600">Base URL:</span>
@@ -91,13 +91,64 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="p-3 shadow-md bg-gray-50 font-mono font-semibold rounded">
+                                    <h6>Menampilkan Data Siswa Berdasarkan NIS</h6>
+                                    <div class="flex flex-col">
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Base URL:</span>
+                                            <div class="flex flex-row"><a class="text-blue-600 hover:text-blue-800"
+                                                    href="/api/siswa/{nis}">
+                                                    /api/siswa/{nis}</a></div>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Method:</span>
+                                            <div class="flex flex-row">GET</div>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Description:</span>
+                                            <div class="flex flex-row">Mengambil data siswa berdasarkan NIS bisa dilihat
+                                                dari semua data siswa (memerlukan token
+                                                autentikasi)</div>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Headers:</span>
+                                            <div class="flex flex-row">Authorization: Bearer &lt;token&gt;</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 shadow-md bg-gray-50 font-mono font-semibold rounded">
+                                    <h6>Logout Authentication</h6>
+                                    <div class="flex flex-col">
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Base URL:</span>
+                                            <div class="flex flex-row"><a class="text-blue-600 hover:text-blue-800"
+                                                    href="/api/logout">
+                                                    /api/logout</a></div>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Method:</span>
+                                            <div class="flex flex-row">POST</div>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Description:</span>
+                                            <div class="flex flex-row">Logout dari sistem (memerlukan token
+                                                autentikasi)</div>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <span class="text-green-600">Headers:</span>
+                                            <div class="flex flex-row">Authorization: Bearer &lt;token&gt;</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <p class="text-gray-500 text-sm text-center py-5">Maaf endpoint untuk API nya hanya ini saja
                                 untuk uji
-                                coba(testing), demi keamanan atau
+                                coba(testing) data dummy untuk Frontend development
+                                atau
                                 siapa tau ada yang bisa hack saya persilahkan program aplikasi ini ada di server local
-                                ubuntu-server saya yang terpublish menggunakan VPN &#x1F601;</p>
+                                ubuntu-server saya yang terpublish menggunakan VPN, supaya saya cari tau kelemahan
+                                sistem saya dimana &#x1F601; </p>
                         </div>
                     </div>
                 </div>
@@ -105,7 +156,7 @@
 
         <footer class="bg-white shadow mt-auto">
             <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 text-center text-gray-500">
-                &copy; 2026 Your Company. b4yu@lex@ndr!4.
+                &copy; 2026. cre@ted by b@yu4lex@ndr!4.
             </div>
         </footer>
     </div>

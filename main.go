@@ -7,7 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -30,6 +32,13 @@ func main() {
 		}
 		return nil
 	})
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*", "http://my-server-dns", "http://192.168.88.103"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{"Content-Type,access-control-allow-origin, access-control-allow-headers"},
+		MaxAge:       12 * time.Hour,
+	}))
 	router.LoadHTMLFiles(files...)
 	// Setup routes web
 	routes.SetupRouters(router)

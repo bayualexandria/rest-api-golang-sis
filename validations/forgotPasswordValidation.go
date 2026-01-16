@@ -14,15 +14,19 @@ var forgotPasswordMessages = map[string]string{
 }
 
 func TranslateForgotPasswordError(err error) string {
-	if errs, ok := err.(validator.ValidationErrors); ok {
-		for _, e := range errs {
-			key := e.Field() + "." + e.ActualTag()
-			if msg, exists := forgotPasswordMessages[key]; exists {
-				return msg
+	errors := make(map[string]string)
+	if validationErrors, ok := err.(validator.ValidationErrors); ok {
+		for _, fieldError := range validationErrors {
+			fieldName := fieldError.Field()
+			tag := fieldError.Tag()
+			key := fieldName + "." + tag
+			if msg, exists := customMessages[key]; exists {
+				errors[fieldName] = msg
 			}
+
 		}
 	}
-	return err.Error()
+	return errors["Email"]
 }
 
 

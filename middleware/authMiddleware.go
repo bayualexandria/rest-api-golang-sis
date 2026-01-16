@@ -15,18 +15,18 @@ func AuthMiddleware() gin.HandlerFunc {
 		var idToken models.PersonalAccessToken
 		var user models.User
 		if token == "" || !strings.HasPrefix(token, "Bearer ") {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token tidak ditemukan!"})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak ditemukan!","status":401})
 			c.Abort()
 			return
 		}
 		if err := config.DB.Where("token = ?", strings.TrimPrefix(token, "Bearer ")).First(&idToken).Error; err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token tidak valid!"})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid!","status":401})
 			c.Abort()
 			return
 
 		}
 		if err := config.DB.Where("status_id = ?", "4").First(&user).Error; err != nil {
-			c.JSON(403, gin.H{"error": "User ini tidak memiliki akses!"})
+			c.JSON(403, gin.H{"message": "User ini tidak memiliki akses!","status":403})
 			c.Abort()
 			return
 

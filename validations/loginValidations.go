@@ -4,16 +4,18 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type ResetPasswordValidation struct {
-	Password string `json:"password" binding:"required,min=8"`
+type LoginValidation struct {
+	Username string `json:"username" binding:"required,numeric"`
+	Password string `json:"password" binding:"required"`
 }
 
-var resetPasswordMessages = map[string]string{
+var customMessages = map[string]string{
+	"Username.required": "Username atau NIP harus diisi",
+	"Username.numeric":  "Yang anda masukan bukan username atau NIP",
 	"Password.required": "Password harus diisi",
-	"Password.min":      "Password minimal 8 karakter",
 }
 
-func TranslateResetPasswordError(err error) string {
+func TranslateError(err error) map[string]string {
 	errors := make(map[string]string)
 	if validationErrors, ok := err.(validator.ValidationErrors); ok {
 		for _, fieldError := range validationErrors {
@@ -26,5 +28,5 @@ func TranslateResetPasswordError(err error) string {
 
 		}
 	}
-	return errors["Password"]
+	return errors
 }

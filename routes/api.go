@@ -8,6 +8,7 @@ import (
 )
 
 func SetupRoutersAPI(app *gin.Engine) {
+
 	route := app.Group("/api")
 	{
 		// Authentication Routes
@@ -30,6 +31,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 		route.GET("/", controllers.HomeHandler)
 		route.GET("/user", middleware.AuthMiddlewareAdmin(), controllers.GetUsers)
 		route.GET("/siswa", middleware.AuthMiddleware(), middleware.AuthMiddleware(), controllers.GetSiswa)
+		route.GET("/siswa/:nis", middleware.AuthMiddleware(), middleware.AuthMiddleware(), controllers.GetSiswaByID)
 		route.GET("/guru", middleware.AuthMiddlewareAdmin(), controllers.GetGuru)
 		route.GET("/guru/:nip", middleware.AuthMiddlewareAdmin(), controllers.GetGuruById)
 		route.POST("/logout", middleware.AuthMiddleware(), controllers.LogoutUser)

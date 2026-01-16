@@ -20,30 +20,30 @@ func LoginUserAdmin(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		msg := validations.TranslateError(err)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": msg})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
 		return
 	}
 
 	var user models.User
 	if err := config.DB.Where("username = ?", input.Username).First(&user).Error; err != nil {
-		c.JSON(403, gin.H{"error": "Username belum terdaftar"})
+		c.JSON(403, gin.H{"message": "Username belum terdaftar", "status": 403})
 		return
 	}
 
 	if config.DB.Where("status_id != ?", "4").First(&user).Error != nil {
-		c.JSON(403, gin.H{"error": "User ini tidak memiliki akses login!"})
+		c.JSON(403, gin.H{"message": "User ini tidak memiliki akses login!", "status": 403})
 		return
 
 	}
 
 	if !utils.CheckPasswordHash(input.Password, user.Password) {
-		c.JSON(403, gin.H{"error": "Password yang anda masukan salah"})
+		c.JSON(403, gin.H{"message": "Password yang anda masukan salah", "status": 403})
 		return
 	}
 
 	token, err := utils.GenerateJWT(user.Username)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal memuat token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal memuat token"})
 		return
 	}
 	if err := config.DB.Where("username = ?", input.Username).Where("email_verified_at", nil).First(&user).Error; err == nil || user.EmailVerifiedAt == "" {
@@ -51,7 +51,7 @@ func LoginUserAdmin(c *gin.Context) {
 			"Name":             user.Name,
 			"VerificationLink": "http://" + os.Getenv("APP_URL") + "/api/auth/verify/" + user.Email + "/" + token,
 		})
-		c.JSON(http.StatusOK, gin.H{"data": user.EmailVerifiedAt, "message": "Email belum terverifikasi, silakan cek email anda untuk verifikasi."})
+		c.JSON(http.StatusOK, gin.H{"data": user.EmailVerifiedAt, "message": "Email belum terverifikasi, silakan cek email anda untuk verifikasi.", "status": 200})
 		return
 	}
 	var inputToken models.PersonalAccessToken
@@ -65,36 +65,36 @@ func LoginUserAdmin(c *gin.Context) {
 	inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
 	config.DB.Create(&inputToken)
 
-	c.JSON(http.StatusOK, gin.H{"data": user, "token": token})
+	c.JSON(http.StatusOK, gin.H{"data": user, "token": token, "status": 200})
 }
 
 func LoginUser(c *gin.Context) {
 	var input validations.LoginValidation
 	if err := c.ShouldBindJSON(&input); err != nil {
 		msg := validations.TranslateError(err)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": msg})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
 		return
 	}
 	var user models.User
 
 	if err := config.DB.Where("username = ?", input.Username).First(&user).Error; err != nil {
-		c.JSON(403, gin.H{"error": "Username belum terdaftar"})
+		c.JSON(403, gin.H{"message": "Username belum terdaftar", "status": 403})
 		return
 	}
 
 	if err := config.DB.Where("status_id = ?", "4").First(&user).Error; err != nil {
-		c.JSON(403, gin.H{"error": "User ini tidak memiliki akses login!"})
+		c.JSON(403, gin.H{"message": "User ini tidak memiliki akses login!", "status": 403})
 		return
 
 	}
 
 	if !utils.CheckPasswordHash(input.Password, user.Password) {
-		c.JSON(403, gin.H{"error": "Password yang anda masukan salah"})
+		c.JSON(403, gin.H{"message": "Password yang anda masukan salah", "status": 403})
 		return
 	}
 	token, err := utils.GenerateJWT(user.Username)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal memuat token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal memuat token", "status": 403})
 		return
 	}
 	var inputToken models.PersonalAccessToken
@@ -114,7 +114,7 @@ func LogoutUser(c *gin.Context) {
 	token := c.GetHeader("Authorization")
 	var idToken models.PersonalAccessToken
 	if err := config.DB.Where("token = ?", strings.TrimPrefix(token, "Bearer ")).First(&idToken).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
 		return
 	}
 	config.DB.Where("tokenable_id = ?", idToken.TokenableID).Delete(&models.PersonalAccessToken{})
@@ -125,12 +125,12 @@ func DropEmailVerifiedAt(c *gin.Context) {
 
 	var user models.User
 	if err := config.DB.Where("username = ?", c.Param("username")).First(&user).Error; err != nil {
-		c.JSON(403, gin.H{"error": "User tidak ditemukan"})
+		c.JSON(403, gin.H{"message": "User tidak ditemukan", "status": 403})
 		return
 	}
 	user.EmailVerifiedAt = ""
 	config.DB.Save(&user)
-	c.JSON(http.StatusOK, gin.H{"message": "Email verified at field has been cleared"})
+	c.JSON(http.StatusOK, gin.H{"message": "Email verified at field has been cleared", "status": 200})
 }
 
 func VerifyEmail(c *gin.Context) {
@@ -139,17 +139,17 @@ func VerifyEmail(c *gin.Context) {
 
 	token, err := utils.VerifyJWT(tokenString)
 	if err != nil || !token.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token tidak valid atau sudah kedaluwarsa"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid atau sudah kedaluwarsa"})
 		return
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || claims["user_id"] == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token tidak valid"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid"})
 		return
 	}
 	var user models.User
 	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		c.JSON(403, gin.H{"error": "User tidak ditemukan"})
+		c.JSON(403, gin.H{"message": "User tidak ditemukan"})
 		return
 	}
 	user.EmailVerifiedAt = time.Now().Format("2006-01-02 15:04:05")
@@ -161,17 +161,17 @@ func ForgotPassword(c *gin.Context) {
 	var input validations.ForgotPasswordValidation
 	if err := c.ShouldBindJSON(&input); err != nil {
 		msg := validations.TranslateForgotPasswordError(err)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": msg})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": msg})
 		return
 	}
 	var user models.User
 	if err := config.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
-		c.JSON(403, gin.H{"error": "Email belum terdaftar"})
+		c.JSON(403, gin.H{"message": "Email belum terdaftar"})
 		return
 	}
 	token, err := utils.GenerateJWT(user.Username)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal memuat token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal memuat token"})
 		return
 	}
 	var passwordResetToken models.PasswordResetToken
@@ -201,19 +201,19 @@ func SendResetPassword(c *gin.Context) {
 	var email = c.Param("email")
 	var passwordResetToken models.PasswordResetToken
 	if err := config.DB.Where("email = ? AND token = ?", email, tokenString).First(&passwordResetToken).Error; err != nil {
-		c.JSON(403, gin.H{"error": "Token tidak valid atau email tidak ditemukan"})
+		c.JSON(403, gin.H{"message": "Token tidak valid atau email tidak ditemukan"})
 		return
 	}
 
 	var user models.User
 	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		c.JSON(403, gin.H{"error": "User tidak ditemukan"})
+		c.JSON(403, gin.H{"message": "User tidak ditemukan"})
 		return
 	}
 	newPassword := ResetPasswordNotRandomString(12)
 	hashedPassword, err := utils.HashPassword(newPassword)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal membuat hash password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal membuat hash password"})
 		return
 	}
 
@@ -248,29 +248,29 @@ func ResetPassword(c *gin.Context) {
 	var input validations.ResetPasswordValidation
 	if err := c.ShouldBindJSON(&input); err != nil {
 		msg := validations.TranslateResetPasswordError(err)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": msg})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": msg})
 		return
 	}
 	tokenString := c.Param("token")
 	email := c.Param("email")
 	token, err := utils.VerifyJWT(tokenString)
 	if err != nil || !token.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token tidak valid atau sudah kedaluwarsa"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid atau sudah kedaluwarsa"})
 		return
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || claims["user_id"] == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token tidak valid"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid"})
 		return
 	}
 	var user models.User
 	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		c.JSON(403, gin.H{"error": "User tidak ditemukan"})
+		c.JSON(403, gin.H{"message": "User tidak ditemukan"})
 		return
 	}
 	hashedPassword, err := utils.HashPassword(input.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal membuat hash password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal membuat hash password"})
 		return
 	}
 	user.Password = hashedPassword
