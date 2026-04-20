@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	sqlite "gorm.io/driver/sqlite" // Tetap di-import, tapi kita override dengan modernc
 	"gorm.io/gorm"
 	_ "modernc.org/sqlite"
@@ -44,7 +45,23 @@ func ConnectDatabase() {
 		DB = database
 		return
 	}
+	if db=="postgresql" {
+		database, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
+			os.Getenv("DB_HOST"),
+			os.Getenv("DB_USERNAME"),
+			os.Getenv("DB_PASSWORD"),
+			os.Getenv("DB_DATABASE"),
+			os.Getenv("DB_PORT"),
+		)), &gorm.Config{})
+		if err != nil {
+			log.Fatal("Gagal konek ke PostgreSQL:", err)
+		}
+		fmt.Println("✅ Koneksi ke PostgreSQL berhasil!")
+		DB = database
+		return
+	}
 
-	fmt.Println("✅ Tidak ada koneksi ke database!")
+
+	fmt.Println("❌ Tidak ada koneksi ke database!")
 
 }

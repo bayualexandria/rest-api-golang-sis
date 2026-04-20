@@ -14,7 +14,12 @@ func AuthMiddleware() gin.HandlerFunc {
 		token := c.GetHeader("Authorization")
 		var idToken models.PersonalAccessToken
 		var user models.User
-		if token == "" || !strings.HasPrefix(token, "Bearer ") {
+		if !strings.HasPrefix(token, "Bearer ") {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Tidak terautentikasi!","status":401})
+			c.Abort()
+			return
+		}
+		if token == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak ditemukan!","status":401})
 			c.Abort()
 			return
