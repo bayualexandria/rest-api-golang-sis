@@ -8,7 +8,9 @@ import (
 )
 
 func SetupRoutersAPI(app *gin.Engine) {
-
+	// app.NoRoute(func(c *gin.Context) {
+	// 	c.HTML(404, "404.html", gin.H{"message": "Halaman tidak ditemukan", "status": 404})
+	// })
 	route := app.Group("/api")
 	{
 		// Authentication Routes

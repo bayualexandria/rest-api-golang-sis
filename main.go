@@ -25,6 +25,7 @@ func main() {
 	// 1. Koneksi ke database
 	config.ConnectDatabase()
 	config.EmailConfig()
+
 	var files []string
 	filepath.Walk("./views", func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(path, ".html") {
@@ -34,11 +35,14 @@ func main() {
 	})
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*", "http://my-server-dns", "http://192.168.88.103"},
+		AllowOrigins: []string{"*", "https://api-golang.bayualexandria.site/", "http://192.168.88.103"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders: []string{"Content-Type,access-control-allow-origin, access-control-allow-headers"},
 		MaxAge:       12 * time.Hour,
 	}))
+	router.NoRoute(func(c *gin.Context) {
+		c.HTML(404, "404.html", gin.H{"message": "Halaman tidak ditemukan", "status": 404})
+	})
 	router.LoadHTMLFiles(files...)
 	// Setup routes web
 	routes.SetupRouters(router)
