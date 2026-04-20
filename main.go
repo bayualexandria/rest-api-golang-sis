@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend-api/config"
+	"backend-api/databases/seeders"
 	"backend-api/routes"
 	"log"
 	"os"
@@ -49,6 +50,9 @@ func main() {
 
 	// Setup routes API
 	routes.SetupRoutersAPI(router)
+
+	// Seeders
+	seeders.SeederGuru(config.DB)
 
 	router.Run(os.Getenv("APP_URL"))
 }
