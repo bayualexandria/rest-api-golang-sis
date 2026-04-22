@@ -52,7 +52,9 @@ func main() {
 	routes.SetupRoutersAPI(router)
 
 	// Seeders
-	seeders.SeederGuru(config.DB)
+	if len(os.Args) > 1 && os.Args[1] == "seed" {
+		seeders.RunSeeders(config.DB)
+	}
 
 	router.Run(os.Getenv("APP_URL"))
 }

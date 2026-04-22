@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS status_user (
+    id BIGINT PRIMARY KEY,
+    nama_status VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ NULL
+);
