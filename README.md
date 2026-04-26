@@ -1,15 +1,15 @@
-##Sistem Informasi Siswa Via Golang
+## Sistem Informasi Siswa Via Golang
 
 
 
-##Cara menjalankan migration 
+## Cara menjalankan migration 
 
-#Membuat file migration
+# Membuat file migration
 
 ```
 migrate create -ext sql -dir databases/migrations (nama_file)
 ```
-#SQLITE
+# SQLITE
 
 Up
 ```
@@ -21,7 +21,7 @@ Down
 migrate -path databases/migrations -database "sqlite3://database.sqlite" down
 ```
 
-#Postgree(Recomended)
+# Postgree(Recomended)
 
 Up
 ```
