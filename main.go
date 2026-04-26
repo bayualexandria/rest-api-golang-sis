@@ -55,6 +55,8 @@ func main() {
 	if len(os.Args) > 1 && os.Args[1] == "seed" {
 		seeders.RunSeeders(config.DB)
 	}
+	// Mailer
+	config.Mailer()
 
 	router.Run(os.Getenv("APP_URL"))
 }
