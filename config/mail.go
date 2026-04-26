@@ -1,19 +1,27 @@
 package config
 
-import ("gopkg.in/gomail.v2"
-"os")
+import (
+    "os"
+    "strconv"
+)
 
-func mailer()  {
-	m := gomail.NewMessage()
+type MailConfig struct {
+    Host     string
+    Port     int
+    Username string
+    Password string
+    From     string
+}
 
-	m.SetHeader("From", os.Getenv("MAIL_EMAIL"))
-	m.SetHeader("To", "wardanabayu455@gmail.com")
-	m.SetHeader("Subject", "Test Email")
-	m.SetBody("text/plain", "Halo ini email dari Golang")
+func GetMailConfig() MailConfig {
+    port, _ := strconv.Atoi(os.Getenv("MAIL_PORT"))
 
-	d := gomail.NewDialer(os.Getenv("MAIL_HOST"), 587, os.Getenv("MAIL_EMAIL"), os.Getenv("MAIL_PASSWORD"))
-
-	if err := d.DialAndSend(m); err != nil {
-		panic(err)
-	}
+    return MailConfig{
+        Host:     os.Getenv("MAIL_HOST"),
+        Port:     port,
+        Username: os.Getenv("MAIL_USERNAME"),
+        Password: os.Getenv("MAIL_PASSWORD"),
+        From:     os.Getenv("MAIL_FROM"),
+        
+    }
 }

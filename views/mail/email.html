@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Email</title>
+</head>
+
+<body style="margin:0; padding:0; background-color:#edf2f7; font-family:Arial, sans-serif;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;">
+        <tr>
+            <td align="center">
+
+                <!-- Logo -->
+                <table width="100%" style="margin-bottom:20px;">
+                    <tr>
+                        <td align="center" style="color:#888; font-size:16px;">
+                            Laravel Logo
+                        </td>
+                    </tr>
+                </table>
+                <!-- Card -->
+                <table width="600" cellpadding="0" cellspacing="0"
+                    style="background:#ffffff; border-radius:6px; padding:40px;">
+
+                    <tr>
+                        <td>
+
+                            <h2 style="margin-top:0; color:#2d3748; font-size: 24px;">Hello!</h2>
+
+                            <p style="color:#718096; font-size: 16px;">
+                                Apa kabar, <strong style="color:#4a5568;">{{.Name}}</strong>
+                            </p>
+
+                            <p style="color:#718096; line-height:1.6;font-size: 16px;">
+                                {{.Message}}
+                            </p>
+                            {{if .Username}}
+                            <p style="color:#718096;font-weight: bold; font-size: large; line-height:1.6;">
+                                {{.Username}}
+                            </p>
+                            {{end}}
+                            {{if .Password}}
+                            <p style="color:#718096;font-weight: bold; font-size: large; line-height:1.6;">
+                                {{.Password}}
+                            </p>
+                            {{end}}
+                            {{if .URL}}
+                            <a href="https://www.smkxxxx.sch.id"
+                                style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#3182ce; color:#fff; text-decoration:none; border-radius:4px;"
+                                id="linkButton">
+                                {{.NameButton}}
+                            </a>
+                            {{end}}
+
+                            <p style="color:#718096;font-size: 16px;">Terima kasih!</p>
+
+                            <p style="color:#718096;font-size: 16px;">
+                                Hormat kami,<br>
+                                SMK XXXX
+                            </p>
+                            <br />
+                            {{if .URL}}
+                            <p style="color:#718096;">Jika button diatas tidak bisa digunakan, silakan klik link
+                                berikut: <a href="https://www.smkxxxx.sch.id">{{.URL}}</a></p>
+                            {{end}}
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Footer (FIXED) -->
+                <table width="600" cellpadding="0" cellspacing="0" style="margin-top:30px;">
+                    <tr>
+                        <td align="center" style="padding:15px 10px; font-size:13px; color:#6b7280;">
+                            © 2026 Sistem Informasi Siswa. All rights reserved.
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+
+</html>

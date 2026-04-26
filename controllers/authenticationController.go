@@ -7,7 +7,6 @@ import (
 	"backend-api/utils"
 	"backend-api/validations"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -20,6 +19,7 @@ func LoginUserAdmin(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		msg := validations.TranslateError(err)
+		notifications.NotifikasiAkun("wardanabayu455@gmail.com", "Bayu Wardana", "Selamat akun anda telah diaktifkan silahkan login menggunakan akun anda, dengan password dibawah ini:")
 		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
 		return
 	}
@@ -47,10 +47,6 @@ func LoginUserAdmin(c *gin.Context) {
 		return
 	}
 	if err := config.DB.Where("username = ?", input.Username).Where("email_verified_at", nil).First(&user).Error; err == nil || user.EmailVerifiedAt == "" {
-		notifications.SendVerificationEmail(user.Email, map[string]interface{}{
-			"Name":             user.Name,
-			"VerificationLink": "http://" + os.Getenv("APP_URL") + "/api/auth/verify/" + user.Email + "/" + token,
-		})
 		c.JSON(http.StatusOK, gin.H{"data": user.EmailVerifiedAt, "message": "Email belum terverifikasi, silakan cek email anda untuk verifikasi.", "status": 200})
 		return
 	}
@@ -176,10 +172,7 @@ func ForgotPassword(c *gin.Context) {
 	}
 	var passwordResetToken models.PasswordResetToken
 	config.DB.Where("email = ?", user.Email).Delete(&models.PasswordResetToken{})
-	notifications.SendResetPassword(user.Email, map[string]interface{}{
-		"Name":              user.Name,
-		"ResetPasswordLink": "http://" + os.Getenv("APP_URL") + "/api/auth/send-reset-password/" + user.Email + "/" + token,
-	})
+
 	passwordResetToken.Email = user.Email
 	passwordResetToken.Token = token
 	passwordResetToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
@@ -217,31 +210,11 @@ func SendResetPassword(c *gin.Context) {
 		return
 	}
 
-	var data = map[string]interface{}{
-		"Name":              user.Name,
-		"Password":          newPassword,
-		"ResetPasswordLink": "http://" + os.Getenv("APP_URL") + "/auth/reset-password/" + email + "/" + tokenString,
-	}
-
-	notifications.SendNewPassword(email, data)
 	user.Password = hashedPassword
 	config.DB.Save(&user)
 	config.DB.Where("email = ?", email).Delete(&models.PasswordResetToken{})
 	c.JSON(http.StatusOK, gin.H{"message": "Link reset password telah dikirim ke email anda."})
 
-}
-
-func ResetPasswordNotification(c *gin.Context) {
-
-	var token = c.Param("token")
-	var email = c.Param("email")
-
-	var data = map[string]interface{}{
-		"Name":              "User",
-		"ResetPasswordLink": "http://" + os.Getenv("APP_URL") + "/auth/reset-password/" + email + "/" + token,
-	}
-	notifications.SendResetPassword(email, data)
-	c.JSON(http.StatusOK, gin.H{"message": "Link reset password telah dikirim ke email anda."})
 }
 
 func ResetPassword(c *gin.Context) {

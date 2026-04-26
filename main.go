@@ -25,7 +25,7 @@ func main() {
 
 	// 1. Koneksi ke database
 	config.ConnectDatabase()
-	config.EmailConfig()
+	// config.EmailConfig()
 
 	var files []string
 	filepath.Walk("./views", func(path string, info os.FileInfo, err error) error {
@@ -56,7 +56,13 @@ func main() {
 		seeders.RunSeeders(config.DB)
 	}
 	// Mailer
-	config.Mailer()
+	// m := mailers.NewMailer()
+
+	// m.Send(
+	// 	"wardanabayu455@gmail.com",
+	// 	"Test Email",
+	// 	"<h1>Halo dari Golang</h1>",
+	// )
 
 	router.Run(os.Getenv("APP_URL"))
 }
