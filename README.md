@@ -5,6 +5,7 @@ Sistem Informasi Siswa Via Golang
 Cara menjalankan migration 
 
 #Membuat file migration
+
 migrate create -ext sql -dir databases/migrations (nama_file)
 
 #SQLITE
