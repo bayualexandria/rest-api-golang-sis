@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS users_guru;
+DROP TABLE IF EXISTS guru;

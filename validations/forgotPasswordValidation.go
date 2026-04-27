@@ -20,7 +20,7 @@ func TranslateForgotPasswordError(err error) string {
 			fieldName := fieldError.Field()
 			tag := fieldError.Tag()
 			key := fieldName + "." + tag
-			if msg, exists := customMessages[key]; exists {
+			if msg, exists := forgotPasswordMessages[key]; exists {
 				errors[fieldName] = msg
 			}
 
@@ -28,5 +28,3 @@ func TranslateForgotPasswordError(err error) string {
 	}
 	return errors["Email"]
 }
-
-

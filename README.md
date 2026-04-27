@@ -32,3 +32,14 @@ Down
 ```
 migrate -path database/migrations -database "postgres://user:pass@localhost:5432/dbname?sslmode=disable" down
 ```
+### MySQL(Recomended)
+
+Up
+```
+migrate -path databases/migrations -database "mysql://root:Wardana13@tcp(localhost:3306)/golang-sis" up
+```
+
+Down
+```
+migrate -path databases/migrations -database "mysql://root:Wardana13@tcp(localhost:3306)/golang-sis" down
+```

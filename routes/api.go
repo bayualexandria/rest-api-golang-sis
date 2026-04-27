@@ -32,8 +32,8 @@ func SetupRoutersAPI(app *gin.Engine) {
 		// Endpoint Routes
 		route.GET("/", controllers.HomeHandler)
 		route.GET("/user", middleware.AuthMiddlewareAdmin(), controllers.GetUsers)
-		route.GET("/siswa", middleware.AuthMiddleware(), middleware.AuthMiddleware(), controllers.GetSiswa)
-		route.GET("/siswa/:nis", middleware.AuthMiddleware(), middleware.AuthMiddleware(), controllers.GetSiswaByID)
+		route.GET("/siswa", middleware.AuthMiddlewareAdmin(), middleware.AuthMiddleware(), controllers.GetSiswa)
+		route.GET("/siswa/:nis", middleware.AuthMiddleware(), controllers.GetSiswaByID)
 		route.GET("/guru", middleware.AuthMiddlewareAdmin(), controllers.GetGuru)
 		route.GET("/guru/:nip", middleware.AuthMiddlewareAdmin(), controllers.GetGuruById)
 		route.POST("/logout", middleware.AuthMiddleware(), controllers.LogoutUser)

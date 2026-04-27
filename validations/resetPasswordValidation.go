@@ -20,7 +20,7 @@ func TranslateResetPasswordError(err error) string {
 			fieldName := fieldError.Field()
 			tag := fieldError.Tag()
 			key := fieldName + "." + tag
-			if msg, exists := customMessages[key]; exists {
+			if msg, exists := resetPasswordMessages[key]; exists {
 				errors[fieldName] = msg
 			}
 

@@ -30,7 +30,7 @@ func AuthMiddlewareAdmin() gin.HandlerFunc {
 			return
 
 		}
-		if err := config.DB.Where("status_id = ?", "3").Where("status_id = ?", "2").Where("status_id = ?", "1").First(&user).Error; err != nil {
+		if err := config.DB.Where("status_user_id = ?", "3").Where("status_user_id = ?", "2").Where("status_user_id = ?", "1").First(&user).Error; err != nil {
 			c.JSON(403, gin.H{"message": "User ini tidak memiliki akses!", "status": 403})
 			c.Abort()
 			return

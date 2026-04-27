@@ -6,6 +6,8 @@ import (
 	"backend-api/notifications"
 	"backend-api/utils"
 	"backend-api/validations"
+	"backend-api/validations/adminLogin"
+	"backend-api/validations/siswalogin"
 	"net/http"
 	"strings"
 	"time"
@@ -15,10 +17,10 @@ import (
 )
 
 func LoginUserAdmin(c *gin.Context) {
-	var input validations.LoginValidation
+	var input adminlogin.LoginAdminValidation
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		msg := validations.TranslateError(err)
+		msg := adminlogin.TranslateErrorLoginAdmin(err)
 		notifications.NotifikasiAkun("wardanabayu455@gmail.com", "Bayu Wardana", "Selamat akun anda telah diaktifkan silahkan login menggunakan akun anda, dengan password dibawah ini:")
 		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
 		return
@@ -30,7 +32,7 @@ func LoginUserAdmin(c *gin.Context) {
 		return
 	}
 
-	if config.DB.Where("status_id != ?", "4").First(&user).Error != nil {
+	if config.DB.Where("status_user_id != ?", 4).First(&user).Error != nil {
 		c.JSON(403, gin.H{"message": "User ini tidak memiliki akses login!", "status": 403})
 		return
 
@@ -65,9 +67,9 @@ func LoginUserAdmin(c *gin.Context) {
 }
 
 func LoginUser(c *gin.Context) {
-	var input validations.LoginValidation
+	var input siswalogin.LoginSiswaValidation
 	if err := c.ShouldBindJSON(&input); err != nil {
-		msg := validations.TranslateError(err)
+		msg := siswalogin.TranslateErrorLoginSiswa(err)
 		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
 		return
 	}
@@ -78,7 +80,7 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	if err := config.DB.Where("status_id = ?", "4").First(&user).Error; err != nil {
+	if err := config.DB.Where("status_user_id = ?", 4).First(&user).Error; err != nil {
 		c.JSON(403, gin.H{"message": "User ini tidak memiliki akses login!", "status": 403})
 		return
 
