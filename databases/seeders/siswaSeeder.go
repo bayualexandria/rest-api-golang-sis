@@ -44,13 +44,14 @@ func HashPasswordUserSiswa(password string) string {
 
 func (s SiswaSeeder) Run(db *gorm.DB) {
 	for i := 0; i < 10; i++ {
+		genders := []string{"Laki-laki", "Perempuan"}
 		username := faker.CCNumber()
 		nama := faker.Name()
 		siswa := SiswaSeeder{
 			ID:           i + 1,
 			Nis:          username, // Contoh NIS dengan 8 digit
 			Nama:         nama,
-			JenisKelamin: faker.Gender(),
+			JenisKelamin: genders[i%2], // Alternatif jenis kelamin
 			NoHp:         faker.Phonenumber(),
 			Alamat:       faker.Word() + " Street No., " + faker.CCNumber(),
 			ImageProfile: faker.URL(),

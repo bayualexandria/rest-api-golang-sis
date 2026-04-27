@@ -7,8 +7,8 @@ type Seeder interface {
 }
 
 func RunSeeders(db *gorm.DB) {
-	GuruSeeder{}.Run(db)
 	StatusUserSeeder{}.Run(db)
+	GuruSeeder{}.Run(db)
 	SiswaSeeder{}.Run(db)
 	// tambah seeder lain di sini
 }

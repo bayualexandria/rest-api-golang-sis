@@ -6,7 +6,7 @@ import (
 	"backend-api/notifications"
 	"backend-api/utils"
 	"backend-api/validations"
-	"backend-api/validations/adminLogin"
+	adminlogin "backend-api/validations/adminLogin"
 	"backend-api/validations/siswalogin"
 	"net/http"
 	"strings"
@@ -63,7 +63,7 @@ func LoginUserAdmin(c *gin.Context) {
 	inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
 	config.DB.Create(&inputToken)
 
-	c.JSON(http.StatusOK, gin.H{"data": user, "token": token, "status": 200})
+	c.JSON(http.StatusOK, gin.H{"user": user, "accessToken": token, "status": 200})
 }
 
 func LoginUser(c *gin.Context) {
@@ -96,6 +96,8 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 	var inputToken models.PersonalAccessToken
+	// Auto increment ID
+	inputToken.ID= 0
 	inputToken.Token = token
 	inputToken.TokenableType = "User"
 	inputToken.TokenableID = user.ID
@@ -105,7 +107,7 @@ func LoginUser(c *gin.Context) {
 	inputToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
 	inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
 	config.DB.Create(&inputToken)
-	c.JSON(http.StatusOK, gin.H{"data": user, "token": token})
+	c.JSON(http.StatusOK, gin.H{"user": user, "accessToken": token, "status": 200})
 }
 
 func LogoutUser(c *gin.Context) {
