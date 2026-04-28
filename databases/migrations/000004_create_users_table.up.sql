@@ -1,7 +1,7 @@
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    username VARCHAR(255) NOT NULL UNIQUE,
+    username BIGINT NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     email_verified_at TIMESTAMP NULL,
     password VARCHAR(255) NOT NULL,

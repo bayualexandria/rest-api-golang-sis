@@ -1,4 +1,4 @@
-package siswalogin
+package siswaLogin
 
 import (
 	"github.com/go-playground/validator/v10"

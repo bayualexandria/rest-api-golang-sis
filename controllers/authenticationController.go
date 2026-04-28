@@ -7,7 +7,7 @@ import (
 	"backend-api/utils"
 	"backend-api/validations"
 	adminlogin "backend-api/validations/adminLogin"
-	"backend-api/validations/siswalogin"
+	"backend-api/validations/siswaLogin"
 	"net/http"
 	"strings"
 	"time"
@@ -67,9 +67,9 @@ func LoginUserAdmin(c *gin.Context) {
 }
 
 func LoginUser(c *gin.Context) {
-	var input siswalogin.LoginSiswaValidation
+	var input siswaLogin.LoginSiswaValidation
 	if err := c.ShouldBindJSON(&input); err != nil {
-		msg := siswalogin.TranslateErrorLoginSiswa(err)
+		msg := siswaLogin.TranslateErrorLoginSiswa(err)
 		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
 		return
 	}
@@ -97,7 +97,7 @@ func LoginUser(c *gin.Context) {
 	}
 	var inputToken models.PersonalAccessToken
 	// Auto increment ID
-	inputToken.ID= 0
+	inputToken.ID = 0
 	inputToken.Token = token
 	inputToken.TokenableType = "User"
 	inputToken.TokenableID = user.ID
