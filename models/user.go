@@ -8,7 +8,7 @@ type User struct {
 	Email           string `json:"email"`
 	EmailVerifiedAt string `json:"email_verified_at"`
 	Password        string `json:"password"`
-	StatusUserId        string `json:"status_user_id"`
+	StatusUserId        int `json:"status_user_id"`
 }
 
 func (User) TableName() string {

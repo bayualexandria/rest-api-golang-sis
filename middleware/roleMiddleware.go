@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
+func RoleMiddleware(allowedRoles ...int) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userData, exists := c.Get("user")
 		if !exists {
@@ -24,6 +24,6 @@ func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 			}
 		}
 
-		c.AbortWithStatusJSON(403, gin.H{"message": "User ini tidak memiliki akses!", "status": 403})
+		c.AbortWithStatusJSON(403, gin.H{"message": "User ini tidak memiliki akses role!", "status": 403})
 	}
 }

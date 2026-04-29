@@ -41,17 +41,9 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// cek status user
-		if user.StatusUserId != "4" {
-			c.JSON(http.StatusForbidden, gin.H{"message": "User ini tidak memiliki akses!", "status": 403})
-			c.Abort()
-			return
-		}
-
 		// simpan user ke context (optional tapi penting)
 		c.Set("user", user)
 
 		c.Next()
 	}
 }
-

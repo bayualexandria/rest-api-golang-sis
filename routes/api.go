@@ -31,12 +31,12 @@ func SetupRoutersAPI(app *gin.Engine) {
 
 		// Endpoint Routes
 		route.GET("/", controllers.HomeHandler)
-		route.GET("/user", middleware.AuthMiddlewareAdmin(), controllers.GetUsers)
-		route.GET("/user/:nis/siswa", middleware.AuthMiddleware(), middleware.RoleMiddleware("1"), controllers.GetUsersByNIS)
-		route.GET("/siswa", middleware.AuthMiddlewareAdmin(), middleware.AuthMiddleware(), controllers.GetSiswa)
+		route.GET("/user", middleware.AuthMiddleware(), controllers.GetUsers)
+		route.GET("/user/:nis/siswa", middleware.AuthMiddleware(), middleware.RoleMiddleware(3, 4), controllers.GetUsersByNIS)
+		route.GET("/siswa", middleware.AuthMiddleware(), middleware.AuthMiddleware(), controllers.GetSiswa)
 		route.GET("/siswa/:nis", middleware.AuthMiddleware(), controllers.GetSiswaByID)
-		route.GET("/guru", middleware.AuthMiddlewareAdmin(), controllers.GetGuru)
-		route.GET("/guru/:nip", middleware.AuthMiddlewareAdmin(), controllers.GetGuruById)
+		route.GET("/guru", middleware.AuthMiddleware(), controllers.GetGuru)
+		route.GET("/guru/:nip", middleware.AuthMiddleware(), controllers.GetGuruById)
 		route.POST("/logout", middleware.AuthMiddleware(), controllers.LogoutUser)
 	}
 
