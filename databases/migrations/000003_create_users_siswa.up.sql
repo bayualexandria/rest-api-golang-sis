@@ -1,4 +1,6 @@
 CREATE TABLE IF NOT EXISTS siswa (
+    -- Jika menggunakan MySQL, gunakan AUTO_INCREMENT untuk kolom id
+    -- Jika menggunakan PostgreSQL, gunakan SERIAL atau BIGSERIAL untuk kolom id
     id INT AUTO_INCREMENT PRIMARY KEY,
     nis BIGINT UNIQUE NOT NULL,
     nama VARCHAR(255) NOT NULL,

@@ -9,6 +9,7 @@ import (
 	adminlogin "backend-api/validations/adminLogin"
 	"backend-api/validations/siswalogin"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -48,11 +49,6 @@ func LoginUserAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal memuat token"})
 		return
 	}
-	if err := config.DB.Where("username = ?", input.Username).Where("email_verified_at", nil).First(&user).Error; err == nil || user.EmailVerifiedAt == "" {
-		notifications.NotifikasiAktivasiAkunUser(user.Email, user.Name,"Silahkan verifikasi email anda untuk mengaktifkan akun anda, dengan cara klik link dibawah ini: ", token)
-		c.JSON(http.StatusOK, gin.H{"data": user.EmailVerifiedAt, "message": "Email belum terverifikasi, silakan cek email anda untuk verifikasi.", "status": 200})
-		return
-	}
 	var inputToken models.PersonalAccessToken
 	inputToken.Token = token
 	inputToken.TokenableType = "User"
@@ -62,6 +58,14 @@ func LoginUserAdmin(c *gin.Context) {
 	inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
 	inputToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
 	inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+	if err := config.DB.Where("username = ?", input.Username).Where("email_verified_at", nil).First(&user).Error; err == nil || user.EmailVerifiedAt == "" {
+		notifications.NotifikasiAktivasiAkunUser(user.Email, user.Name, "Silahkan verifikasi email anda untuk mengaktifkan akun anda, dengan cara klik link dibawah ini: ", os.Getenv("APP_URL")+"/api/auth/verify/"+user.Email+"/"+token)
+		config.DB.Create(&inputToken)
+		config.DB.Save(&user)
+		c.JSON(http.StatusOK, gin.H{"message": "Email belum terverifikasi, silakan cek email anda untuk verifikasi.", "status": 200})
+		return
+	}
+
 	config.DB.Create(&inputToken)
 
 	c.JSON(http.StatusOK, gin.H{"user": user, "accessToken": token, "status": 200})
@@ -138,41 +142,44 @@ func VerifyEmail(c *gin.Context) {
 	tokenString := c.Param("token")
 	email := c.Param("email")
 
+	var personalAccessToken models.PersonalAccessToken
+
 	token, err := utils.VerifyJWT(tokenString)
-	if err != nil || !token.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid atau sudah kedaluwarsa"})
+	if err != nil || !token.Valid || config.DB.Where("token = ?", tokenString).First(&personalAccessToken).Error != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid atau sudah kedaluwarsa", "status": 401})
 		return
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || claims["user_id"] == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid", "status": 401})
 		return
 	}
 	var user models.User
 	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		c.JSON(403, gin.H{"message": "User tidak ditemukan"})
+		c.JSON(403, gin.H{"message": "User tidak ditemukan", "status": 403})
 		return
 	}
 	user.EmailVerifiedAt = time.Now().Format("2006-01-02 15:04:05")
+	config.DB.Where("tokenable_id = ?", user.ID).Delete(&personalAccessToken)
 	config.DB.Save(&user)
-	c.JSON(http.StatusOK, gin.H{"message": "Email berhasil diverifikasi"})
+	c.JSON(http.StatusOK, gin.H{"message": "Email berhasil diverifikasi", "status": 200})
 }
 
 func ForgotPassword(c *gin.Context) {
 	var input validations.ForgotPasswordValidation
 	if err := c.ShouldBindJSON(&input); err != nil {
 		msg := validations.TranslateForgotPasswordError(err)
-		c.JSON(http.StatusUnauthorized, gin.H{"message": msg})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
 		return
 	}
 	var user models.User
 	if err := config.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
-		c.JSON(403, gin.H{"message": "Email belum terdaftar"})
+		c.JSON(403, gin.H{"message": "Email belum terdaftar", "status": 403})
 		return
 	}
 	token, err := utils.GenerateJWT(user.Username)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal memuat token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal memuat token", "status": 500})
 		return
 	}
 	var passwordResetToken models.PasswordResetToken
@@ -182,7 +189,7 @@ func ForgotPassword(c *gin.Context) {
 	passwordResetToken.Token = token
 	passwordResetToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
 	config.DB.Create(&passwordResetToken)
-	c.JSON(http.StatusOK, gin.H{"message": "Link reset password telah dikirim ke email anda."})
+	c.JSON(http.StatusOK, gin.H{"message": "Link reset password telah dikirim ke email anda.", "status": 200})
 }
 
 func ResetPasswordNotRandomString(n int) string {
@@ -199,26 +206,26 @@ func SendResetPassword(c *gin.Context) {
 	var email = c.Param("email")
 	var passwordResetToken models.PasswordResetToken
 	if err := config.DB.Where("email = ? AND token = ?", email, tokenString).First(&passwordResetToken).Error; err != nil {
-		c.JSON(403, gin.H{"message": "Token tidak valid atau email tidak ditemukan"})
+		c.JSON(403, gin.H{"message": "Token tidak valid atau email tidak ditemukan", "status": 403})
 		return
 	}
 
 	var user models.User
 	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		c.JSON(403, gin.H{"message": "User tidak ditemukan"})
+		c.JSON(403, gin.H{"message": "User tidak ditemukan", "status": 403})
 		return
 	}
 	newPassword := ResetPasswordNotRandomString(12)
 	hashedPassword, err := utils.HashPassword(newPassword)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal membuat hash password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal membuat hash password", "status": 500})
 		return
 	}
 
 	user.Password = hashedPassword
 	config.DB.Save(&user)
 	config.DB.Where("email = ?", email).Delete(&models.PasswordResetToken{})
-	c.JSON(http.StatusOK, gin.H{"message": "Link reset password telah dikirim ke email anda."})
+	c.JSON(http.StatusOK, gin.H{"message": "Link reset password telah dikirim ke email anda.", "status": 200})
 
 }
 
@@ -226,34 +233,34 @@ func ResetPassword(c *gin.Context) {
 	var input validations.ResetPasswordValidation
 	if err := c.ShouldBindJSON(&input); err != nil {
 		msg := validations.TranslateResetPasswordError(err)
-		c.JSON(http.StatusUnauthorized, gin.H{"message": msg})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
 		return
 	}
 	tokenString := c.Param("token")
 	email := c.Param("email")
 	token, err := utils.VerifyJWT(tokenString)
 	if err != nil || !token.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid atau sudah kedaluwarsa"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid atau sudah kedaluwarsa", "status": 401})
 		return
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || claims["user_id"] == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid", "status": 401})
 		return
 	}
 	var user models.User
 	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		c.JSON(403, gin.H{"message": "User tidak ditemukan"})
+		c.JSON(403, gin.H{"message": "User tidak ditemukan", "status": 403})
 		return
 	}
 	hashedPassword, err := utils.HashPassword(input.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal membuat hash password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal membuat hash password", "status": 500})
 		return
 	}
 	user.Password = hashedPassword
 	user.EmailVerifiedAt = time.Now().Format("2006-01-02 15:04:05")
 	config.DB.Where("email = ?", email).Delete(&models.PasswordResetToken{})
 	config.DB.Save(&user)
-	c.JSON(http.StatusOK, gin.H{"message": "Password berhasil direset"})
+	c.JSON(http.StatusOK, gin.H{"message": "Password berhasil direset", "status": 200})
 }

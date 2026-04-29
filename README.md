@@ -34,21 +34,21 @@ migrate -path databases/migrations -database "sqlite3://database.sqlite" down
 
 Up
 ```
-migrate -path database/migrations -database "postgres://user:pass@localhost:5432/dbname?sslmode=disable" up
+migrate -path databases/migrations -database "postgres://user:pass@localhost:5432/dbname?sslmode=disable" up
 ```
 
 Down
 ```
-migrate -path database/migrations -database "postgres://user:pass@localhost:5432/dbname?sslmode=disable" down
+migrate -path databases/migrations -database "postgres://user:pass@localhost:5432/dbname?sslmode=disable" down
 ```
 ### MySQL(Recomended)
 
 Up
 ```
-migrate -path databases/migrations -database "mysql://root:Wardana13@tcp(localhost:3306)/golang-sis" up
+migrate -path databases/migrations -database "mysql://user:pass@tcp(localhost:3306)/dbname" up
 ```
 
 Down
 ```
-migrate -path databases/migrations -database "mysql://root:Wardana13@tcp(localhost:3306)/golang-sis" down
+migrate -path databases/migrations -database "mysql://user:pass@tcp(localhost:3306)/dbname" down
 ```

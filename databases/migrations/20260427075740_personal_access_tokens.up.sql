@@ -1,4 +1,6 @@
 CREATE TABLE personal_access_tokens (
+  -- Jika menggunakan MySQL, gunakan AUTO_INCREMENT untuk kolom id
+    -- Jika menggunakan PostgreSQL, gunakan SERIAL atau BIGSERIAL untuk kolom id
   id INT AUTO_INCREMENT PRIMARY KEY,
   tokenable_type varchar(255) not null,
   tokenable_id BIGINT not null,
