@@ -1,6 +1,15 @@
 ## Sistem Informasi Siswa Via Golang
 
+## Clean cache ketika package error
 
+Gunakan perintah dibawah ini untuk membersihkan package
+```
+go clean -modcache
+```
+Dan memperbaharui kembali dengan perintah ini
+```
+go mod tidy
+```
 
 ## Cara menjalankan migration 
 

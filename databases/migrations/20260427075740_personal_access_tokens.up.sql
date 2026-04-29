@@ -1,5 +1,5 @@
 CREATE TABLE personal_access_tokens (
-  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  id INT AUTO_INCREMENT PRIMARY KEY,
   tokenable_type varchar(255) not null,
   tokenable_id BIGINT not null,
   name varchar(255) not null,

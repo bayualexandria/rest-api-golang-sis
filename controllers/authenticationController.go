@@ -7,7 +7,7 @@ import (
 	"backend-api/utils"
 	"backend-api/validations"
 	adminlogin "backend-api/validations/adminLogin"
-	"backend-api/validations/siswaLogin"
+	"backend-api/validations/siswalogin"
 	"net/http"
 	"strings"
 	"time"
@@ -21,7 +21,7 @@ func LoginUserAdmin(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		msg := adminlogin.TranslateErrorLoginAdmin(err)
-		notifications.NotifikasiAkun("wardanabayu455@gmail.com", "Bayu Wardana", "Selamat akun anda telah diaktifkan silahkan login menggunakan akun anda, dengan password dibawah ini:")
+		// notifications.NotifikasiAkun("wardanabayu455@gmail.com", "Bayu Wardana", "Selamat akun anda telah diaktifkan silahkan login menggunakan akun anda, dengan password dibawah ini:")
 		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
 		return
 	}
@@ -49,6 +49,7 @@ func LoginUserAdmin(c *gin.Context) {
 		return
 	}
 	if err := config.DB.Where("username = ?", input.Username).Where("email_verified_at", nil).First(&user).Error; err == nil || user.EmailVerifiedAt == "" {
+		notifications.NotifikasiAktivasiAkunUser(user.Email, user.Name,"Silahkan verifikasi email anda untuk mengaktifkan akun anda, dengan cara klik link dibawah ini: ", token)
 		c.JSON(http.StatusOK, gin.H{"data": user.EmailVerifiedAt, "message": "Email belum terverifikasi, silakan cek email anda untuk verifikasi.", "status": 200})
 		return
 	}
@@ -67,9 +68,9 @@ func LoginUserAdmin(c *gin.Context) {
 }
 
 func LoginUser(c *gin.Context) {
-	var input siswaLogin.LoginSiswaValidation
+	var input siswalogin.LoginSiswaValidation
 	if err := c.ShouldBindJSON(&input); err != nil {
-		msg := siswaLogin.TranslateErrorLoginSiswa(err)
+		msg := siswalogin.TranslateErrorLoginSiswa(err)
 		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
 		return
 	}
