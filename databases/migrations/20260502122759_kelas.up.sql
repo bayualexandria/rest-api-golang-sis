@@ -1,8 +1,9 @@
-CREATE TABLE IF NOT EXISTS status_user (
+CREATE TABLE kelas (
     -- Jika menggunakan MySQL, gunakan AUTO_INCREMENT untuk kolom id
     -- Jika menggunakan PostgreSQL, gunakan SERIAL atau BIGSERIAL untuk kolom id
     id BIGSERIAL PRIMARY KEY,
-    nama_status VARCHAR(255) NOT NULL,
+    nama_kelas VARCHAR(255) NOT NULL,
+    jurusan VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL

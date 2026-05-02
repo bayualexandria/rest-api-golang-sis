@@ -51,7 +51,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			JenisKelamin: "Laki-laki",
 			NoHp:         "081234567890",
 			Alamat:       "Jl. Contoh Alamat No. 123, Kota Contoh",
-			ImageProfile: "https://example.com/images/bayu.jpg",
+			ImageProfile: "storages/logo-pendidikan.png",
 		},
 		{
 			ID:           2,
@@ -60,7 +60,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			JenisKelamin: "Laki-laki",
 			NoHp:         "081234567891",
 			Alamat:       "Jl. Contoh Alamat No. 123, Kota Contoh",
-			ImageProfile: "https://example.com/images/bayu.jpg",
+			ImageProfile: "storages/logo-pendidikan.png",
 		},
 		{
 			ID:           3,
@@ -69,7 +69,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			JenisKelamin: "Laki-laki",
 			NoHp:         "081234567892",
 			Alamat:       "Jl. Contoh Alamat No. 123, Kota Contoh",
-			ImageProfile: "https://example.com/images/bayu.jpg",
+			ImageProfile: "storages/logo-pendidikan.png",
 		},
 	}
 	passHash := "admin123" // Contoh password default

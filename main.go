@@ -51,6 +51,8 @@ func main() {
 	// Setup routes API
 	routes.SetupRoutersAPI(router)
 
+	router.Static("/storages", "./storages")
+
 	// Seeders
 	if len(os.Args) > 1 && os.Args[1] == "seed" {
 		seeders.RunSeeders(config.DB)
