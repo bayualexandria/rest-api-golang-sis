@@ -10,5 +10,7 @@ func RunSeeders(db *gorm.DB) {
 	StatusUserSeeder{}.Run(db)
 	GuruSeeder{}.Run(db)
 	SiswaSeeder{}.Run(db)
+	KelasSeeder{}.Run(db)
+	ProfileSekolahSeeder{}.Run(db)
 	// tambah seeder lain di sini
 }

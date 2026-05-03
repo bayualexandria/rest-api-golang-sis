@@ -31,6 +31,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 
 		// Endpoint Routes
 		route.GET("/", controllers.HomeHandler)
+		route.PATCH("/siswa/:nis", controllers.UpdateSiswa)
 		route.GET("/user", middleware.AuthMiddleware(), controllers.GetUsers)
 		route.GET("/user/:nis/siswa", middleware.AuthMiddleware(), middleware.RoleMiddleware(3, 4), controllers.GetUsersByNIS)
 		route.GET("/siswa", middleware.AuthMiddleware(), middleware.AuthMiddleware(), controllers.GetSiswa)

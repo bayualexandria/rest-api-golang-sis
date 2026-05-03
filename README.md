@@ -52,3 +52,13 @@ Down
 ```
 migrate -path databases/migrations -database "mysql://user:pass@tcp(localhost:3306)/dbname" down
 ```
+
+##### Note:
+Jika terjadi error
+```
+"gcc" not found
+```
+Jalankan perintah ini di terminal/cmd/powershell
+```
+set CGO_ENABLED=0
+``
