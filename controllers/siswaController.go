@@ -91,7 +91,7 @@ func UpdateSiswa(c *gin.Context) {
 		"no_hp":         input.NoHp,
 		"alamat":        input.Alamat,
 		"image_profile": input.ImageProfile,
-		"kelas_id":      input.KelasID,
+		"kelas_id":      input.KelasId,
 	})
 	config.DB.Table("users").Where("username = ?", nis).Updates(map[string]interface{}{
 		"name":  input.Nama,
