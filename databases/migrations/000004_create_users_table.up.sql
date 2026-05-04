@@ -1,7 +1,7 @@
 CREATE TABLE users (
     -- Jika menggunakan MySQL, gunakan AUTO_INCREMENT untuk kolom id
     -- Jika menggunakan PostgreSQL, gunakan SERIAL atau BIGSERIAL untuk kolom id
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     username BIGINT NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,

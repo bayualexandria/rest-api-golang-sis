@@ -9,8 +9,10 @@ type Siswa struct {
 	NoHp         string `json:"no_hp"`
 	Alamat       string `json:"alamat"`
 	ImageProfile string `json:"image_profile"`
+	Email		string `json:"email"`
 }
 
 func (Siswa) TableName() string {
 	return "siswa" // jadi singular
 }
+

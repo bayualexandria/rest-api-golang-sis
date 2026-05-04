@@ -8,13 +8,12 @@ import (
 )
 
 type UpdateSiswaValidation struct {
-	Nama         string                `json:"nama" binding:"required"`
-	JenisKelamin string                `json:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
-	NoHp         string                `json:"no_hp" binding:"required,numeric"`
-	Alamat       string                `json:"alamat" binding:"required"`
-	ImageProfile *multipart.FileHeader `json:"image_profile" binding:"required"`
-	KelasId      int                   `json:"kelas_id" binding:"required,gt=0"`
-	Email        string                `json:"email" binding:"required,email"`
+	Nama         string `form:"nama" binding:"required"`
+	JenisKelamin string `form:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
+	NoHp         string `form:"no_hp" binding:"required,numeric"`
+	Alamat       string `form:"alamat" binding:"required"`
+	Email        string `form:"email" binding:"required"`
+	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"required"`
 }
 
 var updateSiswaMessages = map[string]string{
@@ -24,11 +23,8 @@ var updateSiswaMessages = map[string]string{
 	"NoHp.required":         "No HP wajib diisi.",
 	"NoHp.numeric":          "No HP harus berupa angka.",
 	"Alamat.required":       "Alamat wajib diisi.",
+	"Email.required":        "Email harus diisi.",
 	"ImageProfile.required": "Image profile wajib diunggah.",
-	"KelasId.required":      "Kelas ID wajib diisi.",
-	"KelasId.gt":            "Kelas ID harus lebih besar dari 0.",
-	"Email.required":        "Email wajib diisi.",
-	"Email.email":           "Format email tidak valid.",
 }
 
 func TranslateUpdateSiswaError(err error) map[string]string {
