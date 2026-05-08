@@ -31,14 +31,27 @@ func SetupRoutersAPI(app *gin.Engine) {
 
 		// Endpoint Routes
 		route.GET("/", controllers.HomeHandler)
-		route.PATCH("/siswa/:nis", controllers.UpdateSiswa)
-		route.GET("/user", middleware.AuthMiddleware(), controllers.GetUsers)
-		route.GET("/user/:nis/siswa", middleware.AuthMiddleware(), middleware.RoleMiddleware(3, 4), controllers.GetUsersByNIS)
-		route.GET("/siswa", controllers.GetSiswa)
-		route.GET("/siswa/:nis", middleware.AuthMiddleware(), controllers.GetSiswaByID)
-		route.GET("/guru", middleware.AuthMiddleware(), controllers.GetGuru)
-		route.GET("/guru/:nip", middleware.AuthMiddleware(), controllers.GetGuruById)
-		route.POST("/logout", middleware.AuthMiddleware(), controllers.LogoutUser)
+
+		// Users
+		user := route.Group("/user")
+		user.GET("/", middleware.AuthMiddleware(), controllers.GetUsers)
+		user.GET("")
+		user.GET("/guru/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(2,3), controllers.GetGuruById)
+		user.GET("/siswa/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(4), controllers.GetUsersByNIS)
+
+		// Siswa
+		siswa := route.Group("/siswa")
+		siswa.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.GetSiswa)
+		siswa.GET("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.GetSiswaByID)
+		siswa.PATCH("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.UpdateSiswa)
+
+		// Guru
+		guru := route.Group("/guru")
+		guru.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.GetGuru)
+		guru.PATCH("/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.UpdateGuru)
+
+		// Logout
+		route.POST("/logout", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.LogoutUser)
 	}
 
 }

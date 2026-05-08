@@ -36,10 +36,15 @@ func main() {
 	})
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*", "https://api-golang.bayualexandria.site/", "http://192.168.88.103"},
+		AllowOrigins: []string{"*", "https://api-golang.bayualexandria.site/", "http://192.168.88.239:8080/"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders: []string{"Content-Type,access-control-allow-origin, access-control-allow-headers"},
-		MaxAge:       12 * time.Hour,
+		AllowHeaders: []string{
+			"Origin",
+			"Content-Type",
+			"Accept",
+			"Authorization",
+		},
+		MaxAge: 12 * time.Hour,
 	}))
 	router.NoRoute(func(c *gin.Context) {
 		c.HTML(404, "404.html", gin.H{"message": "Halaman tidak ditemukan", "status": 404})
