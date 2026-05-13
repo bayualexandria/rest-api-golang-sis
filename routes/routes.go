@@ -15,7 +15,9 @@ func SetupRouters(app *gin.Engine) {
 
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{
+			"status": 200,
 			"title": "Welcome to Backend API",
+			
 		})
 	})
 }

@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS linked_social_accounts;

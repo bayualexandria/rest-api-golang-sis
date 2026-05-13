@@ -17,8 +17,8 @@ func LoginUserSocialMedia(c *gin.Context) {
 		c.JSON(403, gin.H{"message": "User belum terdaftar! Silahkan hubungi administrator sekolah.", "status": 403})
 		return
 	} else {
-		var siswa models.Siswa
-		if err := config.DB.Where("nis = ?", user.Username).First(&siswa).Error; err != nil {
+
+		if err := config.DB.Where("status_user_id != ?", 4).First(&user).Error; err != nil {
 			c.JSON(403, gin.H{"message": "User ini bukan siswa! Silahkan hubungi administrator sekolah.", "status": 403})
 			return
 		} else {
@@ -43,7 +43,7 @@ func LoginUserSocialMedia(c *gin.Context) {
 					linkedSocialAccount.ProviderName = nameGoogle
 					linkedSocialAccount.ProviderID = idGoogle
 					config.DB.Save(&linkedSocialAccount)
-					c.JSON(200, gin.H{"message": "Login berhasil!", "status": 200, "token": token, "data": user})
+					c.JSON(200, gin.H{"message": "Login berhasil!", "status": 200, "token": token, "user": user})
 				}
 			}
 		}

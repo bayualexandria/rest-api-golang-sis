@@ -34,3 +34,11 @@ func GetUsersByNIS(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": result})
 }
+
+func GetUsersByUsername(c *gin.Context) {
+	username := c.Param("username")
+
+	var user models.User
+	config.DB.Where("username = ?", username).First(&user)
+	c.JSON(http.StatusOK, gin.H{"data": user})
+}

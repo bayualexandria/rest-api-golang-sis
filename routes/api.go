@@ -27,7 +27,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 		route.GET("/drop-email-verified-at/:username", controllers.DropEmailVerifiedAt)
 
 		// Login Social Media Routes
-		route.GET("/login/google/:email/:idGoogle/:nameGoogle", controllers.LoginUserSocialMedia)
+		route.GET("/login-admin/google/:email/:idGoogle/:nameGoogle", controllers.LoginUserSocialMedia)
 
 		// Endpoint Routes
 		route.GET("/", controllers.HomeHandler)
@@ -35,8 +35,8 @@ func SetupRoutersAPI(app *gin.Engine) {
 		// Users
 		user := route.Group("/user")
 		user.GET("/", middleware.AuthMiddleware(), controllers.GetUsers)
-		user.GET("")
-		user.GET("/guru/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(2,3), controllers.GetGuruById)
+		user.GET("/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetUsersByUsername)
+		user.GET("/guru/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(2, 3), controllers.GetGuruById)
 		user.GET("/siswa/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(4), controllers.GetUsersByNIS)
 
 		// Siswa
