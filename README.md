@@ -1,5 +1,8 @@
 ## Sistem Informasi Siswa Via Golang
 
+Aplikasi ini menggunakan HttpOnly untuk akses token authentication nya, tanpa perlu set cookie di front end.
+
+
 ## Clean cache ketika package error
 
 Gunakan perintah dibawah ini untuk membersihkan package

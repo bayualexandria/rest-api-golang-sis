@@ -10,7 +10,6 @@ import (
 	"backend-api/validations/siswalogin"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +21,6 @@ func LoginUserAdmin(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		msg := adminlogin.TranslateErrorLoginAdmin(err)
-		// notifications.NotifikasiAkun("wardanabayu455@gmail.com", "Bayu Wardana", "Selamat akun anda telah diaktifkan silahkan login menggunakan akun anda, dengan password dibawah ini:")
 		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
 		return
 	}
@@ -33,10 +31,9 @@ func LoginUserAdmin(c *gin.Context) {
 		return
 	}
 
-	if config.DB.Where("status_user_id != ?", 4).First(&user).Error != nil {
+	if config.DB.Where("status_id != ?", 4).First(&user).Error != nil {
 		c.JSON(403, gin.H{"message": "User ini tidak memiliki akses login!", "status": 403})
 		return
-
 	}
 
 	if !utils.CheckPasswordHash(input.Password, user.Password) {
@@ -67,7 +64,14 @@ func LoginUserAdmin(c *gin.Context) {
 
 	config.DB.Create(&inputToken)
 
-	c.JSON(http.StatusOK, gin.H{"user": user, "accessToken": token, "status": 200})
+	/// Di dalam controller saat LOGIN BERHASIL:
+	// Gunakan properti cookie standar go untuk mengatur SameSite secara eksplisit
+	c.Writer.Header().Set("Set-Cookie", "access_token="+token+"; Max-Age=86400; Path=/; SameSite=Lax; HttpOnly")
+
+	// ATAU jika menggunakan c.SetCookie bawaan Gin, pastikan parameternya seperti ini:
+	// c.SetCookie("access_token", token, 86400, "/", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"user": user, "status": 200}) // Hilangkan token dari body JSON
 }
 
 func LoginUser(c *gin.Context) {
@@ -84,10 +88,9 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	if err := config.DB.Where("status_user_id = ?", 4).First(&user).Error; err != nil {
+	if err := config.DB.Where("status_id = ?", 4).First(&user).Error; err != nil {
 		c.JSON(403, gin.H{"message": "User ini tidak memiliki akses login!", "status": 403})
 		return
-
 	}
 
 	if !utils.CheckPasswordHash(input.Password, user.Password) {
@@ -100,8 +103,6 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 	var inputToken models.PersonalAccessToken
-	// Auto increment ID
-	inputToken.ID = 0
 	inputToken.Token = token
 	inputToken.TokenableType = "User"
 	inputToken.TokenableID = user.ID
@@ -111,17 +112,36 @@ func LoginUser(c *gin.Context) {
 	inputToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
 	inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
 	config.DB.Create(&inputToken)
-	c.JSON(http.StatusOK, gin.H{"user": user, "accessToken": token, "status": 200})
+
+	// Di dalam controller saat LOGIN BERHASIL:
+	// Gunakan properti cookie standar go untuk mengatur SameSite secara eksplisit
+	c.Writer.Header().Set("Set-Cookie", "access_token="+token+"; Max-Age=86400; Path=/; SameSite=Lax; HttpOnly")
+
+	// ATAU jika menggunakan c.SetCookie bawaan Gin, pastikan parameternya seperti ini:
+	// c.SetCookie("access_token", token, 86400, "/", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"user": user, "status": 200})
 }
 
 func LogoutUser(c *gin.Context) {
-	token := c.GetHeader("Authorization")
+	// === MODIFIKASI LOGOUT DI SINI ===
+	// Ambil token langsung dari Cookie, bukan Header lagi
+	tokenString, err := c.Cookie("access_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+
 	var idToken models.PersonalAccessToken
-	if err := config.DB.Where("token = ?", strings.TrimPrefix(token, "Bearer ")).First(&idToken).Error; err != nil {
+	if err := config.DB.Where("token = ?", tokenString).First(&idToken).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
 		return
 	}
 	config.DB.Where("tokenable_id = ?", idToken.TokenableID).Delete(&models.PersonalAccessToken{})
+
+	// Hapus cookie di browser dengan mengatur MaxAge ke -1
+	c.SetCookie("access_token", "", -1, "/", "", false, true)
+
 	c.JSON(http.StatusOK, gin.H{"message": "Berhasil logout"})
 }
 

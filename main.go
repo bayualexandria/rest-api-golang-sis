@@ -3,14 +3,13 @@ package main
 import (
 	"backend-api/config"
 	"backend-api/databases/seeders"
+	"backend-api/middleware"
 	"backend-api/routes"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -21,8 +20,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("File .env tidak ditemukan: %v", err)
 	}
-	router := gin.Default()
+	router := gin.New()
 
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
 	// 1. Koneksi ke database
 	config.ConnectDatabase()
 	// config.EmailConfig()
@@ -35,17 +36,7 @@ func main() {
 		return nil
 	})
 
-	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*", "https://api-golang.bayualexandria.site/", "http://192.168.88.239:8080/"},
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders: []string{
-			"Origin",
-			"Content-Type",
-			"Accept",
-			"Authorization",
-		},
-		MaxAge: 12 * time.Hour,
-	}))
+	
 	router.NoRoute(func(c *gin.Context) {
 		c.HTML(404, "404.html", gin.H{"message": "Halaman tidak ditemukan", "status": 404})
 	})
@@ -56,7 +47,12 @@ func main() {
 	// Setup routes API
 	routes.SetupRoutersAPI(router)
 
-	router.Static("/storages", "./storages")
+	router.Use(middleware.CORSMiddleware())
+	// Logger dan Recovery tetap diperlukan agar tidak crash
+
+  
+
+	router.Static("/storage", "./storage")
 
 	// Seeders
 	if len(os.Args) > 1 && os.Args[1] == "seed" {

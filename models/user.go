@@ -4,11 +4,11 @@ package models
 type User struct {
 	ID              int    `json:"id"`
 	Name            string `json:"name"`
-	Username        int    `json:"username"`
+	Username        string    `json:"username"`
 	Email           string `json:"email"`
 	EmailVerifiedAt string `json:"email_verified_at"`
 	Password        string `json:"password"`
-	StatusUserId        int `json:"status_user_id"`
+	StatusId        int `json:"status_id"`
 }
 
 func (User) TableName() string {

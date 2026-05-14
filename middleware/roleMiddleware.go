@@ -18,7 +18,7 @@ func RoleMiddleware(allowedRoles ...int) gin.HandlerFunc {
 
 		// cek apakah role user ada di allowedRoles
 		for _, role := range allowedRoles {
-			if user.StatusUserId == role {
+			if user.StatusId == role {
 				c.Next()
 				return
 			}

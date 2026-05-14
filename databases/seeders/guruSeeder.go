@@ -25,7 +25,7 @@ type UserGuruSeeder struct {
 	Email           string
 	Password        string
 	EmailVerifiedAt string
-	StatusUserID    int
+	StatusID    int
 }
 
 func (GuruSeeder) TableName() string {
@@ -51,7 +51,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			JenisKelamin: "Laki-laki",
 			NoHp:         "081234567890",
 			Alamat:       "Jl. Contoh Alamat No. 123, Kota Contoh",
-			ImageProfile: "storages/logo-pendidikan.png",
+			ImageProfile: "logo-pendidikan.png",
 		},
 		{
 			ID:           2,
@@ -60,7 +60,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			JenisKelamin: "Laki-laki",
 			NoHp:         "081234567891",
 			Alamat:       "Jl. Contoh Alamat No. 123, Kota Contoh",
-			ImageProfile: "storages/logo-pendidikan.png",
+			ImageProfile: "logo-pendidikan.png",
 		},
 		{
 			ID:           3,
@@ -69,7 +69,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			JenisKelamin: "Laki-laki",
 			NoHp:         "081234567892",
 			Alamat:       "Jl. Contoh Alamat No. 123, Kota Contoh",
-			ImageProfile: "storages/logo-pendidikan.png",
+			ImageProfile: "logo-pendidikan.png",
 		},
 	}
 	passHash := "admin123" // Contoh password default
@@ -81,7 +81,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			Email:           "wardanabayu455@gmail.com",
 			Password:        hashPasswordUserGuru(passHash),
 			EmailVerifiedAt: time.Now().Format("2006-01-02"),
-			StatusUserID:    1, // Misalnya, ID status user untuk Guru
+			StatusID:    1, // Misalnya, ID status user untuk Guru
 		},
 		{
 			ID:              2,
@@ -90,7 +90,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			Email:           "wardanabayu456@gmail.com",
 			Password:        hashPasswordUserGuru(passHash),
 			EmailVerifiedAt: time.Now().Format("2006-01-02"),
-			StatusUserID:    2, // Misalnya, ID status user untuk Guru
+			StatusID:    2, // Misalnya, ID status user untuk Guru
 		},
 		{
 			ID:              3,
@@ -99,7 +99,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			Email:           "wardanabayu457@gmail.com",
 			Password:        hashPasswordUserGuru(passHash),
 			EmailVerifiedAt: time.Now().Format("2006-01-02"),
-			StatusUserID:    3, // Misalnya, ID status user untuk Guru
+			StatusID:    3, // Misalnya, ID status user untuk Guru
 		},
 	}
 

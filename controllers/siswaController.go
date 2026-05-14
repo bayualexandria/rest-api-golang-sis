@@ -60,7 +60,7 @@ func GetSiswa(c *gin.Context) {
 
 func GetSiswaByID(c *gin.Context) {
 	var siswa models.Siswa
-	nis := c.Param("nis")
+	nis := c.Param("username")
 
 	// Ambil data berdasarkan ID dari database
 	result := config.DB.Where("nis = ?", nis).First(&siswa)

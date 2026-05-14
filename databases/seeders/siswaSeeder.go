@@ -26,7 +26,7 @@ type UserSiswaSeeder struct {
 	Email           string
 	Password        string
 	EmailVerifiedAt string
-	StatusUserID    int
+	StatusID    int
 }
 
 func (SiswaSeeder) TableName() string {
@@ -54,7 +54,7 @@ func (s SiswaSeeder) Run(db *gorm.DB) {
 			JenisKelamin: genders[i%2], // Alternatif jenis kelamin
 			NoHp:         faker.Phonenumber(),
 			Alamat:       faker.Word() + " Street No., " + faker.CCNumber(),
-			ImageProfile: "storages/logo-pendidikan.png",
+			ImageProfile: "logo-pendidikan.png",
 		}
 		passHash := "admin123" // Contoh password default
 		user := UserSiswaSeeder{
@@ -64,7 +64,7 @@ func (s SiswaSeeder) Run(db *gorm.DB) {
 			Email:           faker.Email(),
 			Password:        HashPasswordUserSiswa(passHash),
 			EmailVerifiedAt: time.Now().Format("2006-01-02"),
-			StatusUserID:    4, // Misalnya, ID status user untuk Siswa
+			StatusID:    4, // Misalnya, ID status user untuk Siswa
 		}
 		if err := db.Create(&siswa).Error; err != nil {
 			log.Fatal("Error creating siswa:", err)

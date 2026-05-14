@@ -11,22 +11,31 @@ import (
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.GetHeader("Authorization")
+		var tokenString string
+		var err error
 
-		if token == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak ditemukan!", "status": 401})
+		// 1. Coba ambil token dari Cookie dulu (Sistem utama)
+		tokenString, err = c.Cookie("access_token")
+
+		// 2. JIKA Cookie kosong/gagal (karena diblokir localhost), coba ambil dari Header Authorization (Sistem Cadangan)
+		if err != nil || tokenString == "" {
+			authHeader := c.GetHeader("Authorization")
+			if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
+				tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+			}
+		}
+
+		// Jika kedua cara di atas tetap tidak menemukan token
+		if tokenString == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Token tidak ditemukan atau sesi berakhir!", 
+				"status":  401,
+			})
 			c.Abort()
 			return
 		}
 
-		if !strings.HasPrefix(token, "Bearer ") {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Format token salah!", "status": 401})
-			c.Abort()
-			return
-		}
-
-		tokenString := strings.TrimPrefix(token, "Bearer ")
-
+		// 3. Validasi token ke database
 		var accessToken models.PersonalAccessToken
 		if err := config.DB.Where("token = ?", tokenString).First(&accessToken).Error; err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid!", "status": 401})
@@ -34,6 +43,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// 4. Cari data user
 		var user models.User
 		if err := config.DB.Where("id = ?", accessToken.TokenableID).First(&user).Error; err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "User tidak ditemukan!", "status": 401})
@@ -41,9 +51,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// simpan user ke context (optional tapi penting)
 		c.Set("user", user)
-
 		c.Next()
 	}
 }

@@ -2,7 +2,6 @@ package models
 
 // Model PersonalAccessToken merepresentasikan tabel "personal_access_tokens" di database
 type PersonalAccessToken struct {
-	ID            int    `json:"id"`
 	Token         string `json:"token"`
 	TokenableType string `json:"tokenable_type"`
 	TokenableID   int    `json:"tokenable_id"`

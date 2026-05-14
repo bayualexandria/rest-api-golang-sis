@@ -43,7 +43,7 @@ func GetGuru(c *gin.Context) {
 
 // get post by id
 func GetGuruById(c *gin.Context) {
-	nip := c.Param("nip")
+	nip := c.Param("username")
 	var guru models.Guru
 	if err := config.DB.Where("nip = ?", nip).First(&guru).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Data tidak ditemukan!"})
@@ -52,7 +52,7 @@ func GetGuruById(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"success": true,
-		"message": "Detail Data Guru dengan NIP : " + c.Param("nip"),
+		"message": "Detail Data Guru dengan NIP : " + c.Param("username"),
 		"data":    guru,
 	})
 }
