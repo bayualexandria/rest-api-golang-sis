@@ -5,7 +5,7 @@ import (
 )
 
 type ForgotPasswordValidation struct {
-	Email string `json:"email" binding:"required,email"`
+	Email string `form:"email" binding:"required,email"`
 }
 
 var forgotPasswordMessages = map[string]string{

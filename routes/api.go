@@ -30,11 +30,6 @@ func SetupRoutersAPI(app *gin.Engine) {
 			authRoute.GET("/verify/:email/:token", controllers.VerifyEmail)
 			authRoute.POST("/forgot-password", controllers.ForgotPassword)
 			authRoute.GET("/send-reset-password/:email/:token", controllers.SendResetPassword)
-			authRoute.POST("/reset-password/:email/:token", controllers.ResetPassword)
-			authRoute.POST("/logout", middleware.AuthMiddleware(), controllers.LogoutUser)
-
-			// Drop Email Verified At
-			route.GET("/drop-email-verified-at/:username", controllers.DropEmailVerifiedAt)
 
 			// Login Social Media Routes
 			route.GET("/login-admin/google/:email/:idGoogle/:nameGoogle", controllers.LoginUserSocialMedia)
@@ -44,21 +39,22 @@ func SetupRoutersAPI(app *gin.Engine) {
 
 			// Users
 			user := route.Group("/user")
-			user.GET("/", middleware.AuthMiddleware(), controllers.GetUsers)
+			user.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetUsers)
 			user.GET("/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.GetUsersByUsername)
 			user.GET("/:username/guru", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetUsersByNIP)
 			user.GET("/:username/siswa", middleware.AuthMiddleware(), middleware.RoleMiddleware(4), controllers.GetUsersByNIS)
+			user.PUT("/change-password/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.ChangePassword)
 
 			// Siswa
 			siswa := route.Group("/siswa")
-			siswa.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.GetSiswa)
+			siswa.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswa)
 			siswa.GET("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.GetSiswaByID)
-			siswa.PATCH("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.UpdateSiswa)
+			siswa.PATCH("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateSiswa)
 
 			// Guru
 			guru := route.Group("/guru")
-			guru.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.GetGuru)
-			guru.PATCH("/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.UpdateGuru)
+			guru.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetGuru)
+			guru.PATCH("/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.UpdateGuru)
 
 			// Logout
 			route.POST("/logout", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.LogoutUser)

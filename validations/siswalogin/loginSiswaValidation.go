@@ -5,8 +5,8 @@ import (
 )
 
 type LoginSiswaValidation struct {
-	Username string `json:"username" binding:"required,numeric"`
-	Password string `json:"password" binding:"required"`
+	Username string `form:"username" binding:"required,numeric"`
+	Password string `form:"password" binding:"required"`
 }
 
 var customMessagesLoginSiswa = map[string]string{

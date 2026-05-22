@@ -4,7 +4,6 @@ go 1.25.1
 
 require (
 	github.com/bxcodec/faker/v4 v4.0.0-beta.3
-	github.com/gin-contrib/cors v1.7.7
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-mail/mail v2.3.1+incompatible
 	github.com/golang-jwt/jwt/v5 v5.3.0

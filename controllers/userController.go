@@ -76,3 +76,4 @@ func GetUsersByUsername(c *gin.Context) {
 		First(&user)
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
+

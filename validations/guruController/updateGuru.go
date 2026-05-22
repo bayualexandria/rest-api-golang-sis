@@ -1,4 +1,4 @@
-package updateController
+package controllers // Sesuaikan dengan nama package kamu, misal: controllers atau validation
 
 import (
 	"mime/multipart"
@@ -8,12 +8,12 @@ import (
 )
 
 type UpdateGuruValidation struct {
-	Nama         string                `form:"nama" binding:"required"`
-	JenisKelamin string                `form:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
-	NoHp         string                `form:"no_hp" binding:"required,numeric"`
-	Alamat       string                `form:"alamat" binding:"required"`
-	Email        string                `form:"email" binding:"required"`
-	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"required"`
+	// Menambahkan binding:"omitempty" agar tidak wajib diisi semua saat update
+	Nama         string                `form:"nama" binding:"omitempty"`
+	JenisKelamin string                `form:"jenis_kelamin" binding:"omitempty,oneof=Laki-laki Perempuan"`
+	NoHp         string                `form:"no_hp" binding:"omitempty,numeric"`
+	Alamat       string                `form:"alamat" binding:"omitempty"`
+	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"omitempty"`
 }
 
 var updateGuruMessages = map[string]string{
@@ -23,11 +23,11 @@ var updateGuruMessages = map[string]string{
 	"NoHp.required":         "No HP wajib diisi.",
 	"NoHp.numeric":          "No HP harus berupa angka.",
 	"Alamat.required":       "Alamat wajib diisi.",
-	"Email.required":        "Email harus diisi.",
 	"ImageProfile.required": "Image profile wajib diunggah.",
 }
 
-func TranslateUpdateSiswaError(err error) map[string]string {
+// Nama fungsi disesuaikan dari Siswa menjadi Guru agar seragam
+func TranslateUpdateGuruError(err error) map[string]string {
 	errors := make(map[string]string)
 
 	if validationErrors, ok := err.(validator.ValidationErrors); ok {
