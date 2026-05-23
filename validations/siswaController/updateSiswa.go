@@ -8,12 +8,11 @@ import (
 )
 
 type UpdateSiswaValidation struct {
-	Nama         string `form:"nama" binding:"required"`
-	JenisKelamin string `form:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
-	NoHp         string `form:"no_hp" binding:"required,numeric"`
-	Alamat       string `form:"alamat" binding:"required"`
-	Email        string `form:"email" binding:"required"`
-	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"required"`
+	Nama         string                `form:"nama" binding:"omitempty"`
+	JenisKelamin string                `form:"jenis_kelamin" binding:"omitempty,oneof=Laki-laki Perempuan"`
+	NoHp         string                `form:"no_hp" binding:"omitempty,numeric"`
+	Alamat       string                `form:"alamat" binding:"omitempty"`
+	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"omitempty"`
 }
 
 var updateSiswaMessages = map[string]string{
@@ -23,7 +22,6 @@ var updateSiswaMessages = map[string]string{
 	"NoHp.required":         "No HP wajib diisi.",
 	"NoHp.numeric":          "No HP harus berupa angka.",
 	"Alamat.required":       "Alamat wajib diisi.",
-	"Email.required":        "Email harus diisi.",
 	"ImageProfile.required": "Image profile wajib diunggah.",
 }
 
