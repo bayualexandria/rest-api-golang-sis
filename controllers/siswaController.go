@@ -192,7 +192,7 @@ func UpdateSiswa(c *gin.Context) {
 		filePath := "storage/siswa/" + nis + "/" + filename
 
 		// simpan file
-		os.Remove("storage/guru" + nis)
+		os.Remove("storage/siswa" + nis)
 		os.Remove(siswa.ImageProfile)
 
 		c.SaveUploadedFile(file, filePath)
@@ -213,6 +213,32 @@ func UpdateSiswa(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"success": true,
 		"message": "Data siswa berhasil diupdate",
+		"status":  200,
+	})
+}
+
+func DeleteSiswa(c *gin.Context) {
+	nis := c.Param("nis")
+	var siswa models.Siswa
+	// cek data siswa
+	if err := config.DB.Where("nis = ?", nis).First(&siswa).Error; err != nil {
+		c.JSON(404, gin.H{
+			"message": "Data siswa dengan NIS " + nis + " tidak ditemukan",
+			"status":  404,
+		})
+		return
+	}
+	// hapus data siswa
+	if err := config.DB.Delete(&siswa).Error; err != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal menghapus data siswa!",
+			"status":  500,
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"success": true,
+		"message": "Data siswa berhasil dihapus!",
 		"status":  200,
 	})
 }
