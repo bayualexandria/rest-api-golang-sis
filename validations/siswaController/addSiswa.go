@@ -7,51 +7,48 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type UpdateSiswaValidation struct {
-	Nama         string                `form:"nama" binding:"omitempty"`
-	JenisKelamin string                `form:"jenis_kelamin" binding:"omitempty,oneof=Laki-laki Perempuan"`
-	NoHp         string                `form:"no_hp" binding:"omitempty,numeric"`
-	Alamat       string                `form:"alamat" binding:"omitempty"`
-	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"omitempty"`
+type AddSiswaValidation struct {
+	NIS          int                   `form:"nis" binding:"required,numeric"`
+	Nama         string                `form:"nama" binding:"required"`
+	JenisKelamin string                `form:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
+	NoHp         string                `form:"no_hp" binding:"required,numeric"`
+	Email        string                `form:"email" binding:"required,email"`
+	Alamat       string                `form:"alamat" binding:"required"`
+	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"required"`
 }
 
-var updateSiswaMessages = map[string]string{
+var addSiswaMessages = map[string]string{
+	"NIS.required":          "NIS wajib diisi.",
+	"NIS.numeric":           "NIS harus berupa angka.",
 	"Nama.required":         "Nama wajib diisi.",
 	"JenisKelamin.required": "Jenis kelamin wajib diisi.",
 	"JenisKelamin.oneof":    "Jenis kelamin harus 'Laki-laki' atau 'Perempuan'.",
 	"NoHp.required":         "No HP wajib diisi.",
 	"NoHp.numeric":          "No HP harus berupa angka.",
+	"Email.required":        "Email wajib diisi.",
+	"Email.email":           "Format email tidak valid.",
 	"Alamat.required":       "Alamat wajib diisi.",
 	"ImageProfile.required": "Image profile wajib diunggah.",
 }
 
-
-func TranslateUpdateSiswaError(err error) map[string]string {
+func TranslateAddSiswaError(err error) map[string]string {
 	errors := make(map[string]string)
-
 	if validationErrors, ok := err.(validator.ValidationErrors); ok {
 		for _, fieldError := range validationErrors {
-
 			fieldName := fieldError.Field()
-			jsonKey := toSnakeCase(fieldName)
-
+			jsonKey := toSnakeCaseAddSiswa(fieldName)
 			tag := fieldError.Tag()
 			key := fieldName + "." + tag
-
-			if msg, exists := updateSiswaMessages[key]; exists {
+			if msg, exists := addSiswaMessages[key]; exists {
 				errors[jsonKey] = msg
-			} else {
-				errors[jsonKey] = fieldError.Error()
 			}
 		}
 	}
-
 	return errors
 }
 
-func toSnakeCase(str string) string {
+func toSnakeCaseAddSiswa(str string) string {
 	var result []rune
-
 	for i, r := range str {
 		if unicode.IsUpper(r) {
 			if i > 0 {
@@ -62,6 +59,5 @@ func toSnakeCase(str string) string {
 			result = append(result, r)
 		}
 	}
-
 	return string(result)
 }

@@ -34,6 +34,7 @@ func TranslateErrorLoginSiswa(err error) map[string]string {
 			} else {
 				errors[jsonKey] = fieldError.Error()
 			}
+			
 		}
 	}
 

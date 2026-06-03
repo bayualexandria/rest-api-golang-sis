@@ -79,6 +79,69 @@ func GetSiswaByID(c *gin.Context) {
 	})
 }
 
+func AddSiswa(c *gin.Context) {
+	var input siswacontroller.AddSiswaValidation
+
+	// bind form-data
+	if err := c.ShouldBind(&input); err != nil {
+		msg := siswacontroller.TranslateAddSiswaError(err)
+		c.JSON(400, gin.H{
+			"message": "Gagal menambahkan data siswa!",
+			"data":    msg,
+			"status":  400,
+		})
+		return
+	}
+
+	// Buat instance baru dari model Siswa
+
+	siswa := models.Siswa{
+		Nis:          input.NIS,
+		Nama:         input.Nama,
+		JenisKelamin: input.JenisKelamin,
+		NoHp:         input.NoHp,
+		Alamat:       input.Alamat,
+	}
+
+	user := models.User{
+		Username: fmt.Sprintf("%d", input.NIS),
+		Name:     input.Nama,
+		Email:    input.Email,
+		StatusId: 4, // ID untuk status "siswa"
+	}
+
+	// Simpan ke database
+	if err := config.DB.Create(&siswa).Error; err != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal menambahkan data siswa!",
+			"status":  500,
+		})
+		return
+	}
+	if err := config.DB.Create(&user).Error; err != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal menambahkan data user untuk siswa!",
+			"status":  500,
+		})
+		return
+	}
+
+	c.JSON(201, gin.H{
+		"success": true,
+		"message": "Data siswa berhasil ditambahkan!",
+		"data": gin.H{
+			"nis":           siswa.Nis,
+			"nama":          siswa.Nama,
+			"jenis_kelamin": siswa.JenisKelamin,
+			"no_hp":         siswa.NoHp,
+			"alamat":        siswa.Alamat,
+			"image_profile": siswa.ImageProfile,
+			"email":         user.Email,
+			"status_user":   "siswa",
+		},
+	})
+}
+
 func UpdateSiswa(c *gin.Context) {
 	var siswa models.Siswa
 	var input siswacontroller.UpdateSiswaValidation
@@ -144,7 +207,7 @@ func UpdateSiswa(c *gin.Context) {
 		return
 	}
 	config.DB.Model(&user).Where("username", nis).Updates(map[string]interface{}{
-		"name":  siswa.Nama,
+		"name": siswa.Nama,
 	})
 
 	c.JSON(200, gin.H{
