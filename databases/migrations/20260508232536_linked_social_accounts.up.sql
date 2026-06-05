@@ -3,8 +3,8 @@ CREATE TABLE linked_social_accounts (
     -- id INT AUTO_INCREMENT PRIMARY KEY,
     -- Jika menggunakan PostgreSQL, gunakan SERIAL
     -- id SERIAL PRIMARY KEY
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id),
+    id SERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(username),
     provider_name VARCHAR(255) NOT NULL,
     provider_id VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

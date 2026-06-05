@@ -1,7 +1,6 @@
 package models
 
 type Guru struct {
-	ID           int    `json:"id"`
 	Nip          int    `json:"nip"`
 	Nama         string `json:"nama"`
 	JenisKelamin string `json:"jenis_kelamin"`

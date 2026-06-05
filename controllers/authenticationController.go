@@ -49,7 +49,7 @@ func LoginUserAdmin(c *gin.Context) {
 	var inputToken models.PersonalAccessToken
 	inputToken.Token = token
 	inputToken.TokenableType = "User"
-	inputToken.TokenableID = user.ID
+	inputToken.TokenableID = user.Username
 	inputToken.Name = "Personal Access Token"
 	inputToken.Abilities = "*"
 	inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
@@ -105,7 +105,7 @@ func LoginUser(c *gin.Context) {
 	var inputToken models.PersonalAccessToken
 	inputToken.Token = token
 	inputToken.TokenableType = "User"
-	inputToken.TokenableID = user.ID
+	inputToken.TokenableID = user.Username
 	inputToken.Name = "Personal Access Token"
 	inputToken.Abilities = "*"
 	inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
@@ -114,7 +114,7 @@ func LoginUser(c *gin.Context) {
 	if err := config.DB.Where("username = ?", input.Username).Where("email_verified_at", nil).First(&user).Error; err == nil || user.EmailVerifiedAt == "" {
 		inputToken.Token = token
 		inputToken.TokenableType = "User"
-		inputToken.TokenableID = user.ID
+		inputToken.TokenableID = user.Username
 		inputToken.Name = "Personal Access Token"
 		inputToken.Abilities = "*"
 		inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
@@ -182,7 +182,7 @@ func VerifyEmail(c *gin.Context) {
 		return
 	}
 	user.EmailVerifiedAt = time.Now().Format("2006-01-02 15:04:05")
-	config.DB.Where("tokenable_id = ?", user.ID).Delete(&personalAccessToken)
+	config.DB.Where("tokenable_id = ?", user.Username).Delete(&personalAccessToken)
 	config.DB.Save(&user)
 	c.JSON(http.StatusOK, gin.H{"message": "Email berhasil diverifikasi", "status": 200})
 }

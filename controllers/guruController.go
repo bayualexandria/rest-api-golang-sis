@@ -5,7 +5,6 @@ import (
 	"backend-api/models"
 	guruController "backend-api/validations/guruController"
 	"fmt"
-	"net/http"
 	"os"
 	"time"
 
@@ -37,22 +36,6 @@ func GetGuru(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"succes":  true,
 		"message": "Data guru berhasil ditampilkan!",
-		"data":    guru,
-	})
-}
-
-// get post by id
-func GetGuruById(c *gin.Context) {
-	nip := c.Param("username")
-	var guru models.Guru
-	if err := config.DB.Where("nip = ?", nip).First(&guru).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Data tidak ditemukan!"})
-		return
-	}
-
-	c.JSON(200, gin.H{
-		"success": true,
-		"message": "Detail Data Guru dengan NIP : " + c.Param("username"),
 		"data":    guru,
 	})
 }

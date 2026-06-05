@@ -38,7 +38,7 @@ func LoginUserSocialMedia(c *gin.Context) {
 				var inputToken models.PersonalAccessToken
 				inputToken.Token = token
 				inputToken.TokenableType = "User"
-				inputToken.TokenableID = user.ID
+				inputToken.TokenableID = user.Username
 				inputToken.Name = "Personal Access Token"
 				inputToken.Abilities = "*"
 				inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
@@ -46,7 +46,7 @@ func LoginUserSocialMedia(c *gin.Context) {
 				inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
 
 				if err := config.DB.Where("provider_id = ?", idGoogle).First(&linkedSocialAccount).Error; err != nil {
-					linkedSocialAccount.UserID = uint(user.ID)
+					linkedSocialAccount.UserID = user.Username
 					linkedSocialAccount.ProviderName = nameGoogle
 					linkedSocialAccount.ProviderID = idGoogle
 					config.DB.Create(&linkedSocialAccount)

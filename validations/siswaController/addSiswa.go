@@ -8,7 +8,7 @@ import (
 )
 
 type AddSiswaValidation struct {
-	NIS          int                   `form:"nis" binding:"required,numeric"`
+	Nis          int                   `form:"nis" binding:"required,numeric"`
 	Nama         string                `form:"nama" binding:"required"`
 	JenisKelamin string                `form:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
 	NoHp         string                `form:"no_hp" binding:"required,numeric"`
@@ -18,8 +18,8 @@ type AddSiswaValidation struct {
 }
 
 var addSiswaMessages = map[string]string{
-	"NIS.required":          "NIS wajib diisi.",
-	"NIS.numeric":           "NIS harus berupa angka.",
+	"Nis.required":          "NIS wajib diisi.",
+	"Nis.numeric":           "NIS harus berupa angka.",
 	"Nama.required":         "Nama wajib diisi.",
 	"JenisKelamin.required": "Jenis kelamin wajib diisi.",
 	"JenisKelamin.oneof":    "Jenis kelamin harus 'Laki-laki' atau 'Perempuan'.",

@@ -3,8 +3,8 @@ package controllers
 import (
 	"backend-api/config"
 	"backend-api/models"
+	"backend-api/utils"
 	siswacontroller "backend-api/validations/siswaController"
-
 	"fmt"
 	"os"
 	"time"
@@ -29,7 +29,7 @@ func GetSiswa(c *gin.Context) {
 	err := config.DB.
 		Table("users").
 		Joins("JOIN siswa ON users.username = siswa.nis").
-		Joins("JOIN status_user ON users.status_user_id = status_user.id").
+		Joins("JOIN status_user ON users.status_id = status_user.id").
 		Select(`
 		users.username AS nis,
 			users.name,
@@ -58,29 +58,10 @@ func GetSiswa(c *gin.Context) {
 	})
 }
 
-func GetSiswaByID(c *gin.Context) {
-	var siswa models.Siswa
-	nis := c.Param("username")
-
-	// Ambil data berdasarkan ID dari database
-	result := config.DB.Where("nis = ?", nis).First(&siswa)
-	if result.Error != nil {
-		c.JSON(404, gin.H{
-			"message": "Siswa dengan nis " + nis + " tidak ditemukan.",
-			"status":  404,
-		})
-		return
-	}
-
-	c.JSON(200, gin.H{
-		"success": true,
-		"message": "Data siswa berhasil ditampilkan!",
-		"data":    siswa,
-	})
-}
-
 func AddSiswa(c *gin.Context) {
 	var input siswacontroller.AddSiswaValidation
+	var siswa models.Siswa
+	var user models.User
 
 	// bind form-data
 	if err := c.ShouldBind(&input); err != nil {
@@ -93,34 +74,53 @@ func AddSiswa(c *gin.Context) {
 		return
 	}
 
-	// Buat instance baru dari model Siswa
+	if input.ImageProfile != nil {
+		file := input.ImageProfile
+		// Jika folder storages belum ada, buat folder tersebut
+		os.MkdirAll("storage/siswa/"+fmt.Sprintf("%d", input.Nis), os.ModePerm)
 
-	siswa := models.Siswa{
-		Nis:          input.NIS,
-		Nama:         input.Nama,
-		JenisKelamin: input.JenisKelamin,
-		NoHp:         input.NoHp,
-		Alamat:       input.Alamat,
+		// buat nama file unik
+		filename := fmt.Sprintf("%d_%s", time.Now().Unix(), file.Filename)
+		filePath := "storage/siswa/" + fmt.Sprintf("%d", input.Nis) + "/" + filename
+
+		c.SaveUploadedFile(file, filePath)
+
+		// simpan path ke database
+		siswa.ImageProfile = filePath
 	}
-
-	user := models.User{
-		Username: fmt.Sprintf("%d", input.NIS),
-		Name:     input.Nama,
-		Email:    input.Email,
-		StatusId: 4, // ID untuk status "siswa"
-	}
-
-	// Simpan ke database
-	if err := config.DB.Create(&siswa).Error; err != nil {
+	siswa.ImageProfile = "/storage/logo-pendidikan.png"
+	hashPassword, err := utils.HashPassword(fmt.Sprintf("%d", input.Nis))
+	if err != nil {
 		c.JSON(500, gin.H{
-			"message": "Gagal menambahkan data siswa!",
+			"message": "Gagal menghash password!",
 			"status":  500,
 		})
 		return
 	}
-	if err := config.DB.Create(&user).Error; err != nil {
+	// Simpan ke database
+	if err := config.DB.Model(&user).Create(map[string]interface{}{
+		"username":  input.Nis,
+		"name":      input.Nama,
+		"email":     input.Email,
+		"password":  hashPassword, // Ganti dengan password default atau generate secara acak
+		"status_id": 4,            // Misalnya 4 adalah ID untuk status "siswa"
+	}).Error; err != nil {
 		c.JSON(500, gin.H{
-			"message": "Gagal menambahkan data user untuk siswa!",
+			"message": "Email atau Username sudah digunakan!",
+			"status":  500,
+		})
+		return
+	}
+	if err := config.DB.Model(&siswa).Create(map[string]interface{}{
+		"nis":           input.Nis,
+		"nama":          input.Nama,
+		"jenis_kelamin": input.JenisKelamin,
+		"no_hp":         input.NoHp,
+		"alamat":        input.Alamat,
+		"image_profile": siswa.ImageProfile,
+	}).Error; err != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal menambahkan data siswa!",
 			"status":  500,
 		})
 		return
@@ -206,9 +206,12 @@ func UpdateSiswa(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "Gagal mengupdate database: " + err.Error()})
 		return
 	}
-	config.DB.Model(&user).Where("username", nis).Updates(map[string]interface{}{
+	if err := config.DB.Model(&user).Where("username", nis).Updates(map[string]interface{}{
 		"name": siswa.Nama,
-	})
+	}).Error; err != nil {
+		c.JSON(500, gin.H{"error": "Gagal mengupdate data user: " + err.Error()})
+		return
+	}
 
 	c.JSON(200, gin.H{
 		"success": true,

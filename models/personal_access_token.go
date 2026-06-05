@@ -4,7 +4,7 @@ package models
 type PersonalAccessToken struct {
 	Token         string `json:"token"`
 	TokenableType string `json:"tokenable_type"`
-	TokenableID   int    `json:"tokenable_id"`
+	TokenableID   string    `json:"tokenable_id"`
 	Name          string `json:"name"`
 	Abilities     string `json:"abilities"`
 	LastUsedAt    string `json:"last_used_at"`
