@@ -55,6 +55,7 @@ func GetSiswa(c *gin.Context) {
 		"success": true,
 		"message": "Data siswa berhasil ditampilkan!",
 		"data":    result,
+		"total":   len(result),
 	})
 }
 
@@ -83,12 +84,18 @@ func AddSiswa(c *gin.Context) {
 		filename := fmt.Sprintf("%d_%s", time.Now().Unix(), file.Filename)
 		filePath := "storage/siswa/" + fmt.Sprintf("%d", input.Nis) + "/" + filename
 
+		// simpan file
+		os.Remove("storage/siswa" + fmt.Sprintf("%d", input.Nis))
+		os.Remove(siswa.ImageProfile)
+
 		c.SaveUploadedFile(file, filePath)
 
 		// simpan path ke database
 		siswa.ImageProfile = filePath
+	} else {
+
+		siswa.ImageProfile = "/storage/logo-pendidikan.png"
 	}
-	siswa.ImageProfile = "/storage/logo-pendidikan.png"
 	hashPassword, err := utils.HashPassword(fmt.Sprintf("%d", input.Nis))
 	if err != nil {
 		c.JSON(500, gin.H{

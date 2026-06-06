@@ -22,3 +22,4 @@ type Siswa struct {
 func (Siswa) TableName() string {
 	return "siswa" // jadi singular
 }
+

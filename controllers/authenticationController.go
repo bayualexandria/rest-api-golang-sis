@@ -83,6 +83,7 @@ func LoginUser(c *gin.Context) {
 	}
 	var user models.User
 
+	
 	if err := config.DB.Where("username = ?", input.Username).First(&user).Error; err != nil {
 		c.JSON(403, gin.H{"message": "Username belum terdaftar", "status": 403})
 		return
@@ -247,7 +248,7 @@ func SendResetPassword(c *gin.Context) {
 	notifications.NotificationResetPassword(user.Email, user.Name, "Silahkan menggunakan password dibawah ini untuk melakukan akses login ke portal!", newPassword, user.Username)
 	config.DB.Where("email = ?", email).Delete(&models.PasswordResetToken{})
 	user.Password = hashedPassword
-	config.DB.Save(&user)
+	config.DB.Model(&user).Where("email = ?", email).Update("password", user.Password)
 	c.JSON(http.StatusOK, gin.H{"message": "Silahkan cek email untuk melihat perubahan password!", "status": 200})
 
 }
@@ -309,7 +310,7 @@ func ChangePassword(c *gin.Context) {
 		return
 	}
 	user.Password = hashedPassword
-	config.DB.Save(&user)
+	config.DB.Model(&user).Where("username = ?", username).Update("password", user.Password)
 	c.JSON(http.StatusOK, gin.H{"message": "Password berhasil diubah", "status": 200})
 
 }

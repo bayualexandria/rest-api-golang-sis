@@ -59,6 +59,12 @@ func SetupRoutersAPI(app *gin.Engine) {
 			guru.GET("/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetUsersByNIP)
 			guru.PATCH("/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.UpdateGuru)
 
+			// Trash Data
+			trash := route.Group("/trash")
+			trash.GET("/siswa", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetTrashSiswa)
+			trash.PATCH("/siswa/restore-all", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashAllSiswa)
+			trash.PATCH("/siswa/restore/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashSiswa)
+
 			// Logout
 			route.POST("/logout", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.LogoutUser)
 		}
