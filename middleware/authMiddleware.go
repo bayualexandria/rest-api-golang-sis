@@ -45,7 +45,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// 4. Cari data user
 		var user models.User
-		if err := config.DB.Where("id = ?", accessToken.TokenableID).First(&user).Error; err != nil {
+		if err := config.DB.Where("username = ?", accessToken.TokenableID).First(&user).Error; err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "User tidak ditemukan!", "status": 401})
 			c.Abort()
 			return

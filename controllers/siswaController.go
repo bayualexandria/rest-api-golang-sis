@@ -40,7 +40,7 @@ func GetSiswa(c *gin.Context) {
 			siswa.nama,
 			siswa.image_profile,
 			status_user.nama_status AS status_user_name
-		`).
+		`).Where("users.deleted_at IS NULL").
 		Scan(&result).Error
 
 	if err != nil {
@@ -99,11 +99,12 @@ func AddSiswa(c *gin.Context) {
 	}
 	// Simpan ke database
 	if err := config.DB.Model(&user).Create(map[string]interface{}{
-		"username":  input.Nis,
-		"name":      input.Nama,
-		"email":     input.Email,
-		"password":  hashPassword, // Ganti dengan password default atau generate secara acak
-		"status_id": 4,            // Misalnya 4 adalah ID untuk status "siswa"
+		"username":          input.Nis,
+		"name":              input.Nama,
+		"email":             input.Email,
+		"email_verified_at": time.Now().Format("2006-01-02 15:04:05"),
+		"password":          hashPassword, // Ganti dengan password default atau generate secara acak
+		"status_id":         "4",          // Misalnya 4 adalah ID untuk status "siswa"
 	}).Error; err != nil {
 		c.JSON(500, gin.H{
 			"message": "Email atau Username sudah digunakan!",
@@ -130,13 +131,13 @@ func AddSiswa(c *gin.Context) {
 		"success": true,
 		"message": "Data siswa berhasil ditambahkan!",
 		"data": gin.H{
-			"nis":           siswa.Nis,
-			"nama":          siswa.Nama,
-			"jenis_kelamin": siswa.JenisKelamin,
-			"no_hp":         siswa.NoHp,
-			"alamat":        siswa.Alamat,
+			"nis":           input.Nis,
+			"nama":          input.Nama,
+			"jenis_kelamin": input.JenisKelamin,
+			"no_hp":         input.NoHp,
+			"alamat":        input.Alamat,
 			"image_profile": siswa.ImageProfile,
-			"email":         user.Email,
+			"email":         input.Email,
 			"status_user":   "siswa",
 		},
 	})
@@ -202,7 +203,7 @@ func UpdateSiswa(c *gin.Context) {
 	}
 
 	// simpan ke DB
-	if err := config.DB.Save(&siswa).Error; err != nil {
+	if err := config.DB.Model(&siswa).Where("nis = ?", nis).Updates(siswa).Error; err != nil {
 		c.JSON(500, gin.H{"error": "Gagal mengupdate database: " + err.Error()})
 		return
 	}
@@ -223,6 +224,7 @@ func UpdateSiswa(c *gin.Context) {
 func DeleteSiswa(c *gin.Context) {
 	nis := c.Param("nis")
 	var siswa models.Siswa
+	var user models.User
 	// cek data siswa
 	if err := config.DB.Where("nis = ?", nis).First(&siswa).Error; err != nil {
 		c.JSON(404, gin.H{
@@ -232,9 +234,18 @@ func DeleteSiswa(c *gin.Context) {
 		return
 	}
 	// hapus data siswa
-	if err := config.DB.Delete(&siswa).Error; err != nil {
+	if err := config.DB.Model(&siswa).Where("nis = ?", nis).Delete(&siswa).Error; err != nil {
 		c.JSON(500, gin.H{
 			"message": "Gagal menghapus data siswa!",
+			"status":  500,
+		})
+		return
+	}
+
+	// hapus data user terkait
+	if err := config.DB.Model(&user).Where("username", nis).Delete(&user).Error; err != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal menghapus data user terkait!",
 			"status":  500,
 		})
 		return

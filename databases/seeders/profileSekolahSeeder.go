@@ -7,7 +7,6 @@ import (
 )
 
 type ProfileSekolahSeeder struct {
-	ID           int
 	NamaSekolah  string
 	Alamat       string
 	NoTelp       string
@@ -21,7 +20,6 @@ func (ProfileSekolahSeeder) TableName() string {
 
 func (p ProfileSekolahSeeder) Run(db *gorm.DB) {
 	profile := ProfileSekolahSeeder{
-		ID:           1,
 		NamaSekolah:  "SMK NEGERI 1 SINGOSARI",
 		Alamat:       "Jl. Raya Singosari No. 1, Singosari, Malang",
 		NoTelp:       "0341-123456",

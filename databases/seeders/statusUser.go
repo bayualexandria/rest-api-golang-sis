@@ -7,7 +7,6 @@ import (
 )
 
 type StatusUserSeeder struct {
-	ID     int
 	NamaStatus string
 }
 
@@ -17,10 +16,10 @@ func (StatusUserSeeder) TableName() string {
 
 func (s StatusUserSeeder) Run(db *gorm.DB) {
 	statusUser := []StatusUserSeeder{
-		{ID: 1, NamaStatus: "Admin"},
-		{ID: 2, NamaStatus: "Wali Kelas"},
-		{ID: 3, NamaStatus: "Guru"},
-		{ID: 4, NamaStatus: "Siswa"},
+		{NamaStatus: "Admin"},
+		{NamaStatus: "Wali Kelas"},
+		{NamaStatus: "Guru"},
+		{NamaStatus: "Siswa"},
 	}
 	for _, su := range statusUser {
 		if err := db.Create(&su).Error; err != nil {

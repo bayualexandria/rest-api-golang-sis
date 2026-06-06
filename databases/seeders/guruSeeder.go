@@ -9,7 +9,7 @@ import (
 )
 
 type GuruSeeder struct {
-	ID           int
+
 	Nip          string
 	Nama         string
 	JenisKelamin string
@@ -19,13 +19,13 @@ type GuruSeeder struct {
 }
 
 type UserGuruSeeder struct {
-	ID              int
+
 	Name            string
 	Username        string
 	Email           string
 	Password        string
 	EmailVerifiedAt string
-	StatusID    int
+	StatusID    string
 }
 
 func (GuruSeeder) TableName() string {
@@ -45,7 +45,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 
 	guru := []GuruSeeder{
 		{
-			ID:           1,
+		
 			Nip:          "9106012508950001", // Contoh NIP dengan 8 digit
 			Nama:         "Bayu Wardana",
 			JenisKelamin: "Laki-laki",
@@ -54,7 +54,6 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			ImageProfile: "logo-pendidikan.png",
 		},
 		{
-			ID:           2,
 			Nip:          "9106012508950002", // Contoh NIP dengan 8 digit
 			Nama:         "Bayu Wardana",
 			JenisKelamin: "Laki-laki",
@@ -63,7 +62,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			ImageProfile: "logo-pendidikan.png",
 		},
 		{
-			ID:           3,
+		
 			Nip:          "9106012508950003", // Contoh NIP dengan 8 digit
 			Nama:         "Bayu Wardana",
 			JenisKelamin: "Laki-laki",
@@ -75,31 +74,28 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 	passHash := "admin123" // Contoh password default
 	user := []UserGuruSeeder{
 		{
-			ID:              1,
 			Name:            "Bayu Wardana",
 			Username:        "9106012508950001",
 			Email:           "wardanabayu455@gmail.com",
 			Password:        hashPasswordUserGuru(passHash),
 			EmailVerifiedAt: time.Now().Format("2006-01-02"),
-			StatusID:    1, // Misalnya, ID status user untuk Guru
+			StatusID:    "1", // Misalnya, ID status user untuk Guru
 		},
 		{
-			ID:              2,
 			Name:            "Bayu Wardana",
 			Username:        "9106012508950002",
 			Email:           "wardanabayu456@gmail.com",
 			Password:        hashPasswordUserGuru(passHash),
 			EmailVerifiedAt: time.Now().Format("2006-01-02"),
-			StatusID:    2, // Misalnya, ID status user untuk Guru
+			StatusID:    "2", // Misalnya, ID status user untuk Guru
 		},
 		{
-			ID:              3,
 			Name:            "Bayu Wardana",
 			Username:        "9106012508950003",
 			Email:           "wardanabayu457@gmail.com",
 			Password:        hashPasswordUserGuru(passHash),
 			EmailVerifiedAt: time.Now().Format("2006-01-02"),
-			StatusID:    3, // Misalnya, ID status user untuk Guru
+			StatusID:    "3", // Misalnya, ID status user untuk Guru
 		},
 	}
 
