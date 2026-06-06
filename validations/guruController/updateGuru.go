@@ -1,4 +1,4 @@
-package controllers // Sesuaikan dengan nama package kamu, misal: controllers atau validation
+package gurucontroller // Sesuaikan dengan nama package kamu, misal: controllers atau validation
 
 import (
 	"mime/multipart"

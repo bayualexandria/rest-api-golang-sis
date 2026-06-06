@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserAll struct {
+type UserAllSiswa struct {
 	NIS            string `json:"nis"`
 	Name           string `json:"name"`
 	Email          string `json:"email"`
@@ -24,7 +24,7 @@ type UserAll struct {
 }
 
 func GetSiswa(c *gin.Context) {
-	var result []UserAll
+	var result []UserAllSiswa
 
 	err := config.DB.
 		Table("users").
