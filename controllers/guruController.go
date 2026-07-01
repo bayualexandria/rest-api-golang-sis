@@ -3,9 +3,11 @@ package controllers
 import (
 	"backend-api/config"
 	"backend-api/models"
+	"backend-api/notifications"
 	"backend-api/utils"
 	guruController "backend-api/validations/guruController"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -75,27 +77,6 @@ func AddGuru(c *gin.Context) {
 		return
 	}
 
-	if input.ImageProfile != nil {
-		file := input.ImageProfile
-		// Jika folder storages belum ada, buat folder tersebut
-		os.MkdirAll("storage/guru/"+fmt.Sprintf("%d", input.Nip), os.ModePerm)
-
-		// buat nama file unik
-		filename := fmt.Sprintf("%d_%s", time.Now().Unix(), file.Filename)
-		filePath := "storage/guru/" + fmt.Sprintf("%d", input.Nip) + "/" + filename
-
-		// simpan file
-		os.Remove("storage/guru" + fmt.Sprintf("%d", input.Nip))
-		os.Remove(guru.ImageProfile)
-
-		c.SaveUploadedFile(file, filePath)
-
-		// simpan path ke database
-		guru.ImageProfile = filePath
-	} else {
-
-		guru.ImageProfile = "/storage/logo-pendidikan.png"
-	}
 	hashPassword, err := utils.HashPassword(fmt.Sprintf("%d", input.Nip))
 	if err != nil {
 		c.JSON(500, gin.H{
@@ -106,12 +87,11 @@ func AddGuru(c *gin.Context) {
 	}
 	// Simpan ke database
 	if err := config.DB.Model(&user).Create(map[string]interface{}{
-		"username":          input.Nip,
-		"name":              input.Nama,
-		"email":             input.Email,
-		"email_verified_at": time.Now().Format("2006-01-02 15:04:05"),
-		"password":          hashPassword,     // Ganti dengan password default atau generate secara acak
-		"status_id":         input.StatusId, // Misalnya 4 adalah ID untuk status "siswa"
+		"username":  input.Nip,
+		"name":      input.Nama,
+		"email":     input.Email,
+		"password":  hashPassword,   // Ganti dengan password default atau generate secara acak
+		"status_id": input.StatusId, // Misalnya 4 adalah ID untuk status "siswa"
 	}).Error; err != nil {
 		c.JSON(500, gin.H{
 			"message": "Email atau Username sudah digunakan!",
@@ -125,7 +105,7 @@ func AddGuru(c *gin.Context) {
 		"jenis_kelamin": input.JenisKelamin,
 		"no_hp":         input.NoHp,
 		"alamat":        input.Alamat,
-		"image_profile": guru.ImageProfile,
+		"image_profile": "/storage/logo-pendidikan.png",
 	}).Error; err != nil {
 		c.JSON(500, gin.H{
 			"message": "Gagal menambahkan data guru!",
@@ -133,6 +113,22 @@ func AddGuru(c *gin.Context) {
 		})
 		return
 	}
+	token, err := utils.GenerateJWT(input.Nip)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal memuat token"})
+		return
+	}
+	var inputToken models.PersonalAccessToken
+	inputToken.Token = token
+	inputToken.TokenableType = "User"
+	inputToken.TokenableID = input.Nip
+	inputToken.Name = "Personal Access Token"
+	inputToken.Abilities = "*"
+	inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
+	inputToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
+	inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+	config.DB.Create(&inputToken)
+	notifications.NotifikasiAktivasiAkunUser(input.Email, input.Nama, "Selamat akun anda telah berhasil dibuat. Silahkan verifikasi email anda untuk mengaktifkan akun anda, dengan cara klik link dibawah ini: ", os.Getenv("APP_URL")+"/api/auth/verify/"+input.Email+"/"+token)
 
 	if input.StatusId == "1" {
 		input.StatusId = "Admin"
@@ -151,7 +147,7 @@ func AddGuru(c *gin.Context) {
 			"jenis_kelamin": input.JenisKelamin,
 			"no_hp":         input.NoHp,
 			"alamat":        input.Alamat,
-			"image_profile": guru.ImageProfile,
+			"image_profile": "/storage/logo-pendidikan.png",
 			"email":         input.Email,
 			"status_user":   input.StatusId,
 		},
@@ -214,7 +210,7 @@ func UpdateGuru(c *gin.Context) {
 
 	}
 
-	if err := config.DB.Save(&guru).Error; err != nil {
+	if err := config.DB.Model(&guru).Where("nip = ?", nip).Updates(&guru).Error; err != nil {
 		c.JSON(500, gin.H{"error": "Gagal mengupdate database: " + err.Error()})
 		return
 	}

@@ -1,21 +1,19 @@
 package gurucontroller
 
 import (
-	"mime/multipart"
 	"unicode"
 
 	"github.com/go-playground/validator/v10"
 )
 
 type AddGuruValidation struct {
-	Nip          string                `form:"nip" binding:"required"`
-	Nama         string                `form:"nama" binding:"required"`
-	JenisKelamin string                `form:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
-	NoHp         string                `form:"no_hp" binding:"required,numeric"`
-	Email        string                `form:"email" binding:"required,email"`
-	Alamat       string                `form:"alamat" binding:"required"`
-	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"required"`
-	StatusId     string                `form:"status_id" binding:"required,oneof=1 2 3"` // 1=Admin, 2=Wali Kelas, 3=Guru
+	Nip          string `form:"nip" binding:"required"`
+	Nama         string `form:"nama" binding:"required"`
+	JenisKelamin string `form:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
+	NoHp         string `form:"no_hp" binding:"required,numeric"`
+	Email        string `form:"email" binding:"required,email"`
+	Alamat       string `form:"alamat" binding:"required"`
+	StatusId     string `form:"status_id" binding:"required,oneof=1 2 3"` // 1=Admin, 2=Wali Kelas, 3=Guru
 }
 
 var addGuruMessages = map[string]string{
@@ -29,7 +27,6 @@ var addGuruMessages = map[string]string{
 	"Email.required":        "Email wajib diisi.",
 	"Email.email":           "Format email tidak valid.",
 	"Alamat.required":       "Alamat wajib diisi.",
-	"ImageProfile.required": "Image profile wajib diunggah.",
 	"StatusId.required":     "Status user wajib diisi.",
 	"StatusId.oneof":        "Status user harus 1(Admin), 2(Wali Kelas), atau 3(Guru).",
 }

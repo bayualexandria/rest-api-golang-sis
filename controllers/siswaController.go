@@ -210,7 +210,7 @@ func UpdateSiswa(c *gin.Context) {
 	}
 
 	// simpan ke DB
-	if err := config.DB.Model(&siswa).Where("nis = ?", nis).Updates(siswa).Error; err != nil {
+	if err := config.DB.Model(&siswa).Where("nis = ?", nis).Updates(&siswa).Error; err != nil {
 		c.JSON(500, gin.H{"error": "Gagal mengupdate database: " + err.Error()})
 		return
 	}

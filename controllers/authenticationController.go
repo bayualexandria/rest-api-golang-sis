@@ -184,7 +184,7 @@ func VerifyEmail(c *gin.Context) {
 	}
 	user.EmailVerifiedAt = time.Now().Format("2006-01-02 15:04:05")
 	config.DB.Where("tokenable_id = ?", user.Username).Delete(&personalAccessToken)
-	config.DB.Save(&user)
+	config.DB.Model(&user).Where("email = ?", email).Update("email_verified_at", user.EmailVerifiedAt)
 	c.JSON(http.StatusOK, gin.H{"message": "Email berhasil diverifikasi", "status": 200})
 }
 
