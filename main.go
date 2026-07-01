@@ -3,13 +3,14 @@ package main
 import (
 	"backend-api/config"
 	"backend-api/databases/seeders"
-	"backend-api/middleware"
 	"backend-api/routes"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -20,7 +21,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("File .env tidak ditemukan: %v", err)
 	}
-	router := gin.New()
+	router := gin.Default()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -36,7 +44,6 @@ func main() {
 		return nil
 	})
 
-	
 	router.NoRoute(func(c *gin.Context) {
 		c.HTML(404, "404.html", gin.H{"message": "Halaman tidak ditemukan", "status": 404})
 	})
@@ -47,10 +54,8 @@ func main() {
 	// Setup routes API
 	routes.SetupRoutersAPI(router)
 
-	router.Use(middleware.CORSMiddleware())
+	// router.Use(middleware.CORSMiddleware())
 	// Logger dan Recovery tetap diperlukan agar tidak crash
-
-  
 
 	router.Static("/storage", "./storage")
 

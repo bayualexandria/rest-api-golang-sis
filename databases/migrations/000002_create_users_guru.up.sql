@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS guru(
-    -- Jika menggunakan MySQL, gunakan AUTO_INCREMENT untuk kolom id
-    -- Jika menggunakan PostgreSQL, gunakan SERIAL atau BIGSERIAL untuk kolom id
-    id SERIAL PRIMARY KEY,
+    -- Jika menggunakan MySQL, gunakan 'id INT AUTO_INCREMENT PRIMARY KEY' untuk kolom id
+    -- Jika menggunakan PostgreSQL, gunakan 'id SERIAL PRIMARY KEY' atau BIGSERIAL untuk kolom id
+    id INT AUTO_INCREMENT PRIMARY KEY,
     nip BIGINT UNIQUE NOT NULL,
     nama VARCHAR(255) NOT NULL,
     jenis_kelamin VARCHAR(10) NOT NULL,
