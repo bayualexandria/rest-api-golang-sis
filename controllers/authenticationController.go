@@ -49,13 +49,13 @@ func LoginUserAdmin(c *gin.Context) {
 	var inputToken models.PersonalAccessToken
 	inputToken.Token = token
 	inputToken.TokenableType = "User"
-	inputToken.TokenableID = user.Username
+	inputToken.TokenableID = input.Username
 	inputToken.Name = "Personal Access Token"
 	inputToken.Abilities = "*"
 	inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
 	inputToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
 	inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
-	if err := config.DB.Where("username = ?", input.Username).Where("email_verified_at", nil).First(&user).Error; err == nil || user.EmailVerifiedAt == "" {
+	if err := config.DB.Table("users").Where("username = ?", input.Username).Where("email_verified_at", nil).First(&user).Error; err == nil || user.EmailVerifiedAt == "" {
 		notifications.NotifikasiAktivasiAkunUser(user.Email, user.Name, "Silahkan verifikasi email anda untuk mengaktifkan akun anda, dengan cara klik link dibawah ini: ", os.Getenv("APP_URL")+"/api/auth/verify/"+user.Email+"/"+token)
 		config.DB.Create(&inputToken)
 		c.JSON(http.StatusOK, gin.H{"message": "Email belum terverifikasi, silakan cek email anda untuk verifikasi.", "status": 200})
@@ -70,6 +70,10 @@ func LoginUserAdmin(c *gin.Context) {
 
 	// ATAU jika menggunakan c.SetCookie bawaan Gin, pastikan parameternya seperti ini:
 	// c.SetCookie("access_token", token, 86400, "/", "", false, true)
+	if err := config.DB.Where("username = ?", input.Username).First(&user).Error; err != nil {
+		c.JSON(403, gin.H{"message": "Username belum terdaftar", "status": 403})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"user": gin.H{"name": user.Name, "status_id": user.StatusId}, "message": "Anda berhasil login!", "status": 200}) // Hilangkan token dari body JSON
 }
@@ -83,7 +87,6 @@ func LoginUser(c *gin.Context) {
 	}
 	var user models.User
 
-	
 	if err := config.DB.Where("username = ?", input.Username).First(&user).Error; err != nil {
 		c.JSON(403, gin.H{"message": "Username belum terdaftar", "status": 403})
 		return
@@ -247,8 +250,8 @@ func SendResetPassword(c *gin.Context) {
 	}
 	notifications.NotificationResetPassword(user.Email, user.Name, "Silahkan menggunakan password dibawah ini untuk melakukan akses login ke portal!", newPassword, user.Username)
 	config.DB.Where("email = ?", email).Delete(&models.PasswordResetToken{})
-	user.Password = hashedPassword
-	config.DB.Model(&user).Where("email = ?", email).Update("password", user.Password)
+
+	config.DB.Model(&user).Where("email = ?", email).Update("password", hashedPassword)
 	c.JSON(http.StatusOK, gin.H{"message": "Silahkan cek email untuk melihat perubahan password!", "status": 200})
 
 }

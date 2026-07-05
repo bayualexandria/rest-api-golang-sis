@@ -77,21 +77,13 @@ func AddGuru(c *gin.Context) {
 		return
 	}
 
-	hashPassword, err := utils.HashPassword(fmt.Sprintf("%d", input.Nip))
-	if err != nil {
-		c.JSON(500, gin.H{
-			"message": "Gagal menghash password!",
-			"status":  500,
-		})
-		return
-	}
 	// Simpan ke database
 	if err := config.DB.Model(&user).Create(map[string]interface{}{
 		"username":  input.Nip,
 		"name":      input.Nama,
 		"email":     input.Email,
-		"password":  hashPassword,   // Ganti dengan password default atau generate secara acak
-		"status_id": input.StatusId, // Misalnya 4 adalah ID untuk status "siswa"
+		"password":  utils.HashPasswordUser("admin123"), // Ganti dengan password default atau generate secara acak
+		"status_id": input.StatusId,                     // Misalnya 4 adalah ID untuk status "siswa"
 	}).Error; err != nil {
 		c.JSON(500, gin.H{
 			"message": "Email atau Username sudah digunakan!",
