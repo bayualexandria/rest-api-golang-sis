@@ -3,9 +3,11 @@ package controllers
 import (
 	"backend-api/config"
 	"backend-api/models"
+	"backend-api/notifications"
 	"backend-api/utils"
 	siswacontroller "backend-api/validations/siswaController"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -75,42 +77,14 @@ func AddSiswa(c *gin.Context) {
 		return
 	}
 
-	if input.ImageProfile != nil {
-		file := input.ImageProfile
-		// Jika folder storages belum ada, buat folder tersebut
-		os.MkdirAll("storage/siswa/"+fmt.Sprintf("%d", input.Nis), os.ModePerm)
-
-		// buat nama file unik
-		filename := fmt.Sprintf("%d_%s", time.Now().Unix(), file.Filename)
-		filePath := "storage/siswa/" + fmt.Sprintf("%d", input.Nis) + "/" + filename
-
-		// simpan file
-		os.Remove("storage/siswa" + fmt.Sprintf("%d", input.Nis))
-		os.Remove(siswa.ImageProfile)
-
-		c.SaveUploadedFile(file, filePath)
-
-		// simpan path ke database
-		siswa.ImageProfile = filePath
-	} else {
-
-		siswa.ImageProfile = "/storage/logo-pendidikan.png"
-	}
-	hashPassword, err := utils.HashPassword(fmt.Sprintf("%d", input.Nis))
-	if err != nil {
-		c.JSON(500, gin.H{
-			"message": "Gagal menghash password!",
-			"status":  500,
-		})
-		return
-	}
+	
 	// Simpan ke database
 	if err := config.DB.Model(&user).Create(map[string]interface{}{
 		"username":          input.Nis,
 		"name":              input.Nama,
 		"email":             input.Email,
 		"email_verified_at": time.Now().Format("2006-01-02 15:04:05"),
-		"password":          hashPassword, // Ganti dengan password default atau generate secara acak
+		"password":          utils.HashPasswordUser("admin123"), // Ganti dengan password default atau generate secara acak
 		"status_id":         "4",          // Misalnya 4 adalah ID untuk status "siswa"
 	}).Error; err != nil {
 		c.JSON(500, gin.H{
@@ -125,7 +99,7 @@ func AddSiswa(c *gin.Context) {
 		"jenis_kelamin": input.JenisKelamin,
 		"no_hp":         input.NoHp,
 		"alamat":        input.Alamat,
-		"image_profile": siswa.ImageProfile,
+		"image_profile": "/storage/logo-pendidikan.png",
 	}).Error; err != nil {
 		c.JSON(500, gin.H{
 			"message": "Gagal menambahkan data siswa!",
@@ -133,6 +107,21 @@ func AddSiswa(c *gin.Context) {
 		})
 		return
 	}
+
+	token, err := utils.GenerateJWT(input.Nis)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal memuat token"})
+		return
+	}
+	var inputToken models.PersonalAccessToken
+	inputToken.Token = token
+	inputToken.TokenableType = "User"
+	inputToken.TokenableID = input.Nis
+	inputToken.Name = "Personal Access Token"
+	inputToken.Abilities = "*"
+
+	config.DB.Create(&inputToken)
+	notifications.NotifikasiAktivasiAkunUser(input.Email, input.Nama, "Selamat akun anda telah berhasil dibuat. Silahkan verifikasi email anda untuk mengaktifkan akun anda, dengan cara klik link dibawah ini: ", os.Getenv("APP_URL")+"/api/auth/verify/"+input.Email+"/"+token)
 
 	c.JSON(201, gin.H{
 		"success": true,
@@ -143,7 +132,7 @@ func AddSiswa(c *gin.Context) {
 			"jenis_kelamin": input.JenisKelamin,
 			"no_hp":         input.NoHp,
 			"alamat":        input.Alamat,
-			"image_profile": siswa.ImageProfile,
+			"image_profile": "/storage/logo-pendidikan.png",
 			"email":         input.Email,
 			"status_user":   "siswa",
 		},

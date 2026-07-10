@@ -25,7 +25,6 @@ var updateSiswaMessages = map[string]string{
 	"ImageProfile.required": "Image profile wajib diunggah.",
 }
 
-
 func TranslateUpdateSiswaError(err error) map[string]string {
 	errors := make(map[string]string)
 

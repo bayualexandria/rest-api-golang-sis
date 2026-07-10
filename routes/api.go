@@ -24,10 +24,14 @@ func SetupRoutersAPI(app *gin.Engine) {
 		authRoute.GET("/send-reset-password/:email/:token", controllers.SendResetPassword)
 
 		// Login Social Media Routes
-		route.GET("/login-admin/google/:email/:idGoogle/:nameGoogle", controllers.LoginUserSocialMedia)
+		route.GET("/login-admin/google/:email/:idGoogle/:nameGoogle", controllers.LoginUserAdminSocialMedia)
+		route.GET("/login/google/:email/:idGoogle/:nameGoogle", controllers.LoginUserSiswaSocialMedia)
 
 		// Endpoint Routes
 		route.GET("/", controllers.HomeHandler)
+
+		// Profile Sekolah
+		route.GET("/profile-sekolah", controllers.ProfileSekolahHandler)
 
 		// Users
 		user := route.Group("/user")
@@ -42,7 +46,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 		siswa.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswa)
 		siswa.GET("/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.GetUsersByNIS)
 		siswa.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddSiswa)
-		siswa.PATCH("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateSiswa)
+		siswa.PATCH("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 4), controllers.UpdateSiswa)
 		siswa.DELETE("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.DeleteSiswa)
 
 		// Guru
@@ -58,7 +62,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 		trash.GET("/siswa", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetTrashSiswa)
 		trash.PATCH("/siswa/restore-all", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashAllSiswa)
 		trash.PATCH("/siswa/restore/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashSiswa)
-		trash.GET("/guru",middleware.AuthMiddleware(),middleware.RoleMiddleware(1), controllers.GetTrashGuru)
+		trash.GET("/guru", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetTrashGuru)
 		trash.PATCH("/guru/restore-all", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashAllGuru)
 		trash.PATCH("/guru/restore/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashGuru)
 

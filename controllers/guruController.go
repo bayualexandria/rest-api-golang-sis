@@ -116,9 +116,7 @@ func AddGuru(c *gin.Context) {
 	inputToken.TokenableID = input.Nip
 	inputToken.Name = "Personal Access Token"
 	inputToken.Abilities = "*"
-	inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
-	inputToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
-	inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+
 	config.DB.Create(&inputToken)
 	notifications.NotifikasiAktivasiAkunUser(input.Email, input.Nama, "Selamat akun anda telah berhasil dibuat. Silahkan verifikasi email anda untuk mengaktifkan akun anda, dengan cara klik link dibawah ini: ", os.Getenv("APP_URL")+"/api/auth/verify/"+input.Email+"/"+token)
 

@@ -1,20 +1,18 @@
 package siswacontroller
 
 import (
-	"mime/multipart"
 	"unicode"
 
 	"github.com/go-playground/validator/v10"
 )
 
 type AddSiswaValidation struct {
-	Nis          int                   `form:"nis" binding:"required,numeric"`
+	Nis          string                `form:"nis" binding:"required,numeric"`
 	Nama         string                `form:"nama" binding:"required"`
 	JenisKelamin string                `form:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
 	NoHp         string                `form:"no_hp" binding:"required,numeric"`
 	Email        string                `form:"email" binding:"required,email"`
 	Alamat       string                `form:"alamat" binding:"required"`
-	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"required"`
 }
 
 var addSiswaMessages = map[string]string{
@@ -28,7 +26,6 @@ var addSiswaMessages = map[string]string{
 	"Email.required":        "Email wajib diisi.",
 	"Email.email":           "Format email tidak valid.",
 	"Alamat.required":       "Alamat wajib diisi.",
-	"ImageProfile.required": "Image profile wajib diunggah.",
 }
 
 func TranslateAddSiswaError(err error) map[string]string {
