@@ -31,7 +31,7 @@ func LoginUserAdmin(c *gin.Context) {
 		return
 	}
 
-	if config.DB.Where("status_id != ?", 4).First(&user).Error != nil {
+	if user.StatusId != 1 && user.StatusId != 2 && user.StatusId != 3 {
 		c.JSON(403, gin.H{"message": "User ini tidak memiliki akses login!", "status": 403})
 		return
 	}
@@ -92,7 +92,7 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	if err := config.DB.Where("status_id = ?", 4).First(&user).Error; err != nil {
+	if user.StatusId != 4 {
 		c.JSON(403, gin.H{"message": "User ini tidak memiliki akses login!", "status": 403})
 		return
 	}

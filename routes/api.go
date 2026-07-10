@@ -59,6 +59,8 @@ func SetupRoutersAPI(app *gin.Engine) {
 		trash.PATCH("/siswa/restore-all", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashAllSiswa)
 		trash.PATCH("/siswa/restore/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashSiswa)
 		trash.GET("/guru",middleware.AuthMiddleware(),middleware.RoleMiddleware(1), controllers.GetTrashGuru)
+		trash.PATCH("/guru/restore-all", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashAllGuru)
+		trash.PATCH("/guru/restore/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashGuru)
 
 		// Logout
 		route.POST("/logout", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.LogoutUser)

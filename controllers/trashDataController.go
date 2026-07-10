@@ -145,3 +145,44 @@ func GetTrashGuru(c *gin.Context) {
 	})
 
 }
+
+func RestoreDataTrashAllGuru(c *gin.Context) {
+	guru := config.DB.Unscoped().Model(&models.Guru{}).Where("deleted_at IS NOT NULL").Update("deleted_at", nil).Error
+	user := config.DB.Unscoped().Model(&models.User{}).Where("status_id IN ?", []int{1, 2, 3}).Where("deleted_at IS NOT NULL").Update("deleted_at", nil).Error
+
+	if user != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal merestore data trash guru",
+			"status":  500,
+		})
+		return
+	}
+	if guru != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal merestore data trash guru",
+			"status":  500,
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"message": "Data trash guru berhasil direstore!",
+		"status":  200,
+	})
+}
+
+func RestoreDataTrashGuru(c *gin.Context) {
+	nip := c.Param("nip")
+	guru := config.DB.Unscoped().Model(&models.Guru{}).Where("nip = ?", nip).Where("deleted_at IS NOT NULL").Update("deleted_at", nil).Error
+	user := config.DB.Unscoped().Model(&models.User{}).Where("username = ?", nip).Where("status_id IN ?", []int{1, 2, 3}).Where("deleted_at IS NOT NULL").Update("deleted_at", nil).Error
+	if guru != nil || user != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal merestore data trash guru",
+			"status":  500,
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"message": "Data trash guru berhasil direstore!",
+		"status":  200,
+	})
+}
