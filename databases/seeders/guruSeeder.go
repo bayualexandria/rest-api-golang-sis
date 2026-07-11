@@ -4,11 +4,11 @@ import (
 	"backend-api/utils"
 	"log"
 	"time"
+
 	"gorm.io/gorm"
 )
 
 type GuruSeeder struct {
-
 	Nip          string
 	Nama         string
 	JenisKelamin string
@@ -18,13 +18,12 @@ type GuruSeeder struct {
 }
 
 type UserGuruSeeder struct {
-
 	Name            string
 	Username        string
 	Email           string
 	Password        string
 	EmailVerifiedAt string
-	StatusID    string
+	StatusID        string
 }
 
 func (GuruSeeder) TableName() string {
@@ -35,19 +34,17 @@ func (UserGuruSeeder) TableName() string {
 	return "users" // jadi singular
 }
 
-
-
 func (s GuruSeeder) Run(db *gorm.DB) {
 
 	guru := []GuruSeeder{
 		{
-		
+
 			Nip:          "9106012508950001", // Contoh NIP dengan 8 digit
 			Nama:         "Bayu Wardana",
 			JenisKelamin: "Laki-laki",
 			NoHp:         "081234567890",
 			Alamat:       "Jl. Contoh Alamat No. 123, Kota Contoh",
-			ImageProfile: "logo-pendidikan.png",
+			ImageProfile: "storage/logo-pendidikan.png",
 		},
 		{
 			Nip:          "9106012508950002", // Contoh NIP dengan 8 digit
@@ -55,16 +52,16 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			JenisKelamin: "Laki-laki",
 			NoHp:         "081234567891",
 			Alamat:       "Jl. Contoh Alamat No. 123, Kota Contoh",
-			ImageProfile: "logo-pendidikan.png",
+			ImageProfile: "storage/logo-pendidikan.png",
 		},
 		{
-		
+
 			Nip:          "9106012508950003", // Contoh NIP dengan 8 digit
 			Nama:         "Bayu Wardana 2",
 			JenisKelamin: "Laki-laki",
 			NoHp:         "081234567892",
 			Alamat:       "Jl. Contoh Alamat No. 123, Kota Contoh",
-			ImageProfile: "logo-pendidikan.png",
+			ImageProfile: "storage/logo-pendidikan.png",
 		},
 	}
 	passHash := "admin123" // Contoh password default
@@ -75,7 +72,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			Email:           "wardanabayu453@gmail.com",
 			Password:        utils.HashPasswordUser(passHash),
 			EmailVerifiedAt: time.Now().Format("2006-01-02"),
-			StatusID:    "1", // Misalnya, ID status user untuk Guru
+			StatusID:        "1", // Misalnya, ID status user untuk Guru
 		},
 		{
 			Name:            "Bayu Wardana 1",
@@ -83,7 +80,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			Email:           "wardanabayu456@gmail.com",
 			Password:        utils.HashPasswordUser(passHash),
 			EmailVerifiedAt: time.Now().Format("2006-01-02"),
-			StatusID:    "2", // Misalnya, ID status user untuk Guru
+			StatusID:        "2", // Misalnya, ID status user untuk Guru
 		},
 		{
 			Name:            "Bayu Wardana 2",
@@ -91,7 +88,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			Email:           "wardanabayu457@gmail.com",
 			Password:        utils.HashPasswordUser(passHash),
 			EmailVerifiedAt: time.Now().Format("2006-01-02"),
-			StatusID:    "3", // Misalnya, ID status user untuk Guru
+			StatusID:        "3", // Misalnya, ID status user untuk Guru
 		},
 	}
 

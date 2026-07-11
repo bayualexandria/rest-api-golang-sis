@@ -99,7 +99,7 @@ func AddSiswa(c *gin.Context) {
 		"jenis_kelamin": input.JenisKelamin,
 		"no_hp":         input.NoHp,
 		"alamat":        input.Alamat,
-		"image_profile": "/storage/logo-pendidikan.png",
+		"image_profile": "storage/logo-pendidikan.png",
 	}).Error; err != nil {
 		c.JSON(500, gin.H{
 			"message": "Gagal menambahkan data siswa!",

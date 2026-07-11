@@ -142,7 +142,7 @@ func LoginUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"user": gin.H{"name": user.Name, "status_id": user.StatusId}, "message": "Anda berhasil login!", "status": 200})
 }
 
-func LogoutUser(c *gin.Context) {
+func LogoutUserAdmin(c *gin.Context) {
 	// === MODIFIKASI LOGOUT DI SINI ===
 	// Ambil token langsung dari Cookie, bukan Header lagi
 	tokenString, err := c.Cookie("access_token")
@@ -157,6 +157,29 @@ func LogoutUser(c *gin.Context) {
 		return
 	}
 	config.DB.Where("tokenable_id = ?", idToken.TokenableID).Delete(&models.PersonalAccessToken{})
+
+	// Hapus cookie di browser dengan mengatur MaxAge ke -1
+	c.SetCookie("access_token", "", -1, "/", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Berhasil logout"})
+}
+
+func LogoutUserSiswa(c *gin.Context) {
+	// === MODIFIKASI LOGOUT DI SINI ===
+	// Ambil token langsung dari Cookie, bukan Header lagi
+	nis := c.Param("nis")
+	tokenString, err := c.Cookie("access_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+
+	var idToken models.PersonalAccessToken
+	if err := config.DB.Where("token = ?", tokenString).First(&idToken).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+	config.DB.Where("tokenable_id = ?", nis).Delete(&models.PersonalAccessToken{})
 
 	// Hapus cookie di browser dengan mengatur MaxAge ke -1
 	c.SetCookie("access_token", "", -1, "/", "", false, true)

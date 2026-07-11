@@ -51,7 +51,7 @@ func (s SiswaSeeder) Run(db *gorm.DB) {
 			JenisKelamin: genders[i%2], // Alternatif jenis kelamin
 			NoHp:         faker.Phonenumber(),
 			Alamat:       faker.Word() + " Street No., " + faker.CCNumber(),
-			ImageProfile: "/storage/logo-pendidikan.png",
+			ImageProfile: "storage/logo-pendidikan.png",
 		}
 		passHash := "admin123" // Contoh password default
 		user := UserSiswaSeeder{
