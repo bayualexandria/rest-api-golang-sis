@@ -14,7 +14,6 @@ func SetupRoutersAPI(app *gin.Engine) {
 
 	route := app.Group("/api")
 	{
-
 		// Authentication Routes
 		authRoute := route.Group("auth")
 		authRoute.POST("/login-admin", controllers.LoginUserAdmin)
@@ -57,6 +56,10 @@ func SetupRoutersAPI(app *gin.Engine) {
 		guru.PATCH("/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.UpdateGuru)
 		guru.DELETE("/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.DeleteGuru)
 
+		// kelas
+		kelas := route.Group("/kelas")
+		kelas.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetKelas)
+
 		// Trash Data
 		trash := route.Group("/trash")
 		trash.GET("/siswa", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetTrashSiswa)
@@ -67,7 +70,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 		trash.PATCH("/guru/restore/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashGuru)
 
 		// Logout
-		route.POST("/logout-admin", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.LogoutUserAdmin)
 		route.POST("/logout/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(4), controllers.LogoutUserSiswa)
+		route.POST("/logout-admin", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.LogoutUserAdmin)
 	}
 }
