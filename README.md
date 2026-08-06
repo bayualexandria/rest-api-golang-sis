@@ -2,6 +2,34 @@
 
 Aplikasi ini menggunakan HttpOnly untuk akses token authentication nya, tanpa perlu set cookie di front end.
 
+### Fitur 
+* Authentication Token HTTPOnly(Login/Logout)
+* Authentication melalui social media gmail
+* Data Guru/Wali Kelas/Admin (Insert/GetAll/GetByUsername/Update/Delete)
+* Data Siswa (Insert/GetAll/GetByUsername/Update/Delete)
+* Notifikasi Verifikasi Email dan Forgot Password Pada Akun Siswa dan Guru
+* Data kelas (Insert/GetAll/GetById/Update/Delete)
+* Data Sampah (Softdelete)
+
+
+### Perintah untuk menjalankan program golang
+```
+go run main.go
+```
+
+### Build ke production
+Windows
+```
+go build -o app.exe
+```
+Mac OS/Linux
+```
+go build -o app
+```
+##### Note:
+Jika ingin mengubah nama pada saat build, ubah pada nama "app"
+
+
 
 ## Clean cache ketika package error
 
@@ -55,6 +83,15 @@ Down
 ```
 migrate -path databases/migrations -database "mysql://user:pass@tcp(localhost:3306)/dbname" down
 ```
+
+## Cara menjalankan seeder
+Untuk menjalankan perintah seeder pada golang
+```
+go run main.go seed
+```
+##### Note:
+Gunakan perintah di atas untuk satu kali menjalankan seeder, setelah itu jalankan "go run main.go" seperti biasa.
+
 
 ##### Note:
 Jika terjadi error
