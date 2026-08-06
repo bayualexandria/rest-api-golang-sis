@@ -1,6 +1,7 @@
 ## Rest Full API Sistem Informasi Siswa Via Golang
 
-Aplikasi ini menggunakan HttpOnly untuk akses token authentication nya, tanpa perlu set cookie di front end.
+Aplikasi ini menggunakan HttpOnly untuk akses token authentication nya, tanpa perlu set cookie di front end. Untuk front end saya menggunakan React [link react](https://github.com/bayualexandria/sis-react).
+Dan untuk mobile app nya saya menggunakan Flutter [link flutter](https://github.com/bayualexandria/flutter-sis-getx)
 
 ### Fitur 
 * Authentication Token HTTPOnly(Login/Logout)
