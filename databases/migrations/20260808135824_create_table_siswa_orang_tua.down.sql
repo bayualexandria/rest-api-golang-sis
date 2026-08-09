@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS siswa_orang_tua;

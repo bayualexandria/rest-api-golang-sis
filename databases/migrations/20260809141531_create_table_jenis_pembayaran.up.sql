@@ -1,0 +1,9 @@
+CREATE TABLE `jenis_pembayaran` (
+    `id` BIGINT(20) PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    `nama` VARCHAR(100) NOT NULL,
+    `nominal` DECIMAL(15,2) NOT NULL,
+    `keterangan` TEXT,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `deleted_at` TIMESTAMP NULL
+);

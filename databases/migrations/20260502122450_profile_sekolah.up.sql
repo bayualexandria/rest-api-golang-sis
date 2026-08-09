@@ -1,7 +1,7 @@
 CREATE TABLE profile_sekolah(
         -- Jika menggunakan MySQL, gunakan 'id INT AUTO_INCREMENT PRIMARY KEY' untuk kolom id
     -- Jika menggunakan PostgreSQL, gunakan SERIAL atau BIGSERIAL untuk kolom id
-    id SERIAL PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     nama_sekolah VARCHAR(255) NOT NULL,
     alamat TEXT NOT NULL,
     no_telp VARCHAR(20) NOT NULL,

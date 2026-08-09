@@ -1,0 +1,9 @@
+CREATE TABLE `mata_pelajaran` (
+    `id` BIGINT(20) PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    `kode` VARCHAR(30) NOT NULL,
+    `nama` VARCHAR(255) NOT NULL,
+    `deskripsi` TEXT,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `deleted_at` TIMESTAMP NULL
+);

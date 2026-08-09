@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS `guru_mata_pelajaran`;
