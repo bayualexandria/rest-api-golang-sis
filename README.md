@@ -11,6 +11,7 @@ Dan untuk mobile app nya saya menggunakan Flutter [link flutter](https://github.
 * Notifikasi Verifikasi Email dan Forgot Password Pada Akun Siswa dan Guru
 * Data kelas (Insert/GetAll/GetById/Update/Delete)
 * Data Sampah (Softdelete)
+* Otomatis Semester dan Tahun Ajaran seiring berjalannya semester dan Tahun Pelajaran yang akan datang
 
 
 ### Perintah untuk menjalankan program golang

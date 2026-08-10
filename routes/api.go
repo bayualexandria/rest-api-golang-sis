@@ -1,6 +1,7 @@
 package routes
 
 import (
+
 	"backend-api/controllers"
 	"backend-api/middleware"
 
@@ -11,6 +12,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 	// app.NoRoute(func(c *gin.Context) {
 	// 	c.HTML(404, "404.html", gin.H{"message": "Halaman tidak ditemukan", "status": 404})
 	// })
+	
 
 	route := app.Group("/api")
 	{
@@ -59,6 +61,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 		// kelas
 		kelas := route.Group("/kelas")
 		kelas.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetKelas)
+		
 
 		// Trash Data
 		trash := route.Group("/trash")

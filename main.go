@@ -73,5 +73,17 @@ func main() {
 	// 	"<h1>Halo dari Golang</h1>",
 	// )
 
+	tahunAjaranService :=
+		config.NewTahunAjaranService(config.DB)
+
+	tahunAjaran, err :=
+		tahunAjaranService.EnsureCurrentYear()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	semesterService :=
+		config.NewSemesterService(config.DB)
+	semesterService.EnsureCurrentSemester(tahunAjaran)
 	router.Run(os.Getenv("APP_URL"))
 }
