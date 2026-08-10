@@ -10,5 +10,10 @@ CREATE TABLE personal_access_tokens (
   last_used_at TIMESTAMP NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL
+    deleted_at TIMESTAMP NULL,
+
+    CONSTRAINT `fk_personal_access_token_user`
+        FOREIGN KEY (`tokenable_id`)
+        REFERENCES `users` (`username`)
+        ON DELETE CASCADE
 )
