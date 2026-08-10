@@ -10,5 +10,14 @@ CREATE TABLE users (
     status_id BIGINT REFERENCES status_user(id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL
+    deleted_at TIMESTAMP NULL,
+    CONSTRAINT `fk_user_siswa_username`
+        FOREIGN KEY (`username`)
+        REFERENCES `siswa` (`id`)
+        ON DELETE CASCADE,
+
+    CONSTRAINT `fk_user_guru_username`
+        FOREIGN KEY (`username`)
+        REFERENCES `guru` (`id`)
+        ON DELETE CASCADE
 );
