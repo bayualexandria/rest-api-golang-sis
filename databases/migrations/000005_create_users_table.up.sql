@@ -4,22 +4,13 @@ CREATE TABLE users (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     username BIGINT NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE ,
     email_verified_at TIMESTAMP NULL,
     password VARCHAR(255) NOT NULL,
     status_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
-    CONSTRAINT `fk_user_siswa_username`
-        FOREIGN KEY (`username`)
-        REFERENCES `siswa` (`id`)
-        ON DELETE CASCADE,
-
-    CONSTRAINT `fk_user_guru_username`
-        FOREIGN KEY (`username`)
-        REFERENCES `guru` (`id`)
-        ON DELETE CASCADE,
 
         CONSTRAINT `fk_user_status_id`
         FOREIGN KEY (`status_id`)

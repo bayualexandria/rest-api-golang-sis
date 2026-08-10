@@ -8,8 +8,15 @@ CREATE TABLE IF NOT EXISTS siswa (
     no_hp VARCHAR(20) NOT NULL,
     image_profile VARCHAR(255) NOT NULL,
     alamat TEXT NOT NULL,
-    status_siswa_id BIGINT,
+    status_siswa_id BIGINT(20),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL
+    deleted_at TIMESTAMP NULL,
+  
+    CONSTRAINT `fk_siswa_status`
+    FOREIGN KEY (`status_siswa_id`)
+    REFERENCES `status_siswa` (`id`)
+    ON DELETE SET NULL
+
+
 );

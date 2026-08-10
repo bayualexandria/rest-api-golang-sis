@@ -16,6 +16,7 @@ type SiswaSeeder struct {
 	NoHp         string
 	Alamat       string
 	ImageProfile string
+	StatusSiswaId int
 }
 
 type UserSiswaSeeder struct {
@@ -52,6 +53,7 @@ func (s SiswaSeeder) Run(db *gorm.DB) {
 			NoHp:         faker.Phonenumber(),
 			Alamat:       faker.Word() + " Street No., " + faker.CCNumber(),
 			ImageProfile: "storage/logo-pendidikan.png",
+			StatusSiswaId: 1, // Misalnya, ID status siswa default
 		}
 		passHash := "admin123" // Contoh password default
 		user := UserSiswaSeeder{
