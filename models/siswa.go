@@ -17,6 +17,8 @@ type Siswa struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
+
+	// SiswaKelas []SiswaKelas `gorm:"foreignKey:SiswaID" json:"siswa_kelas"`
 }
 
 func (Siswa) TableName() string {

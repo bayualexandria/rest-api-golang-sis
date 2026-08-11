@@ -30,7 +30,13 @@ func GetUsersByNIS(c *gin.Context) {
 
 	var result UserWithSiswa
 	// Join dengan tabel siswa berdasarkan nis
-	siswa := config.DB.Table("users").Joins("JOIN siswa ON users.username = siswa.nis").Joins("JOIN status_user ON users.status_id = status_user.id").Where("users.username = ?", nis).Where("users.deleted_at IS NULL").Select(" users.name, users.email,users.username AS nis,  siswa.jenis_kelamin, siswa.no_hp, siswa.alamat, siswa.image_profile, status_user.nama_status AS status_user_name").First(&result)
+	siswa := config.DB.Table("users").
+		Joins("JOIN siswa ON users.username = siswa.nis").
+		Joins("JOIN status_user ON users.status_id = status_user.id").
+		Where("users.username = ?", nis).
+		Where("users.deleted_at IS NULL").
+		Select(" users.name, users.email,users.username AS nis,  siswa.jenis_kelamin, siswa.no_hp, siswa.alamat, siswa.image_profile, status_user.nama_status AS status_user_name").
+		First(&result)
 	if siswa.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Siswa tidak ditemukan atau NIS salah", "status": 404})
 		return

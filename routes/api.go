@@ -50,6 +50,13 @@ func SetupRoutersAPI(app *gin.Engine) {
 		siswa.PATCH("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 4), controllers.UpdateSiswa)
 		siswa.DELETE("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.DeleteSiswa)
 
+		// Siswa Kelas
+		siswaKelas := route.Group("/siswa-kelas")
+		siswaKelas.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswaKelas)
+		siswaKelas.GET("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswaKelasByNis)
+		siswaKelas.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddSiswaKelas)
+		siswaKelas.PUT("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateSiswaKelas)
+
 		// Guru
 		guru := route.Group("/guru")
 		guru.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetGuru)
