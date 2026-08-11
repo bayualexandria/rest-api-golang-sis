@@ -12,6 +12,7 @@ Dan untuk mobile app nya saya menggunakan Flutter [link flutter](https://github.
 * Data kelas (Insert/GetAll/GetById/Update/Delete)
 * Data Sampah (Softdelete)
 * Otomatis Semester dan Tahun Ajaran seiring berjalannya semester dan Tahun Pelajaran yang akan datang
+* Absensi Siswa, ketika tidak ada proses input absen maka otomatis dianggap ALPA pada sistem
 
 
 ### Perintah untuk menjalankan program golang
