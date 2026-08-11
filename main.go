@@ -2,9 +2,10 @@ package main
 
 import (
 	"backend-api/config"
-	"backend-api/config/scheduler"
 	"backend-api/databases/seeders"
 	"backend-api/routes"
+	"backend-api/services"
+	"backend-api/services/scheduler"
 	"log"
 	"os"
 	"path/filepath"
@@ -75,7 +76,7 @@ func main() {
 	// )
 
 	tahunAjaranService :=
-		config.NewTahunAjaranService(config.DB)
+		services.NewTahunAjaranService(config.DB)
 
 	tahunAjaran, err :=
 		tahunAjaranService.EnsureCurrentYear()
@@ -84,10 +85,10 @@ func main() {
 		log.Fatal(err)
 	}
 	semesterService :=
-		config.NewSemesterService(config.DB)
+		services.NewSemesterService(config.DB)
 	semesterService.EnsureCurrentSemester(tahunAjaran)
 
-	absensiService := config.NewAbsensiService(config.DB)
+	absensiService := services.NewAbsensiService(config.DB)
 	if err := absensiService.GenerateAlpa(); err != nil {
 		log.Println("Generate ALPA gagal:", err)
 	} else {
