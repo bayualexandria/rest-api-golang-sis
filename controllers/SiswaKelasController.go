@@ -151,13 +151,13 @@ func AddSiswaKelas(c *gin.Context) {
 	var existing models.SiswaKelas
 
 	err := config.DB.
-		Table("siswa_kelas").
-		Joins("JOIN siswa ON siswa_kelas.siswa_id = siswa.id").
-		Joins("JOIN tahun_ajaran ON siswa_kelas.tahun_ajaran_id = tahun_ajaran.id").
-		Joins("JOIN semester ON siswa_kelas.semester_id = semester.id").
-		Where("siswa_id = ?", request.SiswaId).
-		Where("tahun_ajaran_id = ?", tahunAjaran.ID).
-		Where("semester_id = ?", semester.ID).
+		Table("siswa_kelas sk").
+		Joins("JOIN siswa s ON sk.siswa_id = s.id").
+		Joins("JOIN tahun_ajaran ta ON sk.tahun_ajaran_id = ta.id").
+		Joins("JOIN semester sm ON sk.semester_id = sm.id").
+		Where("sk.siswa_id = ?", request.SiswaId).
+		Where("sk.tahun_ajaran_id = ?", tahunAjaran.ID).
+		Where("sk.semester_id = ?", semester.ID).
 		First(&existing).Error
 
 	if err == nil {

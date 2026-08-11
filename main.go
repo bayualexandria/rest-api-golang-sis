@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend-api/config"
+	"backend-api/config/scheduler"
 	"backend-api/databases/seeders"
 	"backend-api/routes"
 	"log"
@@ -85,5 +86,14 @@ func main() {
 	semesterService :=
 		config.NewSemesterService(config.DB)
 	semesterService.EnsureCurrentSemester(tahunAjaran)
+
+	absensiService := config.NewAbsensiService(config.DB)
+	if err := absensiService.GenerateAlpa(); err != nil {
+		log.Println("Generate ALPA gagal:", err)
+	} else {
+		log.Println("Generate ALPA berhasil dijalankan")
+	}
+
+	scheduler.StartAbsensiScheduler()
 	router.Run(os.Getenv("APP_URL"))
 }
