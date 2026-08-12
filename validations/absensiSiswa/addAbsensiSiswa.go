@@ -7,17 +7,13 @@ import (
 )
 
 type AddAbsensiValidation struct {
-	SiswaKelasID uint64  `json:"siswa_kelas_id" binding:"required"`
-	StatusKehadiranID       uint64  `json:"status_kehadiran_id" binding:"required"`
-	Keterangan   *string `json:"keterangan"`
+	StatusKehadiranId uint64  `form:"status_kehadiran_id" binding:"required"`
+	Keterangan        *string `form:"keterangan"`
 }
 
 var addAbsensiMessages = map[string]string{
-	"SiswaKelasID.required": "ID siswa kelas wajib diisi.",
-	"StatusKehadiranID.required": "ID status kehadiran wajib diisi.",
-	"Status.required":       "Status wajib diisi.",
-	"Status.oneof":          "Status harus 'hadir', 'sakit', 'izin', atau 'alpa'.",
-	"Keterangan.required":   "Keterangan wajib diisi.",
+	"StatusKehadiranId.required": "ID status kehadiran wajib diisi.",
+	"Keterangan.required":        "Keterangan wajib diisi.",
 }
 
 func TranslateAddAbsensiError(err error) map[string]string {

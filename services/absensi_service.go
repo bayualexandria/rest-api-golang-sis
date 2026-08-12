@@ -1,4 +1,3 @@
-
 package services
 
 import (
@@ -20,34 +19,16 @@ func NewAbsensiService(db *gorm.DB) *AbsensiService {
 }
 
 // GenerateAlpa membuat absensi ALPA otomatis
-// untuk siswa yang belum melakukan absensi
-// setelah batas waktu absensi.
+// untuk siswa_kelas aktif yang belum melakukan absensi hari ini.
 func (s *AbsensiService) GenerateAlpa() error {
 
 	// =====================================================
-	// Waktu sekarang
+	// Waktu dan tanggal hari ini
 	// =====================================================
 
 	now := time.Now()
 
-	// =====================================================
-	// BATAS WAKTU ABSENSI
-	// Contoh: pukul 08:00
-	// =====================================================
-
-	jamBatas := 8
-
-	if now.Hour() < jamBatas {
-
-		// Belum waktunya membuat ALPA
-		return nil
-	}
-
-	// =====================================================
-	// Tanggal hari ini
-	// =====================================================
-
-	tanggal := time.Date(
+	tanggalHariIni := time.Date(
 		now.Year(),
 		now.Month(),
 		now.Day(),
@@ -69,9 +50,7 @@ func (s *AbsensiService) GenerateAlpa() error {
 		First(&tahunAjaran).Error; err != nil {
 
 		if err == gorm.ErrRecordNotFound {
-			return fmt.Errorf(
-				"tahun ajaran aktif tidak ditemukan",
-			)
+			return fmt.Errorf("tahun ajaran aktif tidak ditemukan")
 		}
 
 		return fmt.Errorf(
@@ -92,9 +71,7 @@ func (s *AbsensiService) GenerateAlpa() error {
 		First(&semester).Error; err != nil {
 
 		if err == gorm.ErrRecordNotFound {
-			return fmt.Errorf(
-				"semester aktif tidak ditemukan",
-			)
+			return fmt.Errorf("semester aktif tidak ditemukan")
 		}
 
 		return fmt.Errorf(
@@ -104,7 +81,7 @@ func (s *AbsensiService) GenerateAlpa() error {
 	}
 
 	// =====================================================
-	// Cari status kehadiran ALPA
+	// Cari status ALPA
 	// =====================================================
 
 	var statusAlpa models.StatusKehadiran
@@ -120,31 +97,44 @@ func (s *AbsensiService) GenerateAlpa() error {
 		}
 
 		return fmt.Errorf(
-			"gagal mengambil status kehadiran ALPA: %w",
+			"gagal mengambil status ALPA: %w",
 			err,
 		)
 	}
 
 	// =====================================================
-	// Ambil semua siswa aktif
-	// pada tahun ajaran aktif
+	// Cari siswa_kelas aktif yang BELUM memiliki
+	// absensi hari ini
 	// =====================================================
 
 	var siswaKelas []models.SiswaKelas
 
+	subQuery := s.DB.
+		Model(&models.AbsensiSiswa{}).
+		Select("1").
+		Where(
+			"absensi_siswa.siswa_kelas_id = siswa_kelas.id",
+		).
+		Where(
+			"absensi_siswa.tanggal = ?",
+			tanggalHariIni,
+		)
+
 	if err := s.DB.
-		Where("tahun_ajaran_id = ?", tahunAjaran.ID).
-		Where("status = ?", "aktif").
+		Model(&models.SiswaKelas{}).
+		Where("siswa_kelas.tahun_ajaran_id = ?", tahunAjaran.ID).
+		Where("siswa_kelas.status = ?", "aktif").
+		Where("NOT EXISTS (?)", subQuery).
 		Find(&siswaKelas).Error; err != nil {
 
 		return fmt.Errorf(
-			"gagal mengambil siswa kelas aktif: %w",
+			"gagal mencari siswa yang belum absensi: %w",
 			err,
 		)
 	}
 
 	// =====================================================
-	// Jika tidak ada siswa
+	// Jika semua siswa sudah melakukan absensi
 	// =====================================================
 
 	if len(siswaKelas) == 0 {
@@ -152,66 +142,24 @@ func (s *AbsensiService) GenerateAlpa() error {
 	}
 
 	// =====================================================
-	// Proses setiap siswa
+	// Buat ALPA
 	// =====================================================
 
 	for _, siswa := range siswaKelas {
-
-		// -------------------------------------------------
-		// Cek apakah sudah memiliki absensi hari ini
-		// -------------------------------------------------
-
-		var absensi models.AbsensiSiswa
-
-		err := s.DB.
-			Where("siswa_kelas_id = ?", siswa.ID).
-			Where("tanggal = ?", tanggal).
-			First(&absensi).Error
-
-		// -------------------------------------------------
-		// Sudah ada absensi
-		// Jangan diubah menjadi ALPA
-		// -------------------------------------------------
-
-		if err == nil {
-			continue
-		}
-
-		// -------------------------------------------------
-		// Jika error bukan RecordNotFound
-		// -------------------------------------------------
-
-		if err != gorm.ErrRecordNotFound {
-
-			return fmt.Errorf(
-				"gagal mengecek absensi siswa_kelas_id=%d: %w",
-				siswa.ID,
-				err,
-			)
-		}
-
-		// -------------------------------------------------
-		// Belum ada absensi
-		// Buat ALPA otomatis
-		// -------------------------------------------------
 
 		absensiAlpa := models.AbsensiSiswa{
 			SiswaKelasID:      siswa.ID,
 			SemesterID:        semester.ID,
 			StatusKehadiranID: statusAlpa.ID,
-			Tanggal:           tanggal,
-
-			// ALPA tidak memiliki jam masuk
-			JamMasuk: nil,
-
-			// ALPA tidak memiliki jam keluar
-			JamKeluar: nil,
+			Tanggal:           tanggalHariIni,
+			JamMasuk:          nil,
+			JamKeluar:         nil,
 		}
 
 		if err := s.DB.Create(&absensiAlpa).Error; err != nil {
 
 			return fmt.Errorf(
-				"gagal membuat alpa siswa_kelas_id=%d: %w",
+				"gagal membuat ALPA siswa_kelas_id=%d: %w",
 				siswa.ID,
 				err,
 			)

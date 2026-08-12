@@ -3,26 +3,29 @@ package controllers
 import (
 	"backend-api/config"
 	"backend-api/models"
+	"time"
+
 	absensisiswa "backend-api/validations/absensiSiswa"
 
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-
 func AddAbsensiSiswa(c *gin.Context) {
 
 	var request absensisiswa.AddAbsensiValidation
 
-	if err := c.ShouldBindJSON(&request); err != nil {
+	var personalAccessToken models.PersonalAccessToken
 
+	if err := c.ShouldBind(&request); err != nil {
+
+		msg := absensisiswa.TranslateAddAbsensiError(err)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "Data absensi tidak valid",
-			"error":   absensisiswa.TranslateAddAbsensiError(err),
+			"error":   msg,
 		})
 
 		return
@@ -34,8 +37,7 @@ func AddAbsensiSiswa(c *gin.Context) {
 
 	var statusKehadiran models.StatusKehadiran
 
-	if err := config.DB.
-		First(&statusKehadiran, request.StatusKehadiranID).Error; err != nil {
+	if err := config.DB.Where("id = ?", request.StatusKehadiranId).First(&statusKehadiran).Error; err != nil {
 
 		if err == gorm.ErrRecordNotFound {
 
@@ -55,6 +57,31 @@ func AddAbsensiSiswa(c *gin.Context) {
 
 		return
 	}
+	cookie, err := c.Cookie("access_token")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"data": cookie,
+		})
+		return
+	}
+
+	if err := config.DB.Where("token = ?", cookie).First(&personalAccessToken).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"data": personalAccessToken.TokenableID,
+		})
+		return
+	}
+	var siswa models.Siswa
+
+	if err := config.DB.Where("nis = ?", personalAccessToken.TokenableID).First(&siswa).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Data siswa tidak ditemukan",
+		})
+
+		return
+	}
 
 	// =====================================================
 	// Cari siswa kelas
@@ -62,11 +89,7 @@ func AddAbsensiSiswa(c *gin.Context) {
 
 	var siswaKelas models.SiswaKelas
 
-	if err := config.DB.
-		Preload("Siswa").
-		Preload("Kelas").
-		Preload("TahunAjaran").
-		First(&siswaKelas, request.SiswaKelasID).Error; err != nil {
+	if err := config.DB.Where("siswa_id =?", siswa.Id).First(&siswaKelas).Error; err != nil {
 
 		if err == gorm.ErrRecordNotFound {
 
@@ -154,17 +177,13 @@ func AddAbsensiSiswa(c *gin.Context) {
 
 	var existing models.AbsensiSiswa
 
-	err := config.DB.
-		Where("siswa_kelas_id = ?", request.SiswaKelasID).
+	if err := config.DB.
+		Where("siswa_kelas_id = ?", siswaKelas.ID).
 		Where("tanggal = ?", tanggalDB).
-		First(&existing).Error
-
-	if err == nil {
+		First(&existing).Error; err == nil {
 
 		// Ambil relasi status kehadiran
-		config.DB.
-			Preload("StatusKehadiran").
-			First(&existing, existing.ID)
+		config.DB.Where("id = ?", existing.ID).First(&existing)
 
 		c.JSON(http.StatusConflict, gin.H{
 			"success": false,
@@ -191,9 +210,9 @@ func AddAbsensiSiswa(c *gin.Context) {
 	// =====================================================
 
 	data := models.AbsensiSiswa{
-		SiswaKelasID:      request.SiswaKelasID,
+		SiswaKelasID:      siswaKelas.ID,
 		SemesterID:        semester.ID,
-		StatusKehadiranID: request.StatusKehadiranID,
+		StatusKehadiranID: request.StatusKehadiranId,
 		Tanggal:           tanggalDB,
 		Keterangan:        request.Keterangan,
 
@@ -229,11 +248,10 @@ func AddAbsensiSiswa(c *gin.Context) {
 		return
 	}
 
-
-
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
 		"message": "Absensi berhasil disimpan",
 		"data":    data,
 	})
 }
+

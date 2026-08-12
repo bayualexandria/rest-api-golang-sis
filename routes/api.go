@@ -68,6 +68,10 @@ func SetupRoutersAPI(app *gin.Engine) {
 		// kelas
 		kelas := route.Group("/kelas")
 		kelas.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetKelas)
+
+		// Absensi Siswa
+		absensi := route.Group("/absensi")
+		absensi.POST("/",middleware.AuthMiddleware(),middleware.RoleMiddleware(4),controllers.AddAbsensiSiswa)
 		
 
 		// Trash Data

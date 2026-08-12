@@ -8,6 +8,8 @@ import (
 
 // Model User merepresentasikan tabel "users" di database
 type Siswa struct {
+	Id uint64 `gorm:"primaryKey;autoIncrement" json:"id"`
+
 	Nis          int    `json:"nis"`
 	Nama         string `json:"nama"`
 	JenisKelamin string `json:"jenis_kelamin"`
@@ -24,4 +26,3 @@ type Siswa struct {
 func (Siswa) TableName() string {
 	return "siswa" // jadi singular
 }
-

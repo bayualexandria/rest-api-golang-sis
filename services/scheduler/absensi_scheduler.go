@@ -25,7 +25,7 @@ func StartAbsensiScheduler() {
 	)
 
 	// Jalankan setiap 5 menit
-	_, err = cronJob.AddFunc("*/5 * * * *", func() {
+	_, err = cronJob.AddFunc("*/1 * * * *", func() {
 
 		now := time.Now()
 
