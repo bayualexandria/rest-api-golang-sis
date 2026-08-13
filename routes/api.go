@@ -71,7 +71,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 
 		// Absensi Siswa
 		absensi := route.Group("/absensi")
-		absensi.POST("/",middleware.AuthMiddleware(),middleware.RoleMiddleware(4),controllers.AddAbsensiSiswa)
+		absensi.POST("/",middleware.AuthMiddleware(),middleware.RoleMiddleware(5),controllers.AddAbsensiSiswa)
 		
 
 		// Trash Data
