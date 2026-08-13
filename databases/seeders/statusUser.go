@@ -20,6 +20,7 @@ func (s StatusUserSeeder) Run(db *gorm.DB) {
 		{NamaStatus: "Wali Kelas"},
 		{NamaStatus: "Guru"},
 		{NamaStatus: "Siswa"},
+		{NamaStatus: "Guru Piket"},
 	}
 	for _, su := range statusUser {
 		if err := db.Create(&su).Error; err != nil {
