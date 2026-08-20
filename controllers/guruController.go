@@ -36,6 +36,7 @@ func GetGuru(c *gin.Context) {
 		guru.nip,
 			users.name,
 			users.email,
+			users.email_verified_at,
 			guru.jenis_kelamin,
 			guru.no_hp,
 			guru.alamat,
