@@ -42,7 +42,7 @@ func HashPasswordUserSiswa(password string) string {
 }
 
 func (s SiswaSeeder) Run(db *gorm.DB) {
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 100; i++ {
 		genders := []string{"Laki-laki", "Perempuan"}
 		username := faker.CCNumber()
 		nama := faker.Name()
