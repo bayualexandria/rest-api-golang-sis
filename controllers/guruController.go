@@ -15,14 +15,15 @@ import (
 )
 
 type UserAllGuru struct {
-	Nip            int    `json:"nip"`
-	Name           string `json:"name"`
-	Email          string `json:"email"`
-	JenisKelamin   string `json:"jenis_kelamin"`
-	NoHp           string `json:"no_hp"`
-	Alamat         string `json:"alamat"`
-	ImageProfile   string `json:"image_profile"`
-	StatusUserName string `json:"status_user_name"`
+	Nip             int    `json:"nip"`
+	Name            string `json:"name"`
+	Email           string `json:"email"`
+	JenisKelamin    string `json:"jenis_kelamin"`
+	NoHp            string `json:"no_hp"`
+	Alamat          string `json:"alamat"`
+	ImageProfile    string `json:"image_profile"`
+	StatusUserName  string `json:"status_user_name"`
+	EmailVerifiedAt string `json:"email_verified_at"`
 }
 
 func GetGuru(c *gin.Context) {
