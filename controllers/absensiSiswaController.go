@@ -140,27 +140,24 @@ func AddAbsensiSiswa(c *gin.Context) {
 	)
 
 	// =====================================================
-	// Cek apakah sudah absen hari ini
+	// CEK APAKAH SISWA SUDAH ABSEN PADA TANGGAL HARI INI
 	// =====================================================
-
 	var existing models.AbsensiSiswa
 
-	if err := config.DB.
+	err := config.DB.
 		Where("siswa_kelas_id = ?", siswaKelas.ID).
 		Where("tanggal = ?", tanggalDB).
-		First(&existing).Error; err == nil {
+		First(&existing).Error
 
-		// Ambil relasi status kehadiran
-		config.DB.Where("id = ?", existing.ID).First(&existing)
-
+	// Jika data ditemukan
+	if err == nil {
 		c.JSON(http.StatusConflict, gin.H{
 			"success": false,
-			"message": "Siswa sudah memiliki absensi hari ini",
-			"data":    existing,
+			"message": "Siswa sudah melakukan absensi pada tanggal ini",
 		})
-
 		return
 	}
+
 
 	// =====================================================
 	// Buat data absensi
@@ -186,7 +183,7 @@ func AddAbsensiSiswa(c *gin.Context) {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"message": "Gagal menyimpan absensi",
+			"message": "Siswa sudah melakukan absensi pada tanggal ini",
 			"error":   err.Error(),
 		})
 
