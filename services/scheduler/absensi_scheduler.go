@@ -30,7 +30,7 @@ func StartAbsensiScheduler() {
 		now := time.Now()
 
 		// Belum mencapai batas absensi
-		if now.Hour() < 8 {
+		if now.Hour() < 12 {
 			return
 		}
 

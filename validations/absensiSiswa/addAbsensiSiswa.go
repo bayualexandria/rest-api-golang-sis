@@ -7,12 +7,12 @@ import (
 )
 
 type AddAbsensiValidation struct {
-	StatusKehadiranId uint64  `form:"status_kehadiran_id" binding:"required"`
+	Nis               string     `form:"nis" binding:"required"`
 	Keterangan        *string `form:"keterangan"`
 }
 
 var addAbsensiMessages = map[string]string{
-	"StatusKehadiranId.required": "ID status kehadiran wajib diisi.",
+	"Nis.required":               "Siswa tidak diketahui.",
 	"Keterangan.required":        "Keterangan wajib diisi.",
 }
 
