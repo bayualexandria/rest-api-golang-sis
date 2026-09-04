@@ -28,6 +28,8 @@ type UserWithSiswa struct {
 func GetUsersByNIS(c *gin.Context) {
 	nis := c.Param("username")
 
+	personalAccessToken := models.PersonalAccessToken{}
+
 	var result UserWithSiswa
 	// Join dengan tabel siswa berdasarkan nis
 	siswa := config.DB.Table("users").
@@ -39,6 +41,11 @@ func GetUsersByNIS(c *gin.Context) {
 		First(&result)
 	if siswa.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Siswa tidak ditemukan atau NIS salah", "status": 404})
+		return
+	}
+
+	if err := config.DB.Where("tokenable_id = ?", nis).First(&personalAccessToken).Error; err != nil {
+		c.JSON(404, gin.H{"message": "Access token tidak ditemukan!", "status": 404})
 		return
 	}
 
@@ -59,7 +66,7 @@ type UserWithGuru struct {
 
 func GetUsersByNIP(c *gin.Context) {
 	nip := c.Param("username")
-
+	personalAccessToken := models.PersonalAccessToken{}
 	var result UserWithGuru
 	// Join dengan tabel guru berdasarkan nip
 	err := config.DB.Table("users").
@@ -72,6 +79,10 @@ func GetUsersByNIP(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Guru tidak ditemukan atau NIP salah", "status": 404})
+		return
+	}
+	if err := config.DB.Where("tokenable_id = ?", nip).First(&personalAccessToken).Error; err != nil {
+		c.JSON(404, gin.H{"message": "Access token tidak ditemukan!", "status": 404})
 		return
 	}
 

@@ -65,8 +65,41 @@ func LoginUserAdmin(c *gin.Context) {
 	config.DB.Create(&inputToken)
 
 	/// Di dalam controller saat LOGIN BERHASIL:
-	// Gunakan properti cookie standar go untuk mengatur SameSite secara eksplisit
-	c.Writer.Header().Set("Set-Cookie", "access_token="+token+"; Max-Age=86400; Path=/; SameSite=Lax; HttpOnly")
+	// Gunakan properti cookie standar go untuk mengatur SameSite secara eksplisit pada localhost bukan antar IP Address
+	// c.Writer.Header().Set("Set-Cookie", "access_token="+token+"; Max-Age=86400; Path=/; SameSite=Lax; HttpOnly")
+
+	// Gunakan ini jika menggunakan IP Address / Jika IP address nya https Secure:true
+	// http.SetCookie(c.Writer, &http.Cookie{
+	// 	Name:     "access_token",
+	// 	Value:    token,
+	// 	Path:     "/",
+	// 	MaxAge:   3600,
+	// 	HttpOnly: true,
+	// 	Secure:   false,
+	// 	SameSite: http.SameSiteLaxMode,
+	// })
+
+	// Gunakan ini jika menggunakan domain dengan https
+	c.Writer.Header().Set(
+		"Set-Cookie",
+		"access_token="+token+
+			"; Max-Age=3600"+
+			"; Path=/"+
+			"; HttpOnly"+
+			"; Secure"+
+			"; SameSite=None",
+	)
+
+	// http.SetCookie(c.Writer, &http.Cookie{
+	// 	Name:     "access_token",
+	// 	Value:    token,
+	// 	MaxAge:   86400,
+	// 	Path:     "/",
+	// 	HttpOnly: true,
+	// 	Secure:   false,
+	// 	SameSite: http.SameSiteLaxMode,
+
+	// })
 
 	// ATAU jika menggunakan c.SetCookie bawaan Gin, pastikan parameternya seperti ini:
 	// c.SetCookie("access_token", token, 86400, "/", "", false, true)

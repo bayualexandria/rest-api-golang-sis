@@ -77,7 +77,6 @@ func AddSiswa(c *gin.Context) {
 		return
 	}
 
-	
 	// Simpan ke database
 	if err := config.DB.Model(&user).Create(map[string]interface{}{
 		"username":          input.Nis,
@@ -85,7 +84,7 @@ func AddSiswa(c *gin.Context) {
 		"email":             input.Email,
 		"email_verified_at": time.Now().Format("2006-01-02 15:04:05"),
 		"password":          utils.HashPasswordUser("admin123"), // Ganti dengan password default atau generate secara acak
-		"status_id":         "4",          // Misalnya 4 adalah ID untuk status "siswa"
+		"status_id":         "4",                                // Misalnya 4 adalah ID untuk status "siswa"
 	}).Error; err != nil {
 		c.JSON(500, gin.H{
 			"message": "Email atau Username sudah digunakan!",
@@ -137,6 +136,26 @@ func AddSiswa(c *gin.Context) {
 			"status_user":   "siswa",
 		},
 	})
+}
+
+func GetSiswaByNIS(c *gin.Context) {
+	nis := c.Param("username")
+
+	var result UserWithSiswa
+	// Join dengan tabel siswa berdasarkan nis
+	siswa := config.DB.Table("users").
+		Joins("JOIN siswa ON users.username = siswa.nis").
+		Joins("JOIN status_user ON users.status_id = status_user.id").
+		Where("users.username = ?", nis).
+		Where("users.deleted_at IS NULL").
+		Select(" users.name, users.email,users.username AS nis,  siswa.jenis_kelamin, siswa.no_hp, siswa.alamat, siswa.image_profile, status_user.nama_status AS status_user_name").
+		First(&result)
+	if siswa.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Siswa tidak ditemukan atau NIS salah", "status": 404})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": result})
 }
 
 func UpdateSiswa(c *gin.Context) {

@@ -4,7 +4,6 @@ CREATE TABLE `siswa_kelas` (
     `kelas_id` BIGINT(20) ,
     `tahun_ajaran_id` BIGINT(20) ,
     `semester_id` BIGINT(20) ,
-    `tanggal_masuk` DATE,
     `status` VARCHAR(50) NOT NULL DEFAULT 'aktif',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

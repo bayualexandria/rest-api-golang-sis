@@ -22,3 +22,4 @@ func GetKelas(c *gin.Context) {
 		"total":   len(kelas),
 	})
 }
+

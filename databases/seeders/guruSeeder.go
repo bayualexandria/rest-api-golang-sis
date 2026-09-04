@@ -48,7 +48,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 		},
 		{
 			Nip:          "9106012508950002", // Contoh NIP dengan 8 digit
-			Nama:         "Bayu Wardana 1",
+			Nama:         "Bagas Dwi Pratama",
 			JenisKelamin: "Laki-laki",
 			NoHp:         "081234567891",
 			Alamat:       "Jl. Contoh Alamat No. 123, Kota Contoh",
@@ -57,8 +57,8 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 		{
 
 			Nip:          "9106012508950003", // Contoh NIP dengan 8 digit
-			Nama:         "Bayu Wardana 2",
-			JenisKelamin: "Laki-laki",
+			Nama:         "Sri Rahayu Ningsih",
+			JenisKelamin: "Perempuan",
 			NoHp:         "081234567892",
 			Alamat:       "Jl. Contoh Alamat No. 123, Kota Contoh",
 			ImageProfile: "storage/logo-pendidikan.png",
@@ -75,7 +75,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			StatusID:        "1", // Misalnya, ID status user untuk Guru
 		},
 		{
-			Name:            "Bayu Wardana 1",
+			Name:            "Bagas Dwi Pratama",
 			Username:        "9106012508950002",
 			Email:           "wardanabayu456@gmail.com",
 			Password:        utils.HashPasswordUser(passHash),
@@ -83,7 +83,7 @@ func (s GuruSeeder) Run(db *gorm.DB) {
 			StatusID:        "2", // Misalnya, ID status user untuk Guru
 		},
 		{
-			Name:            "Bayu Wardana 2",
+			Name:            "Sri Rahayu Ningsih",
 			Username:        "9106012508950003",
 			Email:           "wardanabayu457@gmail.com",
 			Password:        utils.HashPasswordUser(passHash),
