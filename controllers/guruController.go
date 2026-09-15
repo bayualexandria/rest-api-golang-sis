@@ -15,7 +15,7 @@ import (
 )
 
 type UserAllGuru struct {
-	Nip             int    `json:"nip"`
+	Nip             string    `json:"nip"`
 	Name            string `json:"name"`
 	Email           string `json:"email"`
 	JenisKelamin    string `json:"jenis_kelamin"`
@@ -183,6 +183,9 @@ func UpdateGuru(c *gin.Context) {
 	if input.Alamat != "" {
 		guru.Alamat = input.Alamat
 	}
+	if input.StatusId != 0 {
+		user.StatusId = input.StatusId
+	}
 
 	if input.ImageProfile != nil {
 		file := input.ImageProfile
@@ -209,6 +212,7 @@ func UpdateGuru(c *gin.Context) {
 
 	config.DB.Model(&user).Where("username", nip).Updates(map[string]interface{}{
 		"name": guru.Nama,
+		"status_id": user.StatusId,
 	})
 	c.JSON(200, gin.H{
 		"success": true,
