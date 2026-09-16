@@ -4,6 +4,7 @@ import (
 	"backend-api/config"
 	"backend-api/models"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -97,4 +98,33 @@ func GetUsersByUsername(c *gin.Context) {
 		Where("username = ?", username).
 		First(&user)
 	c.JSON(http.StatusOK, gin.H{"data": user})
+}
+
+func UpdateEmailVerifiedAt(c *gin.Context) {
+	username := c.Param("username")
+
+	var user models.User
+	if err := config.DB.Where("username = ?", username).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "User tidak ditemukan!", "status": 404})
+		return
+	}
+
+	user.EmailVerifiedAt = time.Now().Format("2006-01-02 15:04:05") // Set email_verified_at menjadi 1 (terverifikasi)
+	config.DB.Model(&user).Where("username = ?", username).Update("email_verified_at", user.EmailVerifiedAt)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Email berhasil diverifikasi!", "status": 200})
+}
+
+func UpdateEmailVerified(c *gin.Context) {
+	username := c.Param("username")
+
+	var user models.User
+	if err := config.DB.Where("username = ?", username).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "User tidak ditemukan!", "status": 404})
+		return
+	}
+	// Set email_verified_at menjadi 1 (terverifikasi)
+	config.DB.Model(&user).Where("username = ?", username).Update("email_verified_at", nil)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Email berhasil diverifikasi!", "status": 200})
 }

@@ -45,11 +45,13 @@ func SetupRoutersAPI(app *gin.Engine) {
 		user.GET("/:username/guru", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetUsersByNIP)
 		user.GET("/:username/siswa", middleware.AuthMiddleware(), middleware.RoleMiddleware(4), controllers.GetUsersByNIS)
 		user.PUT("/change-password/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.ChangePassword)
+		user.GET("/:username/update-email-verified", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateEmailVerified)
+		user.GET("/:username/update-email-verified-at", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateEmailVerifiedAt)
 
 		// Siswa
 		siswa := route.Group("/siswa")
 		siswa.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswa)
-		siswa.GET("/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.GetSiswaByNIS)
+		siswa.GET("/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.GetDataByNIS)
 		siswa.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddSiswa)
 		siswa.PATCH("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 4), controllers.UpdateSiswa)
 		siswa.DELETE("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.DeleteSiswa)
@@ -71,7 +73,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 		// Guru
 		guru := route.Group("/guru")
 		guru.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetGuru)
-		guru.GET("/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetUsersByNIP)
+		guru.GET("/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetDataGuruByNIP)
 		guru.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddGuru)
 		guru.PATCH("/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.UpdateGuru)
 		guru.DELETE("/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.DeleteGuru)

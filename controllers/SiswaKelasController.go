@@ -54,6 +54,41 @@ func GetSiswaKelas(c *gin.Context) {
 	})
 }
 
+type DataWithSiswa struct {
+	Name           string `json:"name"`
+	Email          string `json:"email"`
+	NIS            string `json:"nis"`
+	JenisKelamin   string `json:"jenis_kelamin"`
+	NoHp           string `json:"no_hp"`
+	Alamat         string `json:"alamat"`
+	ImageProfile   string `json:"image_profile"`
+	StatusUserName string `json:"status_user_name"`
+}
+
+func GetDataByNIS(c *gin.Context) {
+	nis := c.Param("username")
+
+
+
+	var result DataWithSiswa
+	// Join dengan tabel siswa berdasarkan nis
+	siswa := config.DB.Table("users").
+		Joins("JOIN siswa ON users.username = siswa.nis").
+		Joins("JOIN status_user ON users.status_id = status_user.id").
+		Where("users.username = ?", nis).
+		Where("users.deleted_at IS NULL").
+		Select(" users.name, users.email,users.username AS nis,  siswa.jenis_kelamin, siswa.no_hp, siswa.alamat, siswa.image_profile, status_user.nama_status AS status_user_name").
+		First(&result)
+	if siswa.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Siswa tidak ditemukan atau NIS salah", "status": 404})
+		return
+	}
+
+
+
+	c.JSON(http.StatusOK, gin.H{"data": result})
+}
+
 func GetSiswaKelasByNis(c *gin.Context) {
 	idParam := c.Param("nis")
 	var data Siswa

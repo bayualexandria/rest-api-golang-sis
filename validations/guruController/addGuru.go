@@ -7,13 +7,13 @@ import (
 )
 
 type AddGuruValidation struct {
-	Nip          string `form:"nip" binding:"required"`
-	Nama         string `form:"nama" binding:"required"`
-	JenisKelamin string `form:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
-	NoHp         string `form:"no_hp" binding:"required,numeric"`
-	Email        string `form:"email" binding:"required,email"`
-	Alamat       string `form:"alamat" binding:"required"`
-	StatusId     string `form:"status_id" binding:"required,oneof=1 2 3"` // 1=Admin, 2=Wali Kelas, 3=Guru
+	Nip          string  `form:"nip" binding:"required"`
+	Nama         string  `form:"nama" binding:"required"`
+	JenisKelamin *string `json:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
+	NoHp         *string `json:"no_hp" binding:"required,numeric"`
+	StatusId     *string `json:"status_id" binding:"required,oneof=1 2 3"` // 1=Admin, 2=Wali Kelas, 3=Guru
+	Email        string  `form:"email" binding:"required,email"`
+	Alamat       string  `form:"alamat" binding:"required"`
 }
 
 var addGuruMessages = map[string]string{

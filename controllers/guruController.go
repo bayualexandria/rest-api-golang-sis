@@ -15,7 +15,7 @@ import (
 )
 
 type UserAllGuru struct {
-	Nip             string    `json:"nip"`
+	Nip             string `json:"nip"`
 	Name            string `json:"name"`
 	Email           string `json:"email"`
 	JenisKelamin    string `json:"jenis_kelamin"`
@@ -63,13 +63,46 @@ func GetGuru(c *gin.Context) {
 	})
 }
 
+type DataWithGuru struct {
+	Name           string `json:"name"`
+	Email          string `json:"email"`
+	NIP            string `json:"nip" gorm:"column:nip"`
+	JenisKelamin   string `json:"jenis_kelamin"`
+	NoHp           string `json:"no_hp"`
+	Alamat         string `json:"alamat"`
+	ImageProfile   string `json:"image_profile"`
+	StatusUserName string `json:"status_user_name"`
+	StatusID       int    `json:"status_id"`
+}
+
+func GetDataGuruByNIP(c *gin.Context) {
+	nip := c.Param("username")
+	var result DataWithGuru
+	// Join dengan tabel guru berdasarkan nip
+	err := config.DB.Table("users").
+		Joins("JOIN guru ON users.username = guru.nip").
+		Joins("JOIN status_user ON users.status_id = status_user.id").
+		Where("users.username = ?", nip).
+		Where("users.deleted_at IS NULL").
+		Select("users.name, users.email, guru.nip AS nip, guru.jenis_kelamin, guru.no_hp, guru.alamat, guru.image_profile, status_user.nama_status AS status_user_name, users.status_id").
+		First(&result).Error
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Guru tidak ditemukan atau NIP salah", "status": 404})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": result})
+
+}
+
 func AddGuru(c *gin.Context) {
 	var input guruController.AddGuruValidation
 	var guru models.Guru
 	var user models.User
 
 	// bind form-data
-	if err := c.ShouldBind(&input); err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		msg := guruController.TranslateAddGuruError(err)
 		c.JSON(400, gin.H{
 			"message": "Gagal menambahkan data guru!",
@@ -121,14 +154,6 @@ func AddGuru(c *gin.Context) {
 
 	config.DB.Create(&inputToken)
 	notifications.NotifikasiAktivasiAkunUser(input.Email, input.Nama, "Selamat akun anda telah berhasil dibuat. Silahkan verifikasi email anda untuk mengaktifkan akun anda, dengan cara klik link dibawah ini: ", os.Getenv("APP_URL")+"/api/auth/verify/"+input.Email+"/"+token)
-
-	if input.StatusId == "1" {
-		input.StatusId = "Admin"
-	} else if input.StatusId == "2" {
-		input.StatusId = "Wali Kelas"
-	} else if input.StatusId == "3" {
-		input.StatusId = "Guru"
-	}
 
 	c.JSON(201, gin.H{
 		"success": true,
@@ -211,7 +236,7 @@ func UpdateGuru(c *gin.Context) {
 	}
 
 	config.DB.Model(&user).Where("username", nip).Updates(map[string]interface{}{
-		"name": guru.Nama,
+		"name":      guru.Nama,
 		"status_id": user.StatusId,
 	})
 	c.JSON(200, gin.H{

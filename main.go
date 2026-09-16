@@ -26,11 +26,11 @@ func main() {
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
-			// Tambahkan Domain running front-end jika API ini tidak bisa diakses oleh Front-End
-			"http://localhost",
-			"http://localhost:3000",
 			"http://localhost:5173",
+			"http://localhost:3000",
+			"https://8e8b-2001-448a-70c0-54f6-c16c-e757-b0b6-5563.ngrok-free.app",
 		},
+
 		AllowMethods: []string{
 			"GET",
 			"POST",
@@ -39,15 +39,24 @@ func main() {
 			"DELETE",
 			"OPTIONS",
 		},
+
 		AllowHeaders: []string{
 			"Origin",
 			"Content-Type",
+			"Accept",
 			"Authorization",
 		},
+
+		ExposeHeaders: []string{
+			"Content-Length",
+		},
+
 		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
+
+		MaxAge: 12 * time.Hour,
 	}))
 
+	router.Static("/storage", "./storage")
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	// 1. Koneksi ke database
@@ -74,8 +83,6 @@ func main() {
 
 	// router.Use(middleware.CORSMiddleware())
 	// Logger dan Recovery tetap diperlukan agar tidak crash
-
-	router.Static("/storage", "./storage")
 
 	// Seeders
 	if len(os.Args) > 1 && os.Args[1] == "seed" {
