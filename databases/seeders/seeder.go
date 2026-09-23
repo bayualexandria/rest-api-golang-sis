@@ -21,5 +21,6 @@ func RunSeeders(db *gorm.DB) {
 	KelasSeeder{}.Run(db)
 	ProfileSekolahSeeder{}.Run(db)
 	StatusKehadiranSeeder{}.Run(db)
+	MapelSeeder{}.Run(db)
 	// tambah seeder lain di sini
 }

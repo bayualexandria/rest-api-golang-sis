@@ -71,6 +71,10 @@ func SetupRoutersAPI(app *gin.Engine) {
 		ruangKelas.GET("/guru/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.RuangKelasByNip)
 		ruangKelas.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddRuangKelas)
 
+		// Mata Pelajaran
+		mapel := route.Group("/mapel")
+		mapel.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetDataAllMapel)
+
 		// Guru
 		guru := route.Group("/guru")
 		guru.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetGuru)
