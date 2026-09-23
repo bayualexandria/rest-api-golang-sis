@@ -7,17 +7,19 @@ import (
 )
 
 type AddSiswaValidation struct {
-	Nis          string                `form:"nis" binding:"required,numeric"`
-	Nama         string                `form:"nama" binding:"required"`
-	JenisKelamin string                `form:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
-	NoHp         string                `form:"no_hp" binding:"required,numeric"`
-	Email        string                `form:"email" binding:"required,email"`
-	Alamat       string                `form:"alamat" binding:"required"`
+	Nis          string  `form:"nis" binding:"required,numeric"`
+	Nama         string  `form:"nama" binding:"required"`
+	Ttl          string  `form:"ttl" binding:"required"`
+	JenisKelamin *string `json:"jenis_kelamin" binding:"required,oneof=Laki-laki Perempuan"`
+	NoHp         *string `json:"no_hp" binding:"required,numeric"`
+	Email        string  `form:"email" binding:"required,email"`
+	Alamat       string  `form:"alamat" binding:"required"`
 }
 
 var addSiswaMessages = map[string]string{
 	"Nis.required":          "NIS wajib diisi.",
 	"Nis.numeric":           "NIS harus berupa angka.",
+	"Ttl.required":          "Tempat/Tanggal Lahir harus diisi",
 	"Nama.required":         "Nama wajib diisi.",
 	"JenisKelamin.required": "Jenis kelamin wajib diisi.",
 	"JenisKelamin.oneof":    "Jenis kelamin harus 'Laki-laki' atau 'Perempuan'.",

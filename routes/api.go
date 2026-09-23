@@ -51,6 +51,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 		// Siswa
 		siswa := route.Group("/siswa")
 		siswa.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswa)
+		siswa.GET("/search", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswaSearch)
 		siswa.GET("/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.GetDataByNIS)
 		siswa.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddSiswa)
 		siswa.PATCH("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 4), controllers.UpdateSiswa)
@@ -59,15 +60,15 @@ func SetupRoutersAPI(app *gin.Engine) {
 		// Siswa Kelas
 		siswaKelas := route.Group("/siswa-kelas")
 		siswaKelas.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswaKelas)
-		siswaKelas.GET("/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswaKelasByNis)
-		siswaKelas.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddSiswaKelas)
-		siswaKelas.PUT("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateSiswaKelas)
+		siswaKelas.GET("/:nis/:kelas", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswaKelasByNis)
+		siswaKelas.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2), controllers.AddSiswaKelas)
+		siswaKelas.PUT("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2), controllers.UpdateSiswaKelas)
 
 		// Ruang Kelas
 		ruangKelas := route.Group("/ruang-kelas")
 		ruangKelas.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.RuangKelas)
-		ruangKelas.GET("/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.RuangKelasByNip)
-		ruangKelas.GET("/:nip/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2), controllers.RuangKelasById)
+		ruangKelas.GET("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2), controllers.RuangKelasById)
+		ruangKelas.GET("/guru/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.RuangKelasByNip)
 		ruangKelas.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddRuangKelas)
 
 		// Guru

@@ -9,15 +9,18 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserAllSiswa struct {
+	ID             int    `json:"id"`
 	NIS            string `json:"nis"`
 	Name           string `json:"name"`
 	Email          string `json:"email"`
+	Ttl            string `json:"ttl"`
 	JenisKelamin   string `json:"jenis_kelamin"`
 	NoHp           string `json:"no_hp"`
 	Alamat         string `json:"alamat"`
@@ -33,9 +36,11 @@ func GetSiswa(c *gin.Context) {
 		Joins("JOIN siswa ON users.username = siswa.nis").
 		Joins("JOIN status_user ON users.status_id = status_user.id").
 		Select(`
+		siswa.id,
 		users.username AS nis,
 			users.name,
 			users.email,
+			siswa.ttl,
 			siswa.jenis_kelamin,
 			siswa.no_hp,
 			siswa.alamat,
@@ -61,13 +66,51 @@ func GetSiswa(c *gin.Context) {
 	})
 }
 
+func GetSiswaSearch(c *gin.Context) {
+	var result []UserAllSiswa
+
+	err := config.DB.
+		Table("users").
+		Joins("JOIN siswa ON users.username = siswa.nis").
+		Joins("JOIN status_user ON users.status_id = status_user.id").
+		Select(`
+		siswa.id,
+		users.username AS nis,
+			users.name,
+			users.email,
+			siswa.ttl,
+			siswa.jenis_kelamin,
+			siswa.no_hp,
+			siswa.alamat,
+			siswa.nama,
+			siswa.image_profile,
+			status_user.nama_status AS status_user_name
+		`).Where("users.deleted_at IS NULL").Where("siswa.status_siswa_id = ?", 2).
+		Scan(&result).Error
+
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal mengambil data search siswa",
+			"status":  500,
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": true,
+		"message": "Data siswa berhasil ditampilkan!",
+		"data":    result,
+		"total":   len(result),
+	})
+}
+
 func AddSiswa(c *gin.Context) {
 	var input siswacontroller.AddSiswaValidation
 	var siswa models.Siswa
 	var user models.User
 
 	// bind form-data
-	if err := c.ShouldBind(&input); err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		msg := siswacontroller.TranslateAddSiswaError(err)
 		c.JSON(400, gin.H{
 			"message": "Gagal menambahkan data siswa!",
@@ -95,6 +138,7 @@ func AddSiswa(c *gin.Context) {
 	if err := config.DB.Model(&siswa).Create(map[string]interface{}{
 		"nis":           input.Nis,
 		"nama":          input.Nama,
+		"ttl":           input.Ttl,
 		"jenis_kelamin": input.JenisKelamin,
 		"no_hp":         input.NoHp,
 		"alamat":        input.Alamat,
@@ -128,10 +172,11 @@ func AddSiswa(c *gin.Context) {
 		"data": gin.H{
 			"nis":           input.Nis,
 			"nama":          input.Nama,
+			"ttl":           input.Ttl,
 			"jenis_kelamin": input.JenisKelamin,
 			"no_hp":         input.NoHp,
 			"alamat":        input.Alamat,
-			"image_profile": "/storage/logo-pendidikan.png",
+			"image_profile": "storage/logo-pendidikan.png",
 			"email":         input.Email,
 			"status_user":   "siswa",
 		},
@@ -148,7 +193,7 @@ func GetSiswaByNIS(c *gin.Context) {
 		Joins("JOIN status_user ON users.status_id = status_user.id").
 		Where("users.username = ?", nis).
 		Where("users.deleted_at IS NULL").
-		Select(" users.name, users.email,users.username AS nis,  siswa.jenis_kelamin, siswa.no_hp, siswa.alamat, siswa.image_profile, status_user.nama_status AS status_user_name").
+		Select(" users.name, users.email,users.username AS nis,siswa.ttl AS tempat_tanggal_lahir,  siswa.jenis_kelamin, siswa.no_hp, siswa.alamat, siswa.image_profile, status_user.nama_status AS status_user_name").
 		First(&result)
 	if siswa.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Siswa tidak ditemukan atau NIS salah", "status": 404})
@@ -160,78 +205,221 @@ func GetSiswaByNIS(c *gin.Context) {
 
 func UpdateSiswa(c *gin.Context) {
 	var siswa models.Siswa
-	var input siswacontroller.UpdateSiswaValidation
 	var user models.User
+	var input siswacontroller.UpdateSiswaValidation
+
 	nis := c.Param("nis")
 
-	// cek data siswa
-	if err := config.DB.Where("nis = ?", nis).First(&siswa).Error; err != nil {
+	// =========================================================
+	// CARI DATA GURU
+	// =========================================================
+
+	if err := config.DB.
+		Where("nis = ?", nis).
+		First(&siswa).Error; err != nil {
+
 		c.JSON(404, gin.H{
-			"message": "Data siswa dengan NIS " + nis + " tidak ditemukan",
+			"message": "Data guru dengan NIP " + nis + " tidak ditemukan",
 			"status":  404,
 		})
+
 		return
 	}
-	// bind form-data
+
+	// =========================================================
+	// CARI DATA USER
+	// =========================================================
+
+	if err := config.DB.
+		Where("username = ?", nis).
+		First(&user).Error; err != nil {
+
+		c.JSON(404, gin.H{
+			"message": "Data user dengan username " + nis + " tidak ditemukan",
+			"status":  404,
+		})
+
+		return
+	}
+
+	// =========================================================
+	// BIND FORM DATA
+	// =========================================================
+
 	if err := c.ShouldBind(&input); err != nil {
 		msg := siswacontroller.TranslateUpdateSiswaError(err)
+
 		c.JSON(400, gin.H{
 			"message": "Anda belum merubah data!",
 			"data":    msg,
 			"status":  400,
 		})
+
 		return
 	}
 
-	// update field biasa
+	// =========================================================
+	// UPDATE DATA GURU
+	// =========================================================
+
 	if input.Nama != "" {
 		siswa.Nama = input.Nama
 	}
+
+	if input.Ttl != "" {
+		siswa.Ttl = input.Ttl
+	}
+
 	if input.JenisKelamin != "" {
 		siswa.JenisKelamin = input.JenisKelamin
 	}
+
 	if input.NoHp != "" {
 		siswa.NoHp = input.NoHp
 	}
+
 	if input.Alamat != "" {
 		siswa.Alamat = input.Alamat
 	}
 
-	// handle upload gambar (optional)
+	// =========================================================
+	// UPDATE EMAIL USER
+	// =========================================================
+
+	if input.Email != "" {
+		user.Email = input.Email
+	}
+
+	// =========================================================
+	// UPDATE FOTO PROFILE
+	// =========================================================
+
 	if input.ImageProfile != nil {
 		file := input.ImageProfile
-		// Jika folder storages belum ada, buat folder tersebut
-		os.MkdirAll("storage/siswa/"+nis, os.ModePerm)
 
-		// buat nama file unik
-		filename := fmt.Sprintf("%d_%s", time.Now().Unix(), file.Filename)
-		filePath := "storage/siswa/" + nis + "/" + filename
+		// Folder penyimpanan berdasarkan NIP
+		folderPath := filepath.Join(
+			"storage",
+			"guru",
+			nis,
+		)
 
-		// simpan file
-		os.Remove("storage/siswa" + nis)
-		os.Remove(siswa.ImageProfile)
+		// Buat folder jika belum ada
+		if err := os.MkdirAll(folderPath, os.ModePerm); err != nil {
+			c.JSON(500, gin.H{
+				"message": "Gagal membuat folder penyimpanan gambar",
+				"error":   err.Error(),
+				"status":  500,
+			})
 
-		c.SaveUploadedFile(file, filePath)
+			return
+		}
 
-		// simpan path ke database
+		// =====================================================
+		// HAPUS GAMBAR LAMA
+		// =====================================================
+
+		oldImagePath := filepath.Clean(siswa.ImageProfile)
+
+		// Logo default TIDAK BOLEH DIHAPUS
+		defaultImagePath := filepath.Clean(
+			"storage/logo-pendidikan.png",
+		)
+
+		if oldImagePath != "" &&
+			oldImagePath != "." &&
+			oldImagePath != defaultImagePath {
+
+			if _, err := os.Stat(oldImagePath); err == nil {
+				if err := os.Remove(oldImagePath); err != nil {
+					fmt.Println(
+						"Gagal menghapus gambar lama:",
+						err,
+					)
+				}
+			}
+		}
+
+		// =====================================================
+		// BUAT NAMA FILE BARU
+		// =====================================================
+
+		fileName := fmt.Sprintf(
+			"%d_%s",
+			time.Now().UnixNano(),
+			file.Filename,
+		)
+
+		filePath := filepath.Join(
+			folderPath,
+			fileName,
+		)
+
+		// =====================================================
+		// SIMPAN FOTO BARU
+		// =====================================================
+
+		if err := c.SaveUploadedFile(file, filePath); err != nil {
+			c.JSON(500, gin.H{
+				"message": "Gagal menyimpan gambar",
+				"error":   err.Error(),
+				"status":  500,
+			})
+
+			return
+		}
+
+		// Simpan path gambar baru
 		siswa.ImageProfile = filePath
 	}
 
-	// simpan ke DB
-	if err := config.DB.Model(&siswa).Where("nis = ?", nis).Updates(&siswa).Error; err != nil {
-		c.JSON(500, gin.H{"error": "Gagal mengupdate database: " + err.Error()})
-		return
-	}
-	if err := config.DB.Model(&user).Where("username", nis).Updates(map[string]interface{}{
-		"name": siswa.Nama,
-	}).Error; err != nil {
-		c.JSON(500, gin.H{"error": "Gagal mengupdate data user: " + err.Error()})
+	// =========================================================
+	// UPDATE DATABASE GURU
+	// =========================================================
+
+	if err := config.DB.
+		Model(&siswa).
+		Where("nis = ?", nis).
+		Updates(&siswa).Error; err != nil {
+
+		c.JSON(500, gin.H{
+			"message": "Gagal mengupdate database guru",
+			"error":   err.Error(),
+			"status":  500,
+		})
+
 		return
 	}
 
+	// =========================================================
+	// UPDATE DATABASE USER
+	// =========================================================
+
+	if err := config.DB.
+		Model(&user).
+		Where("username = ?", nis).
+		Updates(map[string]interface{}{
+			"name":  siswa.Nama,
+			"email": user.Email,
+		}).Error; err != nil {
+
+		c.JSON(500, gin.H{
+			"message": "Gagal mengupdate data user",
+			"error":   err.Error(),
+			"status":  500,
+		})
+
+		return
+	}
+
+	// =========================================================
+	// RESPONSE
+	// =========================================================
+
 	c.JSON(200, gin.H{
 		"success": true,
-		"message": "Data siswa berhasil diupdate",
+		"data":    siswa,
+		"message": "Data guru berhasil diupdate",
 		"status":  200,
 	})
 }

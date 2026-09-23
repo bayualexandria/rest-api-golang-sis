@@ -10,12 +10,13 @@ import (
 )
 
 type SiswaSeeder struct {
-	Nis          string
-	Nama         string
-	JenisKelamin string
-	NoHp         string
-	Alamat       string
-	ImageProfile string
+	Nis           string
+	Nama          string
+	Ttl           string
+	JenisKelamin  string
+	NoHp          string
+	Alamat        string
+	ImageProfile  string
 	StatusSiswaId int
 }
 
@@ -42,18 +43,19 @@ func HashPasswordUserSiswa(password string) string {
 }
 
 func (s SiswaSeeder) Run(db *gorm.DB) {
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 500; i++ {
 		genders := []string{"Laki-laki", "Perempuan"}
 		username := faker.CCNumber()
 		nama := faker.Name()
 		siswa := SiswaSeeder{
-			Nis:          username, // Contoh NIS dengan 8 digit
-			Nama:         nama,
-			JenisKelamin: genders[i%2], // Alternatif jenis kelamin
-			NoHp:         faker.Phonenumber(),
-			Alamat:       faker.Word() + " Street No., " + faker.CCNumber(),
-			ImageProfile: "storage/logo-pendidikan.png",
-			StatusSiswaId: 1, // Misalnya, ID status siswa default
+			Nis:           username, // Contoh NIS dengan 8 digit
+			Nama:          nama,
+			Ttl:           faker.Date(),
+			JenisKelamin:  genders[i%2], // Alternatif jenis kelamin
+			NoHp:          faker.Phonenumber(),
+			Alamat:        faker.Word() + " Street No., " + faker.CCNumber(),
+			ImageProfile:  "storage/logo-pendidikan.png",
+			StatusSiswaId: 2, // Misalnya, ID status siswa default
 		}
 		passHash := "admin123" // Contoh password default
 		user := UserSiswaSeeder{

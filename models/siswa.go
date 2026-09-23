@@ -9,9 +9,9 @@ import (
 // Model User merepresentasikan tabel "users" di database
 type Siswa struct {
 	Id uint64 `gorm:"primaryKey;autoIncrement" json:"id"`
-
 	Nis          int    `json:"nis"`
 	Nama         string `json:"nama"`
+	Ttl          string `json:"ttl"`
 	JenisKelamin string `json:"jenis_kelamin"`
 	NoHp         string `json:"no_hp"`
 	Alamat       string `json:"alamat"`

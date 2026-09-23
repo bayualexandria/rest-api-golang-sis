@@ -5,7 +5,6 @@ import (
 	"backend-api/models"
 	siswakelas "backend-api/validations/siswaKelas"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -33,7 +32,7 @@ func GetSiswaKelas(c *gin.Context) {
 		Joins("JOIN kelas ON siswa_kelas.kelas_id = kelas.id").
 		Joins("JOIN tahun_ajaran ON siswa_kelas.tahun_ajaran_id = tahun_ajaran.id").
 		Joins("JOIN semester ON siswa_kelas.semester_id = semester.id").
-		Select("siswa_kelas.id,siswa.nama AS nama_siswa, siswa.nis AS nis, siswa.jenis_kelamin, siswa.no_hp, kelas.nama_kelas, kelas.jurusan, tahun_ajaran.nama_tahun AS tahun_ajaran, semester.nama_semester AS semester, siswa_kelas.tanggal_masuk, siswa_kelas.status").
+		Select("siswa_kelas.id,siswa.nama AS nama_siswa, siswa.nis AS nis, siswa.jenis_kelamin, siswa.no_hp, kelas.nama_kelas, kelas.jurusan, tahun_ajaran.nama_tahun AS tahun_ajaran, semester.nama_semester AS semester, siswa_kelas.status").
 		Find(&data).Error; err != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -68,8 +67,6 @@ type DataWithSiswa struct {
 func GetDataByNIS(c *gin.Context) {
 	nis := c.Param("username")
 
-
-
 	var result DataWithSiswa
 	// Join dengan tabel siswa berdasarkan nis
 	siswa := config.DB.Table("users").
@@ -84,23 +81,22 @@ func GetDataByNIS(c *gin.Context) {
 		return
 	}
 
-
-
 	c.JSON(http.StatusOK, gin.H{"data": result})
 }
 
 func GetSiswaKelasByNis(c *gin.Context) {
 	idParam := c.Param("nis")
-	var data Siswa
+	idParamKelas := c.Param("kelas")
+	var data []Siswa
 
 	if err := config.DB.Table("siswa_kelas").
 		Joins("JOIN siswa ON siswa_kelas.siswa_id = siswa.id").
 		Joins("JOIN kelas ON siswa_kelas.kelas_id = kelas.id").
 		Joins("JOIN tahun_ajaran ON siswa_kelas.tahun_ajaran_id = tahun_ajaran.id").
 		Joins("JOIN semester ON siswa_kelas.semester_id = semester.id").
-		Select("siswa_kelas.id,siswa.nis AS nis,siswa.nama AS nama_siswa,  siswa.jenis_kelamin, siswa.no_hp, kelas.nama_kelas, kelas.jurusan, tahun_ajaran.nama_tahun AS tahun_ajaran, semester.nama_semester AS semester, siswa_kelas.tanggal_masuk, siswa_kelas.status").
-		Where("siswa.nis = ?", idParam).
-		First(&data).Error; err != nil {
+		Select("siswa_kelas.id,siswa.nis AS nis,siswa.nama AS nama_siswa,  siswa.jenis_kelamin, siswa.no_hp, kelas.nama_kelas, kelas.jurusan, tahun_ajaran.nama_tahun AS tahun_ajaran, semester.nama_semester AS semester,  siswa_kelas.status").
+		Where("siswa_kelas.wali_kelas_id = ?", idParam).Where("siswa_kelas.kelas_id = ?",idParamKelas).
+		Find(&data).Error; err != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -119,7 +115,7 @@ func GetSiswaKelasByNis(c *gin.Context) {
 }
 
 func AddSiswaKelas(c *gin.Context) {
-	var request = siswakelas.AddDataSiswaKelasRequest{}
+	var request siswakelas.AddDataSiswaKelasValidation
 
 	if err := c.ShouldBind(&request); err != nil {
 		msg := siswakelas.TranslateAddDataSiswaKelasError(err)
@@ -214,16 +210,13 @@ func AddSiswaKelas(c *gin.Context) {
 		return
 	}
 
-	// Tanggal masuk
-	tanggalMasuk := time.Now()
-
 	// Buat data
 	data := models.SiswaKelas{
 		SiswaID:       request.SiswaId,
 		KelasID:       request.KelasId,
 		TahunAjaranID: tahunAjaran.ID,
 		SemesterID:    semester.ID,
-		TanggalMasuk:  &tanggalMasuk,
+		WaliKelasId:   request.WaliKelasId,
 		Status:        "aktif",
 	}
 	// Jika data siswa_id, kelas_id sama dan semester_id dan tahun ajaran_id beda data tersimpan
@@ -240,6 +233,17 @@ func AddSiswaKelas(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Gagal memasukkan siswa ke kelas",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if err := config.DB.Table("siswa").Where("id = ?", request.SiswaId).Updates(map[string]interface{}{
+		"status_siswa_id": 1,
+	}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal mengubah data siswa",
 			"error":   err.Error(),
 		})
 		return

@@ -7,6 +7,7 @@ import (
 )
 
 type Kelas struct {
+	Id        int64  `json:"id"`
 	NamaKelas string `json:"nama_kelas"`
 	Jurusan   string `json:"jurusan"`
 	CreatedAt time.Time

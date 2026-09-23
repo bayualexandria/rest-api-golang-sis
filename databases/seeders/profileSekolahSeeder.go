@@ -24,7 +24,7 @@ func (p ProfileSekolahSeeder) Run(db *gorm.DB) {
 		Alamat:       "Jl. Raya Singosari No. 1, Singosari, Malang",
 		NoTelp:       "0341-123456",
 		Akreditasi:   "A",
-		ImageProfile: "storages/logo-pendidikan.png",
+		ImageProfile: "storage/logo-pendidikan.png",
 	}
 	if err := db.Create(&profile).Error; err != nil {
 		log.Fatal("Error creating profile:", err)

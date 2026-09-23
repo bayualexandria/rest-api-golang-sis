@@ -3,8 +3,8 @@ package controllers
 import (
 	"backend-api/config"
 	"backend-api/models"
-	"time"
 	"strings"
+	"time"
 
 	absensisiswa "backend-api/validations/absensiSiswa"
 
@@ -20,6 +20,15 @@ type AbsensiTampilData struct {
 	NamaKelas    string `json:"nama_kelas"`
 	Jurusan      string `json:"jurusan"`
 	ImageProfile string `json:"image_profile"`
+}
+
+type GetDataAbsensiSiswaStuct struct {
+	Id uint64 `json:"id"`
+	
+}
+
+func GetDataAbsensiSiswa(c *gin.Context) {
+
 }
 
 func AddAbsensiSiswa(c *gin.Context) {
@@ -129,57 +138,56 @@ func AddAbsensiSiswa(c *gin.Context) {
 
 	now := time.Now()
 
-tanggalDB := time.Date(
-    now.Year(),
-    now.Month(),
-    now.Day(),
-    0,
-    0,
-    0,
-    0,
-    now.Location(),
-)
+	tanggalDB := time.Date(
+		now.Year(),
+		now.Month(),
+		now.Day(),
+		0,
+		0,
+		0,
+		0,
+		now.Location(),
+	)
 
-// Cek absensi hari ini
-var existing models.AbsensiSiswa
+	// Cek absensi hari ini
+	var existing models.AbsensiSiswa
 
-err := config.DB.
-    Where("siswa_kelas_id = ?", siswaKelas.ID).
-    Where("tanggal = ?", tanggalDB).
-    First(&existing).Error
+	err := config.DB.
+		Where("siswa_kelas_id = ?", siswaKelas.ID).
+		Where("tanggal = ?", tanggalDB).
+		First(&existing).Error
 
-if err == nil {
-    c.JSON(http.StatusConflict, gin.H{
-        "success": false,
-        "message": "Siswa sudah melakukan absensi pada tanggal ini",
-    })
-    return
-}
+	if err == nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"success": false,
+			"message": "Siswa sudah melakukan absensi pada tanggal ini",
+		})
+		return
+	}
 
-if err != gorm.ErrRecordNotFound {
-    c.JSON(http.StatusInternalServerError, gin.H{
-        "success": false,
-        "message": "Gagal memeriksa absensi",
-        "error":   err.Error(),
-    })
-    return
-}
-
+	if err != gorm.ErrRecordNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal memeriksa absensi",
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	// =====================================================
 	// Buat data absensi
 	// =====================================================
 	jamMasuk := now
 
-data := models.AbsensiSiswa{
-    SiswaKelasID:      siswaKelas.ID,
-    SemesterID:        semester.ID,
-    StatusKehadiranID: 1,
-    Tanggal:           tanggalDB,
-    Keterangan:        request.Keterangan,
-    JamMasuk:          &jamMasuk,
-    JamKeluar:         nil,
-}
+	data := models.AbsensiSiswa{
+		SiswaKelasID:      siswaKelas.ID,
+		SemesterID:        semester.ID,
+		StatusKehadiranID: 1,
+		Tanggal:           tanggalDB,
+		Keterangan:        request.Keterangan,
+		JamMasuk:          &jamMasuk,
+		JamKeluar:         nil,
+	}
 
 	// =====================================================
 	// Simpan absensi
@@ -187,22 +195,22 @@ data := models.AbsensiSiswa{
 
 	if err := config.DB.Create(&data).Error; err != nil {
 
-    // Duplicate entry dari unique index
-    if strings.Contains(strings.ToLower(err.Error()), "duplicate") {
-        c.JSON(http.StatusConflict, gin.H{
-            "success": false,
-            "message": "Siswa sudah melakukan absensi pada tanggal ini",
-        })
-        return
-    }
+		// Duplicate entry dari unique index
+		if strings.Contains(strings.ToLower(err.Error()), "duplicate") {
+			c.JSON(http.StatusConflict, gin.H{
+				"success": false,
+				"message": "Siswa sudah melakukan absensi pada tanggal ini",
+			})
+			return
+		}
 
-    c.JSON(http.StatusInternalServerError, gin.H{
-        "success": false,
-        "message": "Gagal menyimpan absensi",
-        "error":   err.Error(),
-    })
-    return
-}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal menyimpan absensi",
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	var kelas models.Kelas
 	if err := config.DB.Model(&kelas).Where("id =?", siswaKelas.KelasID).First(&kelas).Error; err != nil {

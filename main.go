@@ -27,8 +27,6 @@ func main() {
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
 			"http://localhost:5173",
-			"http://localhost:3000",
-			"https://8e8b-2001-448a-70c0-54f6-c16c-e757-b0b6-5563.ngrok-free.app",
 		},
 
 		AllowMethods: []string{
@@ -56,7 +54,6 @@ func main() {
 		MaxAge: 12 * time.Hour,
 	}))
 
-	router.Static("/storage", "./storage")
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	// 1. Koneksi ke database
@@ -80,6 +77,7 @@ func main() {
 
 	// Setup routes API
 	routes.SetupRoutersAPI(router)
+	router.Static("/storage", "./storage")
 
 	// router.Use(middleware.CORSMiddleware())
 	// Logger dan Recovery tetap diperlukan agar tidak crash
@@ -97,18 +95,10 @@ func main() {
 	// 	"<h1>Halo dari Golang</h1>",
 	// )
 
-	tahunAjaranService :=
-		services.NewTahunAjaranService(config.DB)
-
-	tahunAjaran, err :=
-		tahunAjaranService.EnsureCurrentYear()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	semesterService :=
-		services.NewSemesterService(config.DB)
-	semesterService.EnsureCurrentSemester(tahunAjaran)
+	academicPeriodService := services.NewAcademicPeriodService(config.DB)
+	scheduler.StartAcademicPeriodScheduler(
+	academicPeriodService,
+)
 
 	absensiService := services.NewAbsensiService(config.DB)
 	if err := absensiService.GenerateAlpa(); err != nil {
@@ -116,6 +106,8 @@ func main() {
 	} else {
 		log.Println("Generate ALPA berhasil dijalankan")
 	}
+
+
 
 	scheduler.StartAbsensiScheduler()
 	router.Run(os.Getenv("APP_URL"))

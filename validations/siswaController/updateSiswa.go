@@ -9,10 +9,12 @@ import (
 
 type UpdateSiswaValidation struct {
 	Nama         string                `form:"nama" binding:"omitempty"`
+	Ttl          string                `form:"ttl" binding:"omitempty"`
 	JenisKelamin string                `form:"jenis_kelamin" binding:"omitempty,oneof=Laki-laki Perempuan"`
 	NoHp         string                `form:"no_hp" binding:"omitempty,numeric"`
 	Alamat       string                `form:"alamat" binding:"omitempty"`
 	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"omitempty"`
+	Email        string                `form:"email" binding:"omitempty"`
 }
 
 var updateSiswaMessages = map[string]string{

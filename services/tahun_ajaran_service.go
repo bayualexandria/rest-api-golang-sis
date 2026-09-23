@@ -19,24 +19,45 @@ func NewTahunAjaranService(db *gorm.DB) *TahunAjaranService {
 	}
 }
 
-// EnsureCurrentYear memastikan tahun ajaran saat ini
-// sudah tersedia di database.
+// EnsureCurrentYear memastikan tahun ajaran yang sesuai
+// dengan tanggal sekarang tersedia dan aktif.
+//
+// Tahun ajaran dimulai pada bulan Juli.
+//
+// Januari - Juni:
+//   contoh: 2026/2027
+//
+// Juli - Desember:
+//   contoh: 2026/2027
 func (s *TahunAjaranService) EnsureCurrentYear() (*models.TahunAjaran, error) {
 	now := time.Now()
 
-	// Tahun ajaran dimulai bulan Juli
+	// =====================================================
+	// TENTUKAN TAHUN AWAL TAHUN AJARAN
+	// =====================================================
+
 	year := now.Year()
+
+	// Januari - Juni masih menggunakan
+	// tahun ajaran yang dimulai tahun sebelumnya.
 	if now.Month() < time.July {
 		year--
 	}
 
 	namaTahun := fmt.Sprintf("%d/%d", year, year+1)
 
+	// =====================================================
+	// TANGGAL TAHUN AJARAN
+	// =====================================================
+
 	startDate := time.Date(
 		year,
 		time.July,
 		1,
-		0, 0, 0, 0,
+		0,
+		0,
+		0,
+		0,
 		now.Location(),
 	)
 
@@ -44,30 +65,36 @@ func (s *TahunAjaranService) EnsureCurrentYear() (*models.TahunAjaran, error) {
 		year+1,
 		time.June,
 		30,
-		23, 59, 59,
-		0,
+		23,
+		59,
+		59,
+		999999999,
 		now.Location(),
 	)
 
 	var tahunAjaran models.TahunAjaran
 
+	// =====================================================
+	// TRANSACTION
+	// =====================================================
+
 	err := s.DB.Transaction(func(tx *gorm.DB) error {
 
-		// =====================================================
-		// 1. Cari tahun ajaran berdasarkan nama
-		// =====================================================
+		// =================================================
+		// 1. CARI TAHUN AJARAN
+		// =================================================
 
 		err := tx.
 			Where("nama_tahun = ?", namaTahun).
 			First(&tahunAjaran).Error
 
-		// =====================================================
-		// 2. Jika belum ada → buat tahun ajaran baru
-		// =====================================================
+		// =================================================
+		// 2. BELUM ADA → BUAT BARU
+		// =================================================
 
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 
-			// Matikan semua tahun ajaran lama
+			// Matikan seluruh tahun ajaran lama
 			if err := tx.
 				Model(&models.TahunAjaran{}).
 				Where("is_active = ?", true).
@@ -81,15 +108,16 @@ func (s *TahunAjaranService) EnsureCurrentYear() (*models.TahunAjaran, error) {
 
 			// Buat tahun ajaran baru
 			tahunAjaran = models.TahunAjaran{
-				NamaTahun:       namaTahun,
-				TanggalMulai:    startDate,
-				TanggalSelesai:  endDate,
-				IsActive:        true,
+				NamaTahun:     namaTahun,
+				TanggalMulai:  startDate,
+				TanggalSelesai: endDate,
+				IsActive:      true,
 			}
 
 			if err := tx.Create(&tahunAjaran).Error; err != nil {
 				return fmt.Errorf(
-					"gagal membuat tahun ajaran baru: %w",
+					"gagal membuat tahun ajaran %s: %w",
+					namaTahun,
 					err,
 				)
 			}
@@ -97,21 +125,21 @@ func (s *TahunAjaranService) EnsureCurrentYear() (*models.TahunAjaran, error) {
 			return nil
 		}
 
-		// =====================================================
-		// 3. Jika terjadi error database
-		// =====================================================
+		// =================================================
+		// 3. ERROR DATABASE
+		// =================================================
 
 		if err != nil {
 			return fmt.Errorf(
-				"gagal mencari tahun ajaran: %w",
+				"gagal mencari tahun ajaran %s: %w",
+				namaTahun,
 				err,
 			)
 		}
 
-		// =====================================================
-		// 4. Tahun ajaran sudah ada
-		//    Pastikan dia aktif
-		// =====================================================
+		// =================================================
+		// 4. NONAKTIFKAN TAHUN AJARAN LAIN
+		// =================================================
 
 		if err := tx.
 			Model(&models.TahunAjaran{}).
@@ -124,20 +152,23 @@ func (s *TahunAjaranService) EnsureCurrentYear() (*models.TahunAjaran, error) {
 			)
 		}
 
-		if !tahunAjaran.IsActive {
+		// =================================================
+		// 5. AKTIFKAN TAHUN AJARAN SEKARANG
+		// =================================================
 
-			if err := tx.
-				Model(&tahunAjaran).
-				Update("is_active", true).Error; err != nil {
+		if err := tx.
+			Model(&models.TahunAjaran{}).
+			Where("id = ?", tahunAjaran.ID).
+			Update("is_active", true).Error; err != nil {
 
-				return fmt.Errorf(
-					"gagal mengaktifkan tahun ajaran: %w",
-					err,
-				)
-			}
-
-			tahunAjaran.IsActive = true
+			return fmt.Errorf(
+				"gagal mengaktifkan tahun ajaran %s: %w",
+				namaTahun,
+				err,
+			)
 		}
+
+		tahunAjaran.IsActive = true
 
 		return nil
 	})

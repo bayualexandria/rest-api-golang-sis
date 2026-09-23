@@ -14,7 +14,8 @@ type UpdateGuruValidation struct {
 	NoHp         string                `form:"no_hp" binding:"omitempty,numeric"`
 	Alamat       string                `form:"alamat" binding:"omitempty"`
 	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"omitempty"`
-	StatusId     int                   `form:"status_id" binding:"omitempty"`
+	Email        string                `form:"email" binding:"omitempty"`
+	StatusId     int                `form:"status_id" binding:"omitempty"`
 }
 
 var updateGuruMessages = map[string]string{

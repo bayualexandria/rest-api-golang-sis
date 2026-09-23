@@ -6,14 +6,16 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type AddDataSiswaKelasRequest struct {
-	SiswaId uint64 `form:"siswa_id" binding:"required"`
-	KelasId uint64 `form:"kelas_id" binding:"required"`
+type AddDataSiswaKelasValidation struct {
+	SiswaId     uint64 `form:"siswa_id" binding:"required"`
+	KelasId     uint64 `form:"kelas_id" binding:"required"`
+	WaliKelasId uint64 `form:"wali_kelas_id" binding:"required"`
 }
 
 var addDataSiswaKelasMessages = map[string]string{
-	"SiswaId.required": "Siswa ID wajib diisi.",
-	"KelasId.required": "Kelas ID wajib diisi.",
+	"SiswaId.required":     "Siswa ID wajib diisi.",
+	"KelasId.required":     "Kelas ID wajib diisi.",
+	"WaliKelasId.required": "Wali Kelas ID wajib diisi.",
 }
 
 func TranslateAddDataSiswaKelasError(err error) map[string]string {

@@ -12,9 +12,9 @@ type SiswaKelas struct {
 	SiswaID       uint64 `gorm:"not null;index" json:"siswa_id"`
 	KelasID       uint64 `gorm:"not null;index" json:"kelas_id"`
 	TahunAjaranID uint64 `gorm:"not null;index" json:"tahun_ajaran_id"`
-	SemesterID     uint64 `gorm:"not null;index" json:"semester_id"`
+	SemesterID    uint64 `gorm:"not null;index" json:"semester_id"`
 
-	TanggalMasuk *time.Time `gorm:"type:date" json:"tanggal_masuk"`
+	WaliKelasId uint64 `gorm:"not null;index" json:"wali_kelas_id"`
 
 	Status string `gorm:"size:50;not null;default:aktif" json:"status"`
 

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -132,7 +133,7 @@ func AddGuru(c *gin.Context) {
 		"jenis_kelamin": input.JenisKelamin,
 		"no_hp":         input.NoHp,
 		"alamat":        input.Alamat,
-		"image_profile": "/storage/logo-pendidikan.png",
+		"image_profile": "storage/logo-pendidikan.png",
 	}).Error; err != nil {
 		c.JSON(500, gin.H{
 			"message": "Gagal menambahkan data guru!",
@@ -164,7 +165,7 @@ func AddGuru(c *gin.Context) {
 			"jenis_kelamin": input.JenisKelamin,
 			"no_hp":         input.NoHp,
 			"alamat":        input.Alamat,
-			"image_profile": "/storage/logo-pendidikan.png",
+			"image_profile": "storage/logo-pendidikan.png",
 			"email":         input.Email,
 			"status_user":   input.StatusId,
 		},
@@ -176,75 +177,220 @@ func UpdateGuru(c *gin.Context) {
 	var guru models.Guru
 	var user models.User
 	var input guruController.UpdateGuruValidation
+
 	nip := c.Param("nip")
 
-	if err := config.DB.Where("nip", nip).First(&guru).Error; err != nil {
+	// =========================================================
+	// CARI DATA GURU
+	// =========================================================
+
+	if err := config.DB.
+		Where("nip = ?", nip).
+		First(&guru).Error; err != nil {
+
 		c.JSON(404, gin.H{
 			"message": "Data guru dengan NIP " + nip + " tidak ditemukan",
 			"status":  404,
 		})
+
 		return
 	}
 
+	// =========================================================
+	// CARI DATA USER
+	// =========================================================
+
+	if err := config.DB.
+		Where("username = ?", nip).
+		First(&user).Error; err != nil {
+
+		c.JSON(404, gin.H{
+			"message": "Data user dengan username " + nip + " tidak ditemukan",
+			"status":  404,
+		})
+
+		return
+	}
+
+	// =========================================================
+	// BIND FORM DATA
+	// =========================================================
+
 	if err := c.ShouldBind(&input); err != nil {
 		msg := guruController.TranslateUpdateGuruError(err)
+
 		c.JSON(400, gin.H{
 			"message": "Anda belum merubah data!",
 			"data":    msg,
 			"status":  400,
 		})
+
 		return
 	}
+
+	// =========================================================
+	// UPDATE DATA GURU
+	// =========================================================
 
 	if input.Nama != "" {
 		guru.Nama = input.Nama
 	}
+
 	if input.JenisKelamin != "" {
 		guru.JenisKelamin = input.JenisKelamin
 	}
+
 	if input.NoHp != "" {
 		guru.NoHp = input.NoHp
 	}
+
 	if input.Alamat != "" {
 		guru.Alamat = input.Alamat
+	}
+
+	// =========================================================
+	// UPDATE EMAIL USER
+	// =========================================================
+
+	if input.Email != "" {
+		user.Email = input.Email
 	}
 	if input.StatusId != 0 {
 		user.StatusId = input.StatusId
 	}
 
+	// =========================================================
+	// UPDATE FOTO PROFILE
+	// =========================================================
+
 	if input.ImageProfile != nil {
 		file := input.ImageProfile
 
-		os.MkdirAll("storage/guru"+nip, os.ModePerm)
-		// Jika gambarnya logo-pendidikan.png
+		// Folder penyimpanan berdasarkan NIP
+		folderPath := filepath.Join(
+			"storage",
+			"guru",
+			nip,
+		)
 
-		fileName := fmt.Sprintf("%d_%s", time.Now().Unix(), file.Filename)
-		filePath := "storage/guru/" + nip + "/" + fileName
+		// Buat folder jika belum ada
+		if err := os.MkdirAll(folderPath, os.ModePerm); err != nil {
+			c.JSON(500, gin.H{
+				"message": "Gagal membuat folder penyimpanan gambar",
+				"error":   err.Error(),
+				"status":  500,
+			})
 
-		// Menghapus file lama
-		os.Remove("storage/guru" + nip)
-		os.Remove(guru.ImageProfile)
+			return
+		}
 
-		c.SaveUploadedFile(file, filePath)
+		// =====================================================
+		// HAPUS GAMBAR LAMA
+		// =====================================================
+
+		oldImagePath := filepath.Clean(guru.ImageProfile)
+
+		// Logo default TIDAK BOLEH DIHAPUS
+		defaultImagePath := filepath.Clean(
+			"storage/logo-pendidikan.png",
+		)
+
+		if oldImagePath != "" &&
+			oldImagePath != "." &&
+			oldImagePath != defaultImagePath {
+
+			if _, err := os.Stat(oldImagePath); err == nil {
+				if err := os.Remove(oldImagePath); err != nil {
+					fmt.Println(
+						"Gagal menghapus gambar lama:",
+						err,
+					)
+				}
+			}
+		}
+
+		// =====================================================
+		// BUAT NAMA FILE BARU
+		// =====================================================
+
+		fileName := fmt.Sprintf(
+			"%d_%s",
+			time.Now().UnixNano(),
+			file.Filename,
+		)
+
+		filePath := filepath.Join(
+			folderPath,
+			fileName,
+		)
+
+		// =====================================================
+		// SIMPAN FOTO BARU
+		// =====================================================
+
+		if err := c.SaveUploadedFile(file, filePath); err != nil {
+			c.JSON(500, gin.H{
+				"message": "Gagal menyimpan gambar",
+				"error":   err.Error(),
+				"status":  500,
+			})
+
+			return
+		}
+
+		// Simpan path gambar baru
 		guru.ImageProfile = filePath
-
 	}
 
-	if err := config.DB.Model(&guru).Where("nip = ?", nip).Updates(&guru).Error; err != nil {
-		c.JSON(500, gin.H{"error": "Gagal mengupdate database: " + err.Error()})
+	// =========================================================
+	// UPDATE DATABASE GURU
+	// =========================================================
+
+	if err := config.DB.
+		Model(&guru).
+		Where("nip = ?", nip).
+		Updates(&guru).Error; err != nil {
+
+		c.JSON(500, gin.H{
+			"message": "Gagal mengupdate database guru",
+			"error":   err.Error(),
+			"status":  500,
+		})
+
 		return
 	}
 
-	config.DB.Model(&user).Where("username", nip).Updates(map[string]interface{}{
-		"name":      guru.Nama,
-		"status_id": user.StatusId,
-	})
+	// =========================================================
+	// UPDATE DATABASE USER
+	// =========================================================
+
+	if err := config.DB.
+		Model(&user).
+		Where("username = ?", nip).
+		Updates(map[string]interface{}{
+			"name":      guru.Nama,
+			"email":     user.Email,
+			"status_id": user.StatusId,
+		}).Error; err != nil {
+
+		c.JSON(500, gin.H{
+			"message": "Gagal mengupdate data user",
+			"error":   err.Error(),
+			"status":  500,
+		})
+
+		return
+	}
+
+	// =========================================================
+	// RESPONSE
+	// =========================================================
+
 	c.JSON(200, gin.H{
 		"success": true,
 		"message": "Data guru berhasil diupdate",
 		"status":  200,
 	})
-
 }
 
 func DeleteGuru(c *gin.Context) {

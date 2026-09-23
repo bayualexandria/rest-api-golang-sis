@@ -7,19 +7,13 @@ import (
 )
 
 type AddRuangKelasRequest struct {
-	GuruWaliID    uint64 `json:"guru_wali_id" binding:"required"`
-	KelasID       uint64 `json:"kelas_id" binding:"required"`
-	TahunAjaranID uint64 `json:"tahun_ajaran_id" binding:"required"`
-	SemesterID    uint64 `json:"semester_id" binding:"required"`
-	Status        string `json:"status" binding:"required"`
+	GuruWaliId uint64 `form:"guru_wali_id" binding:"required"`
+	KelasId    uint64 `form:"kelas_id" binding:"required"`
 }
 
 var addRuangKelasMessages = map[string]string{
-	"GuruWaliID.required":    "Guru Wali harus diisi",
-	"KelasID.required":       "Kelas harus diisi",
-	"TahunAjaranID.required": "Tahun Ajaran harus diisi",
-	"SemesterID.required":    "Semester harus diisi",
-	"Status.required":        "Status harus diisi",
+	"GuruWaliId.required": "Guru Wali harus diisi",
+	"KelasId.required":    "Kelas harus diisi",
 }
 
 func TranslateAddRuangKelasError(err error) map[string]string {

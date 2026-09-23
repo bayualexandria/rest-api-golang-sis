@@ -15,7 +15,7 @@ CREATE TABLE wali_kelas (
   
     CONSTRAINT `fk_wali_kelas_guru_wali`
         FOREIGN KEY (`guru_wali_id`)
-        REFERENCES `guru` (`id`)
+        REFERENCES `guru` (`nip`)
         ON UPDATE CASCADE
         ON DELETE SET NULL,
 

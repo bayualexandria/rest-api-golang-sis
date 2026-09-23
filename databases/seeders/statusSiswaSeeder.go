@@ -19,6 +19,7 @@ func (s StatusSiswaSeeder) Run(db *gorm.DB) {
 	statusSiswaList := []StatusSiswaSeeder{
 		{NamaStatus: "Aktif", Keterangan: "Siswa sedang aktif"},
 		{NamaStatus: "Tidak Aktif", Keterangan: "Siswa tidak aktif"},
+		{NamaStatus: "Seleksi", Keterangan: "Siswa baru yang mendaftar untuk mengikuti seleksi"},
 		{NamaStatus: "Lulus", Keterangan: "Siswa telah lulus"},
 		{NamaStatus: "Dikeluarkan", Keterangan: "Siswa keluar sebelum lulus"},
 		{NamaStatus: "Pindah", Keterangan: "Siswa pindah ke sekolah lain"},
