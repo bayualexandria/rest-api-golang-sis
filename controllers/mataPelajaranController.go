@@ -82,3 +82,50 @@ func InsertDataMapel(c *gin.Context) {
 	})
 
 }
+
+func UpdateDataMapel(c *gin.Context) {
+	var id = c.Param("id")
+	var input mapelController.UpdateMapelValidation
+	var mapel models.Mapel
+
+	if err := c.ShouldBind(&input); err != nil {
+		msg := mapelController.TranslateUpdateMapelError(err)
+		c.JSON(400, gin.H{
+			"message": "Gagal mengupdate data mapel!",
+			"data":    msg,
+			"status":  400,
+		})
+		return
+	}
+
+	if err := config.DB.Model(&mapel).Where("id = ?", id).First(&mapel).Error; err != nil {
+		c.JSON(404, gin.H{
+			"message": "Data mapel tidak ditemukan!",
+			"status":  404,
+		})
+		return
+	}
+
+	if input.Nama != "" {
+		mapel.Nama = input.Nama
+	}
+	if input.Kode != "" {
+		mapel.Kode = input.Kode
+	}
+	if input.Deskripsi != "" {
+		mapel.Deskripsi = input.Deskripsi
+	}
+
+	if err := config.DB.Model(&mapel).Where("id = ?", id).Updates(&mapel).Error; err != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal mengupdate data mapel!",
+			"status":  500,
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": true,
+		"message": "Data mapel berhasil diupdate!",
+	})
+}
