@@ -14,7 +14,10 @@ type Siswa struct {
 	Id           uint64 `json:"id"`
 	NIS          string `json:"nis"`
 	NamaSiswa    string `json:"nama_siswa"`
+	Ttl          string `json:"ttl"`
 	JenisKelamin string `json:"jenis_kelamin"`
+	ImageProfile string `json:"image_profile"`
+	Alamat       string `json:"alamat"`
 	NoHp         string `json:"no_hp"`
 	NamaKelas    string `json:"nama_kelas"`
 	Jurusan      string `json:"jurusan"`
@@ -32,7 +35,7 @@ func GetSiswaKelas(c *gin.Context) {
 		Joins("JOIN kelas ON siswa_kelas.kelas_id = kelas.id").
 		Joins("JOIN tahun_ajaran ON siswa_kelas.tahun_ajaran_id = tahun_ajaran.id").
 		Joins("JOIN semester ON siswa_kelas.semester_id = semester.id").
-		Select("siswa_kelas.id,siswa.nama AS nama_siswa, siswa.nis AS nis, siswa.jenis_kelamin, siswa.no_hp, kelas.nama_kelas, kelas.jurusan, tahun_ajaran.nama_tahun AS tahun_ajaran, semester.nama_semester AS semester, siswa_kelas.status").
+		Select("siswa_kelas.id,siswa.nama AS nama_siswa, siswa.nis AS nis, siswa.ttl, siswa.alamat, siswa.jenis_kelamin, siswa.no_hp, siswa.image_profile, kelas.nama_kelas, kelas.jurusan, tahun_ajaran.nama_tahun AS tahun_ajaran, semester.nama_semester AS semester, siswa_kelas.status").
 		Find(&data).Error; err != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -94,8 +97,8 @@ func GetSiswaKelasByNis(c *gin.Context) {
 		Joins("JOIN kelas ON siswa_kelas.kelas_id = kelas.id").
 		Joins("JOIN tahun_ajaran ON siswa_kelas.tahun_ajaran_id = tahun_ajaran.id").
 		Joins("JOIN semester ON siswa_kelas.semester_id = semester.id").
-		Select("siswa_kelas.id,siswa.nis AS nis,siswa.nama AS nama_siswa,  siswa.jenis_kelamin, siswa.no_hp, kelas.nama_kelas, kelas.jurusan, tahun_ajaran.nama_tahun AS tahun_ajaran, semester.nama_semester AS semester,  siswa_kelas.status").
-		Where("siswa_kelas.wali_kelas_id = ?", idParam).Where("siswa_kelas.kelas_id = ?",idParamKelas).
+		Select("siswa_kelas.id,siswa.nis AS nis,siswa.nama AS nama_siswa,siswa.ttl AS ttl, siswa.alamat, siswa.jenis_kelamin, siswa.no_hp, siswa.image_profile, kelas.nama_kelas, kelas.jurusan, tahun_ajaran.nama_tahun AS tahun_ajaran, semester.nama_semester AS semester,  siswa_kelas.status").
+		Where("siswa_kelas.wali_kelas_id = ?", idParam).Where("siswa_kelas.kelas_id = ?", idParamKelas).
 		Find(&data).Error; err != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
