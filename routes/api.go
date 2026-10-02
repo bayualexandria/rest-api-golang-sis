@@ -38,6 +38,13 @@ func SetupRoutersAPI(app *gin.Engine) {
 		// Personal Access Token
 		route.DELETE("/access-token/:username", controllers.GetAccessToken)
 
+		// =========================================================
+		// ROUTES WITH MIDDLEWARE
+		// =========================================================
+
+		// Profile Sekolah
+		route.PATCH("/profile-sekolah", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateProfileSekolahHandler)
+
 		// Users
 		user := route.Group("/user")
 		user.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetUsers)
