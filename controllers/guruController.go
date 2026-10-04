@@ -349,7 +349,14 @@ func UpdateGuru(c *gin.Context) {
 	if err := config.DB.
 		Model(&guru).
 		Where("nip = ?", nip).
-		Updates(&guru).Error; err != nil {
+		Updates(map[string]interface{}{
+			"nama":          guru.Nama,
+			"jenis_kelamin": guru.JenisKelamin,
+			"no_hp":         guru.NoHp,
+			"alamat":        guru.Alamat,
+			"image_profile": guru.ImageProfile,
+			"updated_at":    time.Now(),
+		}).Error; err != nil {
 
 		c.JSON(500, gin.H{
 			"message": "Gagal mengupdate database guru",

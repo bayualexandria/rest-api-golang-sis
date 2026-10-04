@@ -259,10 +259,11 @@ func AddSiswaKelas(c *gin.Context) {
 	})
 }
 
-func UpdateSiswaKelas(c *gin.Context) {
+func DeleteSiswaKelas(c *gin.Context) {
 	id := c.Param("id")
-	request := siswakelas.UpdateDataSiswaKelasRequest{}
+	nis := c.Param("nis")
 	var existing models.SiswaKelas
+	var siswa models.Siswa
 
 	if err := config.DB.Table("siswa_kelas").Where("id = ?", id).First(&existing).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -272,32 +273,31 @@ func UpdateSiswaKelas(c *gin.Context) {
 		return
 	}
 
-	if err := c.ShouldBind(&request); err != nil {
-		msg := siswakelas.TranslateUpdateDataSiswaKelasError(err)
-		c.JSON(400, gin.H{
-			"message": "Anda belum merubah data!",
-			"data":    msg,
-			"status":  400,
+	if err := config.DB.Model(&siswa).Where("nis = ?", nis).First(&siswa).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Data siswa tidak ditemukan",
 		})
 		return
 	}
-	if request.SiswaId != 0 {
-		existing.SiswaID = request.SiswaId
-	}
-	// Apakah bisa jangan pakai 0
 
-	if request.KelasId != 0 {
-		existing.KelasID = request.KelasId
+	if err := config.DB.Delete(&existing).Error; err != nil {
+		c.JSON(500, gin.H{"error": "Gagal menghapus data: " + err.Error()})
+		return
 	}
 
-	if err := config.DB.Model(&existing).Where("id = ?", id).Updates(&existing).Error; err != nil {
-		c.JSON(500, gin.H{"error": "Gagal mengupdate database: " + err.Error()})
+	if err := config.DB.Model(&siswa).Where("nis = ?", nis).Updates(map[string]interface{}{"status_siswa_id": 2}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal mengubah status siswa",
+			"error":   err.Error(),
+		})
 		return
 	}
 
 	c.JSON(200, gin.H{
 		"success": true,
-		"message": "Data siswa kelas berhasil diupdate",
+		"message": "Data siswa kelas berhasil dihapus",
 		"status":  200,
 	})
 

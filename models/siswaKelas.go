@@ -3,7 +3,6 @@ package models
 import (
 	"time"
 
-	"gorm.io/gorm"
 )
 
 type SiswaKelas struct {
@@ -20,7 +19,6 @@ type SiswaKelas struct {
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
 	// Relasi
 	// Siswa       Siswa       `gorm:"foreignKey:SiswaID;references:ID" json:"siswa"`

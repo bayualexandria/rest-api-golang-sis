@@ -69,7 +69,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 		siswaKelas.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswaKelas)
 		siswaKelas.GET("/:nis/:kelas", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswaKelasByNis)
 		siswaKelas.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2), controllers.AddSiswaKelas)
-		siswaKelas.PUT("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2), controllers.UpdateSiswaKelas)
+		siswaKelas.DELETE("/:id/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2), controllers.DeleteSiswaKelas)
 
 		// Ruang Kelas
 		ruangKelas := route.Group("/ruang-kelas")
