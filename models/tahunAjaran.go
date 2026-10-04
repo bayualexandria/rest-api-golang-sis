@@ -7,7 +7,7 @@ import (
 )
 
 type TahunAjaran struct {
-	ID             uint64         `gorm:"primaryKey;column:id" json:"id"`
+	Id             uint64         `gorm:"primaryKey;column:id" json:"id"`
 	NamaTahun      string         `gorm:"column:nama_tahun;size:20;not null" json:"nama_tahun"`
 	TanggalMulai   time.Time      `gorm:"column:tanggal_mulai;not null" json:"tanggal_mulai"`
 	TanggalSelesai time.Time      `gorm:"column:tanggal_selesai;not null" json:"tanggal_selesai"`

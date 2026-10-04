@@ -190,8 +190,8 @@ func AddSiswaKelas(c *gin.Context) {
 		Joins("JOIN tahun_ajaran ta ON sk.tahun_ajaran_id = ta.id").
 		Joins("JOIN semester sm ON sk.semester_id = sm.id").
 		Where("sk.siswa_id = ?", request.SiswaId).
-		Where("sk.tahun_ajaran_id = ?", tahunAjaran.ID).
-		Where("sk.semester_id = ?", semester.ID).
+		Where("sk.tahun_ajaran_id = ?", tahunAjaran.Id).
+		Where("sk.semester_id = ?", semester.Id).
 		First(&existing).Error
 
 	if err == nil {
@@ -217,13 +217,13 @@ func AddSiswaKelas(c *gin.Context) {
 	data := models.SiswaKelas{
 		SiswaID:       request.SiswaId,
 		KelasID:       request.KelasId,
-		TahunAjaranID: tahunAjaran.ID,
-		SemesterID:    semester.ID,
+		TahunAjaranID: tahunAjaran.Id,
+		SemesterID:    semester.Id,
 		WaliKelasId:   request.WaliKelasId,
 		Status:        "aktif",
 	}
 	// Jika data siswa_id, kelas_id sama dan semester_id dan tahun ajaran_id beda data tersimpan
-	if err := config.DB.Where("siswa_id = ? AND kelas_id = ? AND tahun_ajaran_id = ? AND semester_id = ?", request.SiswaId, request.KelasId, tahunAjaran.ID, semester.ID).First(&existing).Error; err == nil {
+	if err := config.DB.Where("siswa_id = ? AND kelas_id = ? AND tahun_ajaran_id = ? AND semester_id = ?", request.SiswaId, request.KelasId, tahunAjaran.Id, semester.Id).First(&existing).Error; err == nil {
 
 		c.JSON(http.StatusConflict, gin.H{
 			"success": false,

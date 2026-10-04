@@ -143,7 +143,7 @@ func (s *TahunAjaranService) EnsureCurrentYear() (*models.TahunAjaran, error) {
 
 		if err := tx.
 			Model(&models.TahunAjaran{}).
-			Where("id <> ?", tahunAjaran.ID).
+			Where("id <> ?", tahunAjaran.Id).
 			Update("is_active", false).Error; err != nil {
 
 			return fmt.Errorf(
@@ -158,7 +158,7 @@ func (s *TahunAjaranService) EnsureCurrentYear() (*models.TahunAjaran, error) {
 
 		if err := tx.
 			Model(&models.TahunAjaran{}).
-			Where("id = ?", tahunAjaran.ID).
+			Where("id = ?", tahunAjaran.Id).
 			Update("is_active", true).Error; err != nil {
 
 			return fmt.Errorf(

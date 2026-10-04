@@ -66,7 +66,7 @@ func (s *AbsensiService) GenerateAlpa() error {
 	var semester models.Semester
 
 	if err := s.DB.
-		Where("tahun_ajaran_id = ?", tahunAjaran.ID).
+		Where("tahun_ajaran_id = ?", tahunAjaran.Id).
 		Where("is_active = ?", true).
 		First(&semester).Error; err != nil {
 
@@ -122,7 +122,7 @@ func (s *AbsensiService) GenerateAlpa() error {
 
 	if err := s.DB.
 		Model(&models.SiswaKelas{}).
-		Where("siswa_kelas.tahun_ajaran_id = ?", tahunAjaran.ID).
+		Where("siswa_kelas.tahun_ajaran_id = ?", tahunAjaran.Id).
 		Where("siswa_kelas.status = ?", "aktif").
 		Where("NOT EXISTS (?)", subQuery).
 		Find(&siswaKelas).Error; err != nil {
@@ -149,7 +149,7 @@ func (s *AbsensiService) GenerateAlpa() error {
 
 		absensiAlpa := models.AbsensiSiswa{
 			SiswaKelasID:      siswa.ID,
-			SemesterID:        semester.ID,
+			SemesterID:        semester.Id,
 			StatusKehadiranID: statusAlpa.ID,
 			Tanggal:           tanggalHariIni,
 			JamMasuk:          nil,

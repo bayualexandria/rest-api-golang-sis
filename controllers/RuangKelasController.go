@@ -153,8 +153,8 @@ func AddRuangKelas(c *gin.Context) {
 	if err := config.DB.Table("wali_kelas").Create(map[string]interface{}{
 		"guru_wali_id":    request.GuruWaliId,
 		"kelas_id":        request.KelasId,
-		"tahun_ajaran_id": tahunAjaran.ID,
-		"semester_id":     semester.ID,
+		"tahun_ajaran_id": tahunAjaran.Id,
+		"semester_id":     semester.Id,
 		"status":          "aktif",
 	}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

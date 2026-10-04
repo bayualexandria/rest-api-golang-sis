@@ -48,7 +48,7 @@ func (s *SemesterService) EnsureCurrentSemester(
 	// 1. Tahun ajaran
 	// 2. Kode semester
 	err := s.DB.
-		Where("tahun_ajaran_id = ?", tahunAjaran.ID).
+		Where("tahun_ajaran_id = ?", tahunAjaran.Id).
 		Where("kode = ?", kode).
 		First(&semester).Error
 
@@ -75,7 +75,7 @@ func (s *SemesterService) EnsureCurrentSemester(
 
 		// Buat semester baru
 		semester = models.Semester{
-			TahunAjaranID: tahunAjaran.ID,
+			TahunAjaranID: tahunAjaran.Id,
 			NamaSemester:  namaSemester,
 			Kode:          kode,
 			IsActive:      true,
@@ -108,7 +108,7 @@ func (s *SemesterService) EnsureCurrentSemester(
 	// Termasuk semester dari tahun ajaran sebelumnya.
 	if err := s.DB.
 		Model(&models.Semester{}).
-		Where("id <> ?", semester.ID).
+		Where("id <> ?", semester.Id).
 		Update("is_active", false).Error; err != nil {
 
 		return nil, fmt.Errorf(
@@ -120,7 +120,7 @@ func (s *SemesterService) EnsureCurrentSemester(
 	// Aktifkan semester yang sesuai dengan periode sekarang.
 	if err := s.DB.
 		Model(&models.Semester{}).
-		Where("id = ?", semester.ID).
+		Where("id = ?", semester.Id).
 		Update("is_active", true).Error; err != nil {
 
 		return nil, fmt.Errorf(

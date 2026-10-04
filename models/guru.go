@@ -7,6 +7,7 @@ import (
 )
 
 type Guru struct {
+	Id           uint64 `gorm:"primaryKey;autoIncrement" json:"id"`
 	Nip          int    `json:"nip"`
 	Nama         string `json:"nama"`
 	JenisKelamin string `json:"jenis_kelamin"`

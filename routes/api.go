@@ -84,6 +84,11 @@ func SetupRoutersAPI(app *gin.Engine) {
 		mapel.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.InsertDataMapel)
 		mapel.PATCH("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateDataMapel)
 
+		// Guru Mapel
+		guruMapel := route.Group("/guru-mapel")
+		guruMapel.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetAllGuruMapel)
+		guruMapel.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddGuruMapel)
+
 		// Guru
 		guru := route.Group("/guru")
 		guru.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetGuru)

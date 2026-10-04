@@ -7,7 +7,7 @@ import (
 )
 
 type Semester struct {
-	ID            uint64         `gorm:"primaryKey;column:id" json:"id"`
+	Id            uint64         `gorm:"primaryKey;column:id" json:"id"`
 	TahunAjaranID uint64         `gorm:"column:tahun_ajaran_id;not null" json:"tahun_ajaran_id"`
 	NamaSemester  string         `gorm:"column:nama_semester;size:50;not null" json:"nama_semester"`
 	Kode          string         `gorm:"column:kode;size:20;not null" json:"kode"`

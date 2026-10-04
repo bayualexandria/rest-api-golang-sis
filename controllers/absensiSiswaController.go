@@ -24,7 +24,6 @@ type AbsensiTampilData struct {
 
 type GetDataAbsensiSiswaStuct struct {
 	Id uint64 `json:"id"`
-	
 }
 
 func GetDataAbsensiSiswa(c *gin.Context) {
@@ -181,7 +180,7 @@ func AddAbsensiSiswa(c *gin.Context) {
 
 	data := models.AbsensiSiswa{
 		SiswaKelasID:      siswaKelas.ID,
-		SemesterID:        semester.ID,
+		SemesterID:        semester.Id,
 		StatusKehadiranID: 1,
 		Tanggal:           tanggalDB,
 		Keterangan:        request.Keterangan,
