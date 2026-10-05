@@ -28,6 +28,26 @@ func GetDataAllMapel(c *gin.Context) {
 	})
 }
 
+func GetDataMapelById(c *gin.Context) {
+	var id = c.Param("id")
+	var mapel models.Mapel
+
+	if err := config.DB.Model(&mapel).Where("id = ?", id).First(&mapel).Error; err != nil {
+		c.JSON(404, gin.H{
+			"message": "Data mapel tidak ditemukan!",
+			"status":  404,
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"data":    mapel,
+		"success": true,
+		"message": "Data Mata Pelajaran berhasil ditampilkan",
+		"status":  200,
+	})
+}
+
 func InsertDataMapel(c *gin.Context) {
 	var input mapelController.AddMapelValidation
 	var mapel models.Mapel
@@ -114,6 +134,14 @@ func UpdateDataMapel(c *gin.Context) {
 	}
 	if input.Deskripsi != "" {
 		mapel.Deskripsi = input.Deskripsi
+	}
+
+	if err := config.DB.Model(&mapel).Where("kode = ?", input.Kode).First(&mapel).Error; err == nil {
+		c.JSON(401, gin.H{
+			"message": "Kode mapel sudah digunakan!",
+			"status":  401,
+		})
+		return
 	}
 
 	if err := config.DB.Model(&mapel).Where("id = ?", id).Updates(&mapel).Error; err != nil {
