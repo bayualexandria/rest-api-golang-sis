@@ -9,13 +9,12 @@ import (
 type AddGuruMapelRequest struct {
 	GuruId          string `form:"guru_id" binding:"required"`
 	MataPelajaranId string `form:"mata_pelajaran_id" binding:"required"`
-	TahunAjaranId   string `form:"tahun_ajaran_id" binding:"required"`
+	
 }
 
 var addGuruMapelMessages = map[string]string{
 	"GuruId.required":        "Guru wajib diisi.",
 	"MataPelajaranId.required":       "Mata Pelajaran wajib diisi.",
-	"TahunAjaranId.required": "Tahun Ajaran wajib diisi.",
 }
 
 func TranslateAddGuruMapelError(err error) map[string]string {

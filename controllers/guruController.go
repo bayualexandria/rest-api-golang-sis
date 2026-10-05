@@ -16,6 +16,7 @@ import (
 )
 
 type UserAllGuru struct {
+	Id              uint64 `json:"id"`
 	Nip             string `json:"nip"`
 	Name            string `json:"name"`
 	Email           string `json:"email"`
@@ -35,6 +36,7 @@ func GetGuru(c *gin.Context) {
 		Joins("JOIN guru ON users.username = guru.nip").
 		Joins("JOIN status_user ON users.status_id = status_user.id").
 		Select(`
+		guru.id,
 		guru.nip,
 			users.name,
 			users.email,

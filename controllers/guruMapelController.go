@@ -95,6 +95,18 @@ func AddGuruMapel(c *gin.Context) {
 		return
 	}
 
+	// Cek apakah mapel id sudah ada untuk guru yang sama di tahun ajaran yang sama
+	var existingGuruMapel models.GuruMapel
+	if err := config.DB.
+		Where("guru_id = ? AND mata_pelajaran_id = ?", request.GuruId, request.MataPelajaranId).
+		First(&existingGuruMapel).Error; err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Guru sudah mengajar mata pelajaran ini dalam tahun ajaran yang sama",
+		})
+		return
+	}
+
 	if err := config.DB.Model(&guruMapel).Create(map[string]interface{}{
 		"guru_id":           request.GuruId,
 		"mata_pelajaran_id": request.MataPelajaranId,
