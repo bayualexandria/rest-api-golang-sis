@@ -26,6 +26,7 @@ func main() {
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
+			"https://sis.dev-coding.web.id",
 			"http://localhost:5173",
 		},
 
@@ -97,8 +98,8 @@ func main() {
 
 	academicPeriodService := services.NewAcademicPeriodService(config.DB)
 	scheduler.StartAcademicPeriodScheduler(
-	academicPeriodService,
-)
+		academicPeriodService,
+	)
 
 	absensiService := services.NewAbsensiService(config.DB)
 	if err := absensiService.GenerateAlpa(); err != nil {
@@ -106,8 +107,6 @@ func main() {
 	} else {
 		log.Println("Generate ALPA berhasil dijalankan")
 	}
-
-
 
 	scheduler.StartAbsensiScheduler()
 	router.Run(os.Getenv("APP_URL"))
