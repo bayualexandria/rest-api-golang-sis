@@ -171,3 +171,80 @@ func AddRuangKelas(c *gin.Context) {
 		"status":  200,
 	})
 }
+
+func UpdateRuangKelas(c *gin.Context) {
+
+	// Implementation for updating room class
+	id := c.Param("id")
+	var request ruangKelas.UpdateRuangKelasRequest
+	var data models.WaliKelas
+
+	if err := config.DB.Table("wali_kelas").Where("id = ?", id).First(&data).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Data ruang kelas tidak ditemukan",
+			"status":  404,
+		})
+		return
+	}
+
+	if err := c.ShouldBind(&request); err != nil {
+		errors := ruangKelas.TranslateUpdateRuangKelasError(err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Validasi gagal",
+			"errors":  errors,
+			"status":  400,
+		})
+		return
+	}
+
+	// Ambil tahun ajaran aktif
+	var tahunAjaran models.TahunAjaran
+
+	if err := config.DB.
+		Where("is_active = ?", true).
+		First(&tahunAjaran).Error; err != nil {
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Tahun ajaran aktif tidak ditemukan",
+		})
+		return
+	}
+
+	// Ambil semester aktif
+	var semester models.Semester
+
+	if err := config.DB.
+		Where("is_active = ?", true).
+		First(&semester).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Semester aktif tidak ditemukan",
+		})
+		return
+	}
+
+	if err := config.DB.Table("wali_kelas").Where("id = ?", id).Updates(map[string]interface{}{
+		"guru_wali_id":    request.GuruWaliId,
+		"kelas_id":        request.KelasId,
+		"tahun_ajaran_id": tahunAjaran.Id,
+		"semester_id":     semester.Id,
+		"status":          "aktif",
+	}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal mengupdate data ruang kelas",
+			"error":   err.Error(),
+			"status":  500,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Data ruang kelas berhasil diupdate",
+		"status":  200,
+	})
+}

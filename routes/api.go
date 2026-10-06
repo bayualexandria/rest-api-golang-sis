@@ -77,7 +77,9 @@ func SetupRoutersAPI(app *gin.Engine) {
 		ruangKelas.GET("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2), controllers.RuangKelasById)
 		ruangKelas.GET("/guru/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.RuangKelasByNip)
 		ruangKelas.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddRuangKelas)
+		ruangKelas.PATCH("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateRuangKelas)
 
+		
 		// Mata Pelajaran
 		mapel := route.Group("/mapel")
 		mapel.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetDataAllMapel)
@@ -90,6 +92,10 @@ func SetupRoutersAPI(app *gin.Engine) {
 		guruMapel.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetAllGuruMapel)
 		guruMapel.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddGuruMapel)
 
+		// kelas
+		kelas := route.Group("/kelas")
+		kelas.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetKelas)
+
 		// Guru
 		guru := route.Group("/guru")
 		guru.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetGuru)
@@ -97,10 +103,6 @@ func SetupRoutersAPI(app *gin.Engine) {
 		guru.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddGuru)
 		guru.PATCH("/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.UpdateGuru)
 		guru.DELETE("/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.DeleteGuru)
-
-		// kelas
-		kelas := route.Group("/kelas")
-		kelas.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetKelas)
 
 		// Semester
 		semester := route.Group("/semester")
