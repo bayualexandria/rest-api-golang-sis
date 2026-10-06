@@ -5,7 +5,6 @@ import (
 	"backend-api/models"
 	"backend-api/utils"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -109,9 +108,7 @@ func LoginUserSiswaSocialMedia(c *gin.Context) {
 				inputToken.TokenableID = user.Username
 				inputToken.Name = "Personal Access Token"
 				inputToken.Abilities = "*"
-				inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
-				inputToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
-				inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+				
 
 				if err := config.DB.Where("provider_id = ?", idGoogle).First(&linkedSocialAccount).Error; err != nil {
 					linkedSocialAccount.UserID = user.Username

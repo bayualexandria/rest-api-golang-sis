@@ -52,9 +52,7 @@ func LoginUserAdmin(c *gin.Context) {
 	inputToken.TokenableID = input.Username
 	inputToken.Name = "Personal Access Token"
 	inputToken.Abilities = "*"
-	inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
-	inputToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
-	inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+	
 	if user.EmailVerifiedAt == "" {
 		notifications.NotifikasiAktivasiAkunUser(user.Email, user.Name, "Silahkan verifikasi email anda untuk mengaktifkan akun anda, dengan cara klik link dibawah ini: ", os.Getenv("APP_URL")+"/api/auth/verify/"+user.Email+"/"+token)
 		config.DB.Create(&inputToken)
@@ -145,18 +143,14 @@ func LoginUser(c *gin.Context) {
 	inputToken.TokenableID = user.Username
 	inputToken.Name = "Personal Access Token"
 	inputToken.Abilities = "*"
-	inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
-	inputToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
-	inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+	
 	if err := config.DB.Where("username = ?", input.Username).Where("email_verified_at", nil).First(&user).Error; err == nil || user.EmailVerifiedAt == "" {
 		inputToken.Token = token
 		inputToken.TokenableType = "User"
 		inputToken.TokenableID = user.Username
 		inputToken.Name = "Personal Access Token"
 		inputToken.Abilities = "*"
-		inputToken.LastUsedAt = time.Now().Format("2006-01-02 15:04:05")
-		inputToken.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
-		inputToken.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+		
 		notifications.NotifikasiAktivasiAkunUser(user.Email, user.Name, "Silahkan verifikasi email anda untuk mengaktifkan akun anda, dengan cara klik link dibawah ini: ", os.Getenv("APP_URL")+"/api/auth/verify/"+user.Email+"/"+token)
 		config.DB.Create(&inputToken)
 		c.JSON(http.StatusOK, gin.H{"message": "Email belum terverifikasi, silakan cek email anda untuk verifikasi.", "status": 200})
