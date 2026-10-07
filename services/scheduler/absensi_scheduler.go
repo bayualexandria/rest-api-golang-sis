@@ -25,7 +25,7 @@ func StartAbsensiScheduler() {
 	)
 
 	// Jalankan setiap 5 menit
-	_, err = cronJob.AddFunc("*/1 * * * *", func() {
+	_, err = cronJob.AddFunc("*/5 * * * *", func() {
 
 		now := time.Now()
 
@@ -35,7 +35,7 @@ func StartAbsensiScheduler() {
 		}
 
 		log.Println(
-			"Menjalankan pengecekan ALPA:",
+			"Menjalankan pengecekan ALPA Jika Batas Waktu Absensi lewat dari Jam 12 Siang setiap hari:",
 			now.Format("2006-01-02 15:04:05"),
 		)
 

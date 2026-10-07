@@ -150,6 +150,19 @@ func AddRuangKelas(c *gin.Context) {
 		})
 		return
 	}
+
+	// Cek apakah wali kelas id sudah ada untuk guru dan kelas yang sama di tahun ajaran yang sama
+	var existingWaliKelas models.WaliKelas
+	if err := config.DB.
+		Where("guru_wali_id = ? AND kelas_id = ?", request.GuruWaliId, request.KelasId).
+		First(&existingWaliKelas).Error; err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Kelas sudah ada dalam tahun ajaran yang sama",
+		})
+		return
+	}
+
 	if err := config.DB.Table("wali_kelas").Create(map[string]interface{}{
 		"guru_wali_id":    request.GuruWaliId,
 		"kelas_id":        request.KelasId,
@@ -173,8 +186,6 @@ func AddRuangKelas(c *gin.Context) {
 }
 
 func UpdateRuangKelas(c *gin.Context) {
-
-	// Implementation for updating room class
 	id := c.Param("id")
 	var request ruangKelas.UpdateRuangKelasRequest
 	var data models.WaliKelas
@@ -199,33 +210,54 @@ func UpdateRuangKelas(c *gin.Context) {
 		return
 	}
 
-	// Ambil tahun ajaran aktif
+	// 1. Ambil tahun ajaran aktif
 	var tahunAjaran models.TahunAjaran
-
-	if err := config.DB.
-		Where("is_active = ?", true).
-		First(&tahunAjaran).Error; err != nil {
-
+	if err := config.DB.Where("is_active = ?", true).First(&tahunAjaran).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "Tahun ajaran aktif tidak ditemukan",
+			"status":  400,
 		})
 		return
 	}
 
-	// Ambil semester aktif
+	// 2. Ambil semester aktif
 	var semester models.Semester
-
-	if err := config.DB.
-		Where("is_active = ?", true).
-		First(&semester).Error; err != nil {
+	if err := config.DB.Where("is_active = ?", true).First(&semester).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "Semester aktif tidak ditemukan",
+			"status":  400,
 		})
 		return
 	}
 
+	// 3. Cek apakah ada siswa di kelas tersebut
+	var totalSiswa int64
+	err := config.DB.Model(&models.SiswaKelas{}).
+		Where("kelas_id = ? AND tahun_ajaran_id = ? AND semester_id = ?", data.KelasId, tahunAjaran.Id, semester.Id).
+		Count(&totalSiswa).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal memeriksa data siswa kelas",
+			"status":  500,
+		})
+		return
+	}
+
+	// Jika jumlah siswa > 0, tolak proses update
+	if totalSiswa > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Tidak bisa mengubah data kelas dikarenakan ada data siswa yang sudah masuk dalam kelas tersebut!",
+			"status":  400,
+		})
+		return
+	}
+
+	// 4. Lakukan update data wali_kelas
 	if err := config.DB.Table("wali_kelas").Where("id = ?", id).Updates(map[string]interface{}{
 		"guru_wali_id":    request.GuruWaliId,
 		"kelas_id":        request.KelasId,

@@ -79,7 +79,6 @@ func SetupRoutersAPI(app *gin.Engine) {
 		ruangKelas.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddRuangKelas)
 		ruangKelas.PATCH("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateRuangKelas)
 
-		
 		// Mata Pelajaran
 		mapel := route.Group("/mapel")
 		mapel.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetDataAllMapel)
@@ -90,7 +89,10 @@ func SetupRoutersAPI(app *gin.Engine) {
 		// Guru Mapel
 		guruMapel := route.Group("/guru-mapel")
 		guruMapel.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetAllGuruMapel)
+		guruMapel.GET("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetDataGuruMapelById)
 		guruMapel.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddGuruMapel)
+		guruMapel.PATCH("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateGuruMapel)
+		guruMapel.DELETE("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.DeleteGuruMapel)
 
 		// kelas
 		kelas := route.Group("/kelas")
