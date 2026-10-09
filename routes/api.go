@@ -86,6 +86,13 @@ func SetupRoutersAPI(app *gin.Engine) {
 		mapel.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.InsertDataMapel)
 		mapel.PATCH("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateDataMapel)
 
+		// Jadwal Pelajaran
+		jadwalMapel := route.Group("/jadwal-mapel")
+		jadwalMapel.GET("/kelas/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetJadwalPelajaranByKelas)
+		jadwalMapel.GET("/guru/:idGuru/mapel/:idMapel", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetJadwalPelajaranByGuruMapel)
+		jadwalMapel.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.InsertJadwalPelajaran)
+		jadwalMapel.PATCH("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateJadwalPelajaran)
+
 		// Guru Mapel
 		guruMapel := route.Group("/guru-mapel")
 		guruMapel.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetAllGuruMapel)

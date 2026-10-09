@@ -154,7 +154,7 @@ func AddRuangKelas(c *gin.Context) {
 	// Cek apakah wali kelas id sudah ada untuk guru dan kelas yang sama di tahun ajaran yang sama
 	var existingWaliKelas models.WaliKelas
 	if err := config.DB.
-		Where("guru_wali_id = ? AND kelas_id = ?", request.GuruWaliId, request.KelasId).
+		Where("kelas_id = ?", request.KelasId).
 		First(&existingWaliKelas).Error; err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
