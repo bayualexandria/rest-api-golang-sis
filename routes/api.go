@@ -81,7 +81,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 
 		// Mata Pelajaran
 		mapel := route.Group("/mapel")
-		mapel.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetDataAllMapel)
+		mapel.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetDataAllMapel)
 		mapel.GET("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetDataMapelById)
 		mapel.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.InsertDataMapel)
 		mapel.PATCH("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateDataMapel)
@@ -90,8 +90,8 @@ func SetupRoutersAPI(app *gin.Engine) {
 		jadwalMapel := route.Group("/jadwal-mapel")
 		jadwalMapel.GET("/kelas/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetJadwalPelajaranByKelas)
 		jadwalMapel.GET("/guru/:idGuru/mapel/:idMapel", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetJadwalPelajaranByGuruMapel)
-		jadwalMapel.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.InsertJadwalPelajaran)
-		jadwalMapel.PATCH("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateJadwalPelajaran)
+		jadwalMapel.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.InsertJadwalPelajaran)
+		jadwalMapel.PATCH("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.UpdateJadwalPelajaran)
 
 		// Guru Mapel
 		guruMapel := route.Group("/guru-mapel")
