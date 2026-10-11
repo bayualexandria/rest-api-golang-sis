@@ -5,21 +5,21 @@ import (
 	"backend-api/models"
 	jadwalpelajaran "backend-api/validations/jadwalPelajaran"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type GetDataJadwalPelajaranByKelasStruct struct {
-	Id         uint64    `json:"id"`
-	NamaKelas  string    `json:"nama_kelas"`
-	Jurusan    string    `json:"jurusan"`
-	NamaGuru   string    `json:"nama_guru"`
-	NamaMapel  string    `json:"nama_mapel"`
-	NamaTahun  string    `json:"nama_tahun"`
-	Hari       string    `json:"hari"`
-	JamMulai   time.Time `json:"jam_mulai"`
-	JamSelesai time.Time `json:"jam_selesai"`
+	Id         uint64 `json:"id" gorm:"column:id"`
+	KelasId    int64  `json:"kelas_id" gorm:"column:kelas_id"`
+	NamaKelas  string `json:"nama_kelas" gorm:"column:nama_kelas"`
+	Jurusan    string `json:"jurusan" gorm:"column:jurusan"`
+	NamaGuru   string `json:"nama_guru" gorm:"column:nama_guru"`
+	NamaMapel  string `json:"nama_mapel" gorm:"column:nama_mapel"`
+	NamaTahun  string `json:"nama_tahun" gorm:"column:nama_tahun"`
+	Hari       string `json:"hari" gorm:"column:hari"`
+	JamMulai   string `json:"jam_mulai" gorm:"column:jam_mulai"`     // Ubah ke string jika di DB tipe datanya TIME/VARCHAR
+	JamSelesai string `json:"jam_selesai" gorm:"column:jam_selesai"` // Ubah ke string
 }
 
 func GetJadwalPelajaranByKelas(c *gin.Context) {
@@ -31,16 +31,29 @@ func GetJadwalPelajaranByKelas(c *gin.Context) {
 		Joins("JOIN kelas ON jadwal_pelajaran.kelas_id = kelas.id").
 		Joins("JOIN mata_pelajaran ON jadwal_pelajaran.mata_pelajaran_id = mata_pelajaran.id").
 		Joins("JOIN tahun_ajaran ON jadwal_pelajaran.tahun_ajaran_id = tahun_ajaran.id").
-		Select("jadwal_pelajaran.id, kelas.nama_kelas, kelas.jurusan,guru.nama AS nama_guru, mata_pelajaran.nama AS nama_mapel, tahun_ajaran.nama_tahun, jadwal_pelajaran.hari, jadwal_pelajaran.jam_mulai, jadwal_pelajaran.jam_selesai").
+		Select("jadwal_pelajaran.id, kelas.id AS kelas_id, kelas.nama_kelas, kelas.jurusan, guru.nama AS nama_guru, mata_pelajaran.nama AS nama_mapel, tahun_ajaran.nama_tahun, jadwal_pelajaran.hari, jadwal_pelajaran.jam_mulai, jadwal_pelajaran.jam_selesai").
 		Where("jadwal_pelajaran.kelas_id = ?", kelasId).
 		Scan(&dataJadwalMapel).Error
 
-	if err == nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"message": "Jadwal mapel tidak ditemukan!", "status": 404,
+	// Perbaikan 1: Cek jika terjadi error database
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Terjadi kesalahan pada server!",
+			"error":   err.Error(),
+			"status":  500,
 		})
 		return
 	}
+
+	// Perbaikan 2: Cek jika data kosong
+	if len(dataJadwalMapel) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Jadwal mapel tidak ditemukan!",
+			"status":  404,
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"data": dataJadwalMapel, "status": 200})
 }
 
@@ -54,17 +67,34 @@ func GetJadwalPelajaranByGuruMapel(c *gin.Context) {
 		Joins("JOIN kelas ON jadwal_pelajaran.kelas_id = kelas.id").
 		Joins("JOIN mata_pelajaran ON jadwal_pelajaran.mata_pelajaran_id = mata_pelajaran.id").
 		Joins("JOIN tahun_ajaran ON jadwal_pelajaran.tahun_ajaran_id = tahun_ajaran.id").
-		Select("jadwal_pelajaran.id, kelas.nama_kelas, kelas.jurusan,guru.nama AS nama_guru, mata_pelajaran.nama AS nama_mapel, tahun_ajaran.nama_tahun, jadwal_pelajaran.hari, jadwal_pelajaran.jam_mulai, jadwal_pelajaran.jam_selesai").
-		Where("jadwal_pelajaran.guru_id = ?", guruId).Where("jadwal_pelajaran.mata_pelajaran_id = ?", mapelId).
+		Select("jadwal_pelajaran.id, kelas.id AS kelas_id, kelas.nama_kelas, kelas.jurusan, guru.nama AS nama_guru, mata_pelajaran.nama AS nama_mapel, tahun_ajaran.nama_tahun, jadwal_pelajaran.hari, jadwal_pelajaran.jam_mulai, jadwal_pelajaran.jam_selesai").
+		Where("jadwal_pelajaran.guru_id = ? AND jadwal_pelajaran.mata_pelajaran_id = ?", guruId, mapelId).
 		Scan(&dataJadwalMapel).Error
 
-	if err == nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"message": "Jadwal mapel tidak ditemukan!", "status": 404,
+	// 1. Cek jika terjadi error pada database (gunakan err != nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Terjadi kesalahan pada server!",
+			"error":   err.Error(),
+			"status":  500,
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": dataJadwalMapel, "status": 200})
+
+	// 2. Cek jika data tidak ditemukan (slice kosong)
+	if len(dataJadwalMapel) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Jadwal mapel tidak ditemukan!",
+			"status":  404,
+		})
+		return
+	}
+
+	// 3. Jika berhasil dan data ada
+	c.JSON(http.StatusOK, gin.H{
+		"data":   dataJadwalMapel,
+		"status": 200,
+	})
 }
 
 func InsertJadwalPelajaran(c *gin.Context) {

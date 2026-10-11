@@ -52,11 +52,37 @@ func GetAllGuruMapel(c *gin.Context) {
 	})
 }
 
+type GuruMapelByIdResponse struct {
+	Id              int64  `json:"id" gorm:"column:id"`
+	GuruId          int64  `json:"guru_id" gorm:"column:guru_id"`
+	MataPelajaranId int64  `json:"mata_pelajaran_id" gorm:"column:mata_pelajaran_id"`
+	NIP             string `json:"nip" gorm:"column:nip"`
+	Nama            string `json:"nama" gorm:"column:nama"`
+	KodeMapel       string `json:"kode_mapel" gorm:"column:kode_mapel"`
+	NamaMapel       string `json:"nama_mapel" gorm:"column:nama_mapel"`
+	TahunAjaran     string `json:"tahun_ajaran" gorm:"column:tahun_ajaran"`
+}
+
 func GetDataGuruMapelById(c *gin.Context) {
 	id := c.Param("id")
-	var guruMapel models.GuruMapel
+	var guruMapel GuruMapelByIdResponse
 
-	if err := config.DB.Model(&guruMapel).Where("id = ?", id).First(&guruMapel).Error; err != nil {
+	if err := config.DB.
+		Table("guru_mata_pelajaran").
+		Select(`
+		guru_mata_pelajaran.id,
+		guru_mata_pelajaran.guru_id,
+		guru_mata_pelajaran.mata_pelajaran_id,
+			guru.nip AS nip,
+			guru.nama AS nama,
+			mata_pelajaran.kode AS kode_mapel,
+			mata_pelajaran.nama AS nama_mapel,
+			tahun_ajaran.nama_tahun AS tahun_ajaran`).
+		Joins("LEFT JOIN guru ON guru_mata_pelajaran.guru_id = guru.id").
+		Joins("LEFT JOIN mata_pelajaran ON guru_mata_pelajaran.mata_pelajaran_id = mata_pelajaran.id").
+		Joins("LEFT JOIN tahun_ajaran ON guru_mata_pelajaran.tahun_ajaran_id = tahun_ajaran.id").
+		Where("guru_mata_pelajaran.id = ?", id).
+		First(&guruMapel).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   err.Error(),
 			"message": "Guru mapel tidak ditemukan",
@@ -177,7 +203,7 @@ func UpdateGuruMapel(c *gin.Context) {
 	var mapel models.Mapel
 	var tahunAjaran models.TahunAjaran
 
-	// Cek apakah guru dengan NIP yang diberikan ada
+	// Cek apakah guru dengan ID yang diberikan ada
 	if err := config.DB.First(&guru, "id = ?", request.GuruId).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   err.Error(),
@@ -186,7 +212,7 @@ func UpdateGuruMapel(c *gin.Context) {
 		return
 	}
 
-	// Cek apakah mata pelajaran dengan kode yang diberikan ada
+	// Cek apakah mata pelajaran dengan ID yang diberikan ada
 	if err := config.DB.First(&mapel, "id = ?", request.MataPelajaranId).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   err.Error(),
@@ -195,7 +221,32 @@ func UpdateGuruMapel(c *gin.Context) {
 		return
 	}
 
-	// Cek apakah tahun ajaran dengan ID yang diberikan ada
+	// Cek apakah kombinasi guru_id dan mata_pelajaran_id sudah digunakan di jadwal pelajaran
+	// (Opsional: Jika ingin mengecek apakah guru/mapel lama sudah terpakai di jadwal lain saat diganti)
+	var totalJadwalMapel int64
+    err := config.DB.Model(&models.JadwalPelajaran{}).
+        Where("guru_id = ? AND mata_pelajaran_id = ?", guruMapel.GuruId, guruMapel.MataPelajaranId).
+        Count(&totalJadwalMapel).Error
+
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "success": false,
+            "message": "Gagal memeriksa data jadwal mapel",
+            "status":  500,
+        })
+        return
+    }
+
+    // 3. Jika sudah memiliki jadwal, tolak proses update
+    if totalJadwalMapel > 0 {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "success": false,
+            "message": "Tidak bisa mengubah data guru mapel dikarenakan ada data jadwal mapel yang sudah masuk dalam kelas tersebut!",
+            "status":  400,
+        })
+        return
+    }
+	// Cek apakah tahun ajaran aktif ada
 	if err := config.DB.
 		Where("is_active = ?", true).
 		First(&tahunAjaran).Error; err != nil {
@@ -207,6 +258,7 @@ func UpdateGuruMapel(c *gin.Context) {
 		return
 	}
 
+	// Lakukan update data guru mapel
 	if err := config.DB.Model(&guruMapel).Where("id = ?", id).Updates(map[string]interface{}{
 		"guru_id":           request.GuruId,
 		"mata_pelajaran_id": request.MataPelajaranId,
@@ -219,7 +271,7 @@ func UpdateGuruMapel(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"data": gin.H{
 			"guru_mapel":     guru.Nama,
 			"mata_pelajaran": mapel.Nama,

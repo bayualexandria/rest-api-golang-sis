@@ -18,18 +18,21 @@ import (
 )
 
 func main() {
-
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("File .env tidak ditemukan: %v", err)
 	}
+
 	router := gin.Default()
+
+	// ==========================================
+	// 1. PASANG CORS DI POSISI PALING ATAS
+	// ==========================================
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
 			"https://sis.dev-coding.web.id",
 			"http://localhost:5173",
 		},
-
 		AllowMethods: []string{
 			"GET",
 			"POST",
@@ -38,28 +41,24 @@ func main() {
 			"DELETE",
 			"OPTIONS",
 		},
-
 		AllowHeaders: []string{
 			"Origin",
 			"Content-Type",
 			"Accept",
 			"Authorization",
 		},
-
 		ExposeHeaders: []string{
 			"Content-Length",
 		},
-
 		AllowCredentials: true,
-
-		MaxAge: 12 * time.Hour,
+		MaxAge:           12 * time.Hour,
 	}))
 
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-	// 1. Koneksi ke database
+
+	// 2. Koneksi ke database
 	config.ConnectDatabase()
-	// config.EmailConfig()
 
 	var files []string
 	filepath.Walk("./views", func(path string, info os.FileInfo, err error) error {
@@ -73,28 +72,22 @@ func main() {
 		c.HTML(404, "404.html", gin.H{"message": "Halaman tidak ditemukan", "status": 404})
 	})
 	router.LoadHTMLFiles(files...)
+
+	// ==========================================
+	// 3. STATIC ROUTE & ROUTER LAINNYA
+	// ==========================================
+	router.Static("/storage", "./storage")
+
 	// Setup routes web
 	routes.SetupRouters(router)
 
 	// Setup routes API
 	routes.SetupRoutersAPI(router)
-	router.Static("/storage", "./storage")
-
-	// router.Use(middleware.CORSMiddleware())
-	// Logger dan Recovery tetap diperlukan agar tidak crash
 
 	// Seeders
 	if len(os.Args) > 1 && os.Args[1] == "seed" {
 		seeders.RunSeeders(config.DB)
 	}
-	// Mailer
-	// m := mailers.NewMailer()
-
-	// m.Send(
-	// 	"wardanabayu455@gmail.com",
-	// 	"Test Email",
-	// 	"<h1>Halo dari Golang</h1>",
-	// )
 
 	academicPeriodService := services.NewAcademicPeriodService(config.DB)
 	scheduler.StartAcademicPeriodScheduler(
