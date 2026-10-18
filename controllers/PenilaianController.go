@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"backend-api/config"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,12 +27,11 @@ func GetDataPenilaian(c *gin.Context) {
 		Joins("JOIN guru ON penilaian.guru_id = guru.id").
 		Joins("JOIN jenis_penilaian ON penilaian.jenis_penilaian_id=jenis_penilaian.id").
 		Joins("JOIN semester ON penilaian.semester_id=semester.id").Select("").Scan(&penilaian).Error; err != nil {
-			c.JSON(500, gin.H{
+		c.JSON(500, gin.H{
 			"message": "Gagal mengambil data guru",
 			"status":  500,
 		})
 		return
 	}
-	
 
 }
