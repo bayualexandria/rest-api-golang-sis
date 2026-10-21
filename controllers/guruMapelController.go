@@ -224,28 +224,28 @@ func UpdateGuruMapel(c *gin.Context) {
 	// Cek apakah kombinasi guru_id dan mata_pelajaran_id sudah digunakan di jadwal pelajaran
 	// (Opsional: Jika ingin mengecek apakah guru/mapel lama sudah terpakai di jadwal lain saat diganti)
 	var totalJadwalMapel int64
-    err := config.DB.Model(&models.JadwalPelajaran{}).
-        Where("guru_id = ? AND mata_pelajaran_id = ?", guruMapel.GuruId, guruMapel.MataPelajaranId).
-        Count(&totalJadwalMapel).Error
+	err := config.DB.Model(&models.JadwalPelajaran{}).
+		Where("guru_id = ? AND mata_pelajaran_id = ?", guruMapel.GuruId, guruMapel.MataPelajaranId).
+		Count(&totalJadwalMapel).Error
 
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "success": false,
-            "message": "Gagal memeriksa data jadwal mapel",
-            "status":  500,
-        })
-        return
-    }
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal memeriksa data jadwal mapel",
+			"status":  500,
+		})
+		return
+	}
 
-    // 3. Jika sudah memiliki jadwal, tolak proses update
-    if totalJadwalMapel > 0 {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "success": false,
-            "message": "Tidak bisa mengubah data guru mapel dikarenakan ada data jadwal mapel yang sudah masuk dalam kelas tersebut!",
-            "status":  400,
-        })
-        return
-    }
+	// 3. Jika sudah memiliki jadwal, tolak proses update
+	if totalJadwalMapel > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Tidak bisa mengubah data guru mapel dikarenakan ada data jadwal mapel yang sudah masuk dalam kelas tersebut!",
+			"status":  400,
+		})
+		return
+	}
 	// Cek apakah tahun ajaran aktif ada
 	if err := config.DB.
 		Where("is_active = ?", true).
@@ -290,6 +290,31 @@ func DeleteGuruMapel(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   err.Error(),
 			"message": "Guru mata pelajaran tidak ditemukan",
+		})
+		return
+	}
+	// Cek apakah kombinasi guru_id dan mata_pelajaran_id sudah digunakan di jadwal pelajaran
+	// (Opsional: Jika ingin mengecek apakah guru/mapel lama sudah terpakai di jadwal lain saat diganti)
+	var totalJadwalMapel int64
+	err := config.DB.Model(&models.JadwalPelajaran{}).
+		Where("guru_id = ? AND mata_pelajaran_id = ?", guruMapel.GuruId, guruMapel.MataPelajaranId).
+		Count(&totalJadwalMapel).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal memeriksa data jadwal mapel",
+			"status":  500,
+		})
+		return
+	}
+
+	// Jika sudah memiliki jadwal, tolak proses delete
+	if totalJadwalMapel > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Tidak bisa menghapus data guru mapel dikarenakan ada data jadwal mapel yang sudah masuk dalam kelas tersebut!",
+			"status":  400,
 		})
 		return
 	}

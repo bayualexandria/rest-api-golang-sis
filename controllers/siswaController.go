@@ -219,7 +219,7 @@ func UpdateSiswa(c *gin.Context) {
 		First(&siswa).Error; err != nil {
 
 		c.JSON(404, gin.H{
-			"message": "Data guru dengan NIP " + nis + " tidak ditemukan",
+			"message": "Data siswa dengan NIS " + nis + " tidak ditemukan",
 			"status":  404,
 		})
 
@@ -374,7 +374,7 @@ func UpdateSiswa(c *gin.Context) {
 	}
 
 	// =========================================================
-	// UPDATE DATABASE GURU
+	// UPDATE DATABASE SISWA
 	// =========================================================
 
 	if err := config.DB.
@@ -383,7 +383,7 @@ func UpdateSiswa(c *gin.Context) {
 		Updates(&siswa).Error; err != nil {
 
 		c.JSON(500, gin.H{
-			"message": "Gagal mengupdate database guru",
+			"message": "Gagal mengupdate database siswa",
 			"error":   err.Error(),
 			"status":  500,
 		})
@@ -419,7 +419,7 @@ func UpdateSiswa(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"success": true,
 		"data":    siswa,
-		"message": "Data guru berhasil diupdate",
+		"message": "Data siswa berhasil diupdate",
 		"status":  200,
 	})
 }

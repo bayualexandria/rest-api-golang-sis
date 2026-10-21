@@ -51,7 +51,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 		user.GET("/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.GetUsersByUsername)
 		user.GET("/:username/guru", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetUsersByNIP)
 		user.GET("/:username/siswa", middleware.AuthMiddleware(), middleware.RoleMiddleware(4), controllers.GetUsersByNIS)
-		user.PUT("/change-password/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.ChangePassword)
+		user.PUT("/change-password/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3, 4), controllers.ChangePassword)
 		user.GET("/:username/update-email-verified", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateEmailVerified)
 		user.GET("/:username/update-email-verified-at", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateEmailVerifiedAt)
 
@@ -67,9 +67,9 @@ func SetupRoutersAPI(app *gin.Engine) {
 		// Siswa Kelas
 		siswaKelas := route.Group("/siswa-kelas")
 		siswaKelas.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswaKelas)
-		siswaKelas.GET("/:nis/:kelas", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswaKelasByNis)
+		siswaKelas.GET("/:nip/:kelas", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSiswaKelasByNip)
 		siswaKelas.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2), controllers.AddSiswaKelas)
-		siswaKelas.DELETE("/:id/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2), controllers.DeleteSiswaKelas)
+		siswaKelas.DELETE("/:id/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2), controllers.DeleteSiswaKelas)
 
 		// Ruang Kelas
 		ruangKelas := route.Group("/ruang-kelas")
@@ -78,6 +78,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 		ruangKelas.GET("/guru/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.RuangKelasByNip)
 		ruangKelas.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddRuangKelas)
 		ruangKelas.PATCH("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.UpdateRuangKelas)
+		ruangKelas.DELETE("/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.DeleteRuangKelas)
 
 		// Mata Pelajaran
 		mapel := route.Group("/mapel")
@@ -88,6 +89,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 
 		// Jadwal Pelajaran
 		jadwalMapel := route.Group("/jadwal-mapel")
+		jadwalMapel.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetJadwalPelajaran)
 		jadwalMapel.GET("/kelas/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetJadwalPelajaranByKelas)
 		jadwalMapel.GET("/guru/:idGuru/mapel/:idMapel", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetJadwalPelajaranByGuruMapel)
 		jadwalMapel.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.InsertJadwalPelajaran)
@@ -121,10 +123,10 @@ func SetupRoutersAPI(app *gin.Engine) {
 		trash := route.Group("/trash")
 		trash.GET("/siswa", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetTrashSiswa)
 		trash.GET("/siswa/restore-all", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashAllSiswa)
-		trash.PATCH("/siswa/restore/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashSiswa)
+		trash.GET("/siswa/restore/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashSiswa)
 		trash.GET("/guru", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetTrashGuru)
 		trash.GET("/guru/restore-all", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashAllGuru)
-		trash.PATCH("/guru/restore/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashGuru)
+		trash.GET("/guru/restore/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashGuru)
 
 		// Logout
 		route.POST("/logout/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(4), controllers.LogoutUserSiswa)

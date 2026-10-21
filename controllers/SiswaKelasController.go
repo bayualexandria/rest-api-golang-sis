@@ -65,30 +65,39 @@ type DataWithSiswa struct {
 	Alamat         string `json:"alamat"`
 	ImageProfile   string `json:"image_profile"`
 	StatusUserName string `json:"status_user_name"`
+	NamaKelas      string `json:"nama_kelas"`
+	Jurusan        string `json:"jurusan"`
 }
 
 func GetDataByNIS(c *gin.Context) {
 	nis := c.Param("username")
 
-	var result DataWithSiswa
-	// Join dengan tabel siswa berdasarkan nis
-	siswa := config.DB.Table("users").
-		Joins("JOIN siswa ON users.username = siswa.nis").
-		Joins("JOIN status_user ON users.status_id = status_user.id").
-		Where("users.username = ?", nis).
-		Where("users.deleted_at IS NULL").
-		Select(" users.name, users.email,users.username AS nis,  siswa.jenis_kelamin, siswa.no_hp, siswa.alamat, siswa.image_profile, status_user.nama_status AS status_user_name").
-		First(&result)
-	if siswa.Error != nil {
+	var siswa models.Siswa
+
+	if err := config.DB.Model(&siswa).Where("nis = ?", nis).First(&siswa).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Siswa tidak ditemukan atau NIS salah", "status": 404})
+		return
+	}
+	var result Siswa
+	// Join dengan tabel siswa berdasarkan nis
+	data := config.DB.Table("siswa_kelas").
+		Joins("JOIN siswa ON siswa_kelas.siswa_id = siswa.id").
+		Joins("JOIN kelas ON siswa_kelas.kelas_id = kelas.id").
+		Joins("JOIN tahun_ajaran ON siswa_kelas.tahun_ajaran_id = tahun_ajaran.id").
+		Joins("JOIN semester ON siswa_kelas.semester_id = semester.id").
+		Select("siswa_kelas.id,siswa.nis AS nis,siswa.nama AS nama_siswa,siswa.ttl AS ttl, siswa.alamat, siswa.jenis_kelamin, siswa.no_hp, siswa.image_profile, kelas.nama_kelas, kelas.jurusan, tahun_ajaran.nama_tahun AS tahun_ajaran, semester.nama_semester AS semester,  siswa_kelas.status").
+		Where("siswa_kelas.siswa_id = ?", siswa.Id).
+		First(&result)
+	if data.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Siswa kelas tidak ditemukan!", "status": 404})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": result})
 }
 
-func GetSiswaKelasByNis(c *gin.Context) {
-	idParam := c.Param("nis")
+func GetSiswaKelasByNip(c *gin.Context) {
+	idParam := c.Param("nip")
 	idParamKelas := c.Param("kelas")
 	var data []Siswa
 
@@ -97,22 +106,23 @@ func GetSiswaKelasByNis(c *gin.Context) {
 		Joins("JOIN kelas ON siswa_kelas.kelas_id = kelas.id").
 		Joins("JOIN tahun_ajaran ON siswa_kelas.tahun_ajaran_id = tahun_ajaran.id").
 		Joins("JOIN semester ON siswa_kelas.semester_id = semester.id").
-		Select("siswa_kelas.id,siswa.nis AS nis,siswa.nama AS nama_siswa,siswa.ttl AS ttl, siswa.alamat, siswa.jenis_kelamin, siswa.no_hp, siswa.image_profile, kelas.nama_kelas, kelas.jurusan, tahun_ajaran.nama_tahun AS tahun_ajaran, semester.nama_semester AS semester,  siswa_kelas.status").
-		Where("siswa_kelas.wali_kelas_id = ?", idParam).Where("siswa_kelas.kelas_id = ?", idParamKelas).
+		Select("siswa_kelas.id, siswa.nis AS nis, siswa.nama AS nama_siswa, siswa.ttl AS ttl, siswa.alamat, siswa.jenis_kelamin, siswa.no_hp, siswa.image_profile, kelas.nama_kelas, kelas.jurusan, tahun_ajaran.nama_tahun AS tahun_ajaran, semester.nama_semester AS semester, siswa_kelas.status").
+		Where("siswa_kelas.wali_kelas_id = ?", idParam).
+		Where("siswa_kelas.kelas_id = ?", idParamKelas).
 		Find(&data).Error; err != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"message": "Gagal mengambil data siswa kelas silahkkan periksa NIS",
+			"message": "Gagal mengambil data siswa kelas, silakan periksa kembali NIP dan Kelas",
 			"total":   0,
 		})
-
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Data siswa kelas berhasil ditampilkan",
+		"total":   len(data),
 		"data":    data,
 	})
 }
@@ -261,7 +271,7 @@ func AddSiswaKelas(c *gin.Context) {
 
 func DeleteSiswaKelas(c *gin.Context) {
 	id := c.Param("id")
-	nis := c.Param("nis")
+	nis := c.Param("nip")
 	var existing models.SiswaKelas
 	var siswa models.Siswa
 

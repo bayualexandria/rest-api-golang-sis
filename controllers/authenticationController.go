@@ -52,7 +52,7 @@ func LoginUserAdmin(c *gin.Context) {
 	inputToken.TokenableID = input.Username
 	inputToken.Name = "Personal Access Token"
 	inputToken.Abilities = "*"
-	
+
 	if user.EmailVerifiedAt == "" {
 		notifications.NotifikasiAktivasiAkunUser(user.Email, user.Name, "Silahkan verifikasi email anda untuk mengaktifkan akun anda, dengan cara klik link dibawah ini: ", os.Getenv("APP_URL")+"/api/auth/verify/"+user.Email+"/"+token)
 		config.DB.Create(&inputToken)
@@ -132,6 +132,16 @@ func LoginUser(c *gin.Context) {
 		c.JSON(403, gin.H{"message": "Password yang anda masukan salah", "status": 403})
 		return
 	}
+	var siswa models.Siswa
+	if err := config.DB.Table("siswa").Where("nis = ?", user.Username).First(&siswa).Error; err != nil {
+		c.JSON(403, gin.H{"message": "Siswa tidak ditemukan", "status": 403})
+		return
+	}
+	var siswaKelas models.SiswaKelas
+	if err := config.DB.Table("siswa_kelas").Where("siswa_id = ?", siswa.Id).First(&siswaKelas).Error; err != nil {
+		c.JSON(403, gin.H{"message": "Siswa belum terdaftar dalam kelas!", "status": 403})
+		return
+	}
 	token, err := utils.GenerateJWT(user.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal memuat token", "status": 403})
@@ -143,14 +153,14 @@ func LoginUser(c *gin.Context) {
 	inputToken.TokenableID = user.Username
 	inputToken.Name = "Personal Access Token"
 	inputToken.Abilities = "*"
-	
+
 	if err := config.DB.Where("username = ?", input.Username).Where("email_verified_at", nil).First(&user).Error; err == nil || user.EmailVerifiedAt == "" {
 		inputToken.Token = token
 		inputToken.TokenableType = "User"
 		inputToken.TokenableID = user.Username
 		inputToken.Name = "Personal Access Token"
 		inputToken.Abilities = "*"
-		
+
 		notifications.NotifikasiAktivasiAkunUser(user.Email, user.Name, "Silahkan verifikasi email anda untuk mengaktifkan akun anda, dengan cara klik link dibawah ini: ", os.Getenv("APP_URL")+"/api/auth/verify/"+user.Email+"/"+token)
 		config.DB.Create(&inputToken)
 		c.JSON(http.StatusOK, gin.H{"message": "Email belum terverifikasi, silakan cek email anda untuk verifikasi.", "status": 200})

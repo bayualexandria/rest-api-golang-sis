@@ -8,14 +8,12 @@ import (
 
 type ChangePasswordValidation struct {
 	Password   string `form:"password" binding:"required,min=8"`
-	RePassword string `form:"re_password" binding:"required,eqfield=Password"`
+	
 }
 
 var changePasswordMessages = map[string]string{
 	"Password.required":   "Password harus diisi",
 	"Password.min":        "Password minimal 8 karakter",
-	"RePassword.required": "Konfirmasi password harus diisi",
-	"RePassword.eqfield":  "Konfirmasi password harus sama dengan password",
 }
 
 func TranslateChangePasswordError(err error) map[string]string {

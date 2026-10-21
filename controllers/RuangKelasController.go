@@ -33,6 +33,7 @@ func RuangKelas(c *gin.Context) {
 		Joins("JOIN kelas ON wali_kelas.kelas_id = kelas.id").
 		Joins("JOIN tahun_ajaran ON wali_kelas.tahun_ajaran_id = tahun_ajaran.id").
 		Joins("JOIN semester ON wali_kelas.semester_id = semester.id").
+		Where("wali_kelas.deleted_at IS NULL").
 		Find(&data).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -279,4 +280,84 @@ func UpdateRuangKelas(c *gin.Context) {
 		"message": "Data ruang kelas berhasil diupdate",
 		"status":  200,
 	})
+}
+
+func DeleteRuangKelas(c *gin.Context) {
+    id := c.Param("id")
+    var data models.WaliKelas
+
+    // Ambil data berdasarkan ID
+    if err := config.DB.Table("wali_kelas").Where("id = ?", id).First(&data).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{
+            "success": false,
+            "message": "Data ruang kelas tidak ditemukan",
+            "status":  404,
+        })
+        return
+    }
+
+    // 1. Ambil tahun ajaran aktif
+    var tahunAjaran models.TahunAjaran
+    if err := config.DB.Where("is_active = ?", true).First(&tahunAjaran).Error; err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "success": false,
+            "message": "Tahun ajaran aktif tidak ditemukan",
+            "status":  400,
+        })
+        return
+    }
+
+    // 2. Ambil semester aktif
+    var semester models.Semester
+    if err := config.DB.Where("is_active = ?", true).First(&semester).Error; err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "success": false,
+            "message": "Semester aktif tidak ditemukan",
+            "status":  400,
+        })
+        return
+    }
+
+    // 3. Cek apakah ada siswa di kelas tersebut
+    var totalSiswa int64
+    err := config.DB.Model(&models.SiswaKelas{}).
+        Where("kelas_id = ? AND tahun_ajaran_id = ? AND semester_id = ?", data.KelasId, tahunAjaran.Id, semester.Id).
+        Count(&totalSiswa).Error
+
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "success": false,
+            "message": "Gagal memeriksa data siswa kelas",
+            "status":  500,
+        })
+        return
+    }
+
+    // Jika jumlah siswa > 0, tolak proses hapus
+    if totalSiswa > 0 {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "success": false,
+            "message": "Tidak bisa menghapus data kelas dikarenakan ada data siswa yang sudah masuk dalam kelas tersebut!",
+            "status":  400,
+        })
+        return
+    }
+
+    // 4. Lakukan delete data wali_kelas secara permanen 
+    // (Tambahkan .Unscoped() jika tabel menggunakan Soft Delete / deleted_at)
+    if err := config.DB.Table("wali_kelas").Unscoped().Where("id = ?", id).Delete(&data).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "success": false,
+            "message": "Gagal menghapus data ruang kelas",
+            "error":   err.Error(),
+            "status":  500,
+        })
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "success": true,
+        "message": "Data ruang kelas berhasil dihapus",
+        "status":  200,
+    })
 }
