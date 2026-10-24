@@ -104,6 +104,27 @@ func GetSiswaSearch(c *gin.Context) {
 	})
 }
 
+func GetDataSiswaByNIS(c *gin.Context) {
+	nis := c.Param("username")
+	var result UserAllSiswa
+	// Join dengan tabel siswa berdasarkan nip
+	err := config.DB.Table("users").
+		Joins("JOIN siswa ON users.username = siswa.nis").
+		Joins("JOIN status_user ON users.status_id = status_user.id").
+		Where("users.username = ?", nis).
+		Where("users.deleted_at IS NULL").
+		Select("users.name, users.email, siswa.nis AS nis, siswa.ttl, siswa.jenis_kelamin, siswa.no_hp, siswa.alamat, siswa.image_profile, status_user.nama_status AS status_user_name, users.status_id").
+		First(&result).Error
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Siswa tidak ditemukan atau NIS salah", "status": 404})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": result})
+
+}
+
 func AddSiswa(c *gin.Context) {
 	var input siswacontroller.AddSiswaValidation
 	var siswa models.Siswa

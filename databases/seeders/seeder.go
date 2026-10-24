@@ -15,6 +15,7 @@ func RunSeeders(db *gorm.DB) {
 		log.Fatal("Database belum diinisialisasi!")
 	}
 	StatusSiswaSeeder{}.Run(db)
+	StatusGuruSeeder{}.Run(db)
 	StatusUserSeeder{}.Run(db)
 	GuruSeeder{}.Run(db)
 	SiswaSeeder{}.Run(db)

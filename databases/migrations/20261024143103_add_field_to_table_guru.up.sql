@@ -1,0 +1,2 @@
+ALTER TABLE guru ADD COLUMN ttl VARCHAR(100) AFTER jenis_kelamin;
+ALTER TABLE guru ADD COLUMN pendidikan VARCHAR(100) AFTER ttl;

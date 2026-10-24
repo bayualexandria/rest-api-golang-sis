@@ -25,6 +25,7 @@ type UserAllGuru struct {
 	Alamat          string `json:"alamat"`
 	ImageProfile    string `json:"image_profile"`
 	StatusUserName  string `json:"status_user_name"`
+	StatusGuru      string `json:"status_guru"`
 	EmailVerifiedAt string `json:"email_verified_at"`
 }
 
@@ -35,6 +36,7 @@ func GetGuru(c *gin.Context) {
 		Table("users").
 		Joins("JOIN guru ON users.username = guru.nip").
 		Joins("JOIN status_user ON users.status_id = status_user.id").
+		Joins("JOIN status_guru ON guru.status_guru_id = status_guru.id").
 		Select(`
 		guru.id,
 		guru.nip,
@@ -46,7 +48,8 @@ func GetGuru(c *gin.Context) {
 			guru.alamat,
 			guru.nama,
 			guru.image_profile,
-			status_user.nama_status AS status_user_name
+			status_user.nama_status AS status_user_name,
+			status_guru.nama_status AS status_guru
 		`).Where("users.deleted_at IS NULL").
 		Scan(&guru).Error
 
@@ -71,6 +74,8 @@ type DataWithGuru struct {
 	Email          string `json:"email"`
 	NIP            string `json:"nip" gorm:"column:nip"`
 	JenisKelamin   string `json:"jenis_kelamin"`
+	Ttl            string `json:"ttl"`
+	Pendidikan     string `json:"pendidikan"`
 	NoHp           string `json:"no_hp"`
 	Alamat         string `json:"alamat"`
 	ImageProfile   string `json:"image_profile"`
@@ -87,7 +92,7 @@ func GetDataGuruByNIP(c *gin.Context) {
 		Joins("JOIN status_user ON users.status_id = status_user.id").
 		Where("users.username = ?", nip).
 		Where("users.deleted_at IS NULL").
-		Select("users.name, users.email, guru.nip AS nip, guru.jenis_kelamin, guru.no_hp, guru.alamat, guru.image_profile, status_user.nama_status AS status_user_name, users.status_id").
+		Select("users.name, users.email, guru.nip AS nip, guru.ttl, guru.pendidikan, guru.jenis_kelamin, guru.no_hp, guru.alamat, guru.image_profile, status_user.nama_status AS status_user_name, users.status_id").
 		First(&result).Error
 
 	if err != nil {
@@ -130,12 +135,15 @@ func AddGuru(c *gin.Context) {
 		return
 	}
 	if err := config.DB.Model(&guru).Create(map[string]interface{}{
-		"nip":           input.Nip,
-		"nama":          input.Nama,
-		"jenis_kelamin": input.JenisKelamin,
-		"no_hp":         input.NoHp,
-		"alamat":        input.Alamat,
-		"image_profile": "storage/logo-pendidikan.png",
+		"nip":            input.Nip,
+		"nama":           input.Nama,
+		"jenis_kelamin":  input.JenisKelamin,
+		"ttl":            input.Ttl,
+		"pendidikan":     input.Pendidikan,
+		"no_hp":          input.NoHp,
+		"alamat":         input.Alamat,
+		"image_profile":  "storage/logo-pendidikan.png",
+		"status_guru_id": input.StatusGuruId,
 	}).Error; err != nil {
 		c.JSON(500, gin.H{
 			"message": "Gagal menambahkan data guru!",
@@ -166,10 +174,13 @@ func AddGuru(c *gin.Context) {
 			"nama":          input.Nama,
 			"jenis_kelamin": input.JenisKelamin,
 			"no_hp":         input.NoHp,
+			"ttl":           input.Ttl,
+			"pendidikan":    input.Pendidikan,
 			"alamat":        input.Alamat,
 			"image_profile": "storage/logo-pendidikan.png",
 			"email":         input.Email,
 			"status_user":   input.StatusId,
+			"status_guru":   input.StatusGuruId,
 		},
 	})
 }
@@ -246,8 +257,18 @@ func UpdateGuru(c *gin.Context) {
 		guru.NoHp = input.NoHp
 	}
 
+	if input.Ttl != "" {
+		guru.Ttl = input.Ttl
+	}
+	if input.Pendidikan != "" {
+		guru.Pendidikan = input.Pendidikan
+	}
+
 	if input.Alamat != "" {
 		guru.Alamat = input.Alamat
+	}
+	if input.StatusGuruId != 0 {
+		guru.StatusGuruId = input.StatusGuruId
 	}
 
 	// =========================================================
@@ -352,12 +373,15 @@ func UpdateGuru(c *gin.Context) {
 		Model(&guru).
 		Where("nip = ?", nip).
 		Updates(map[string]interface{}{
-			"nama":          guru.Nama,
-			"jenis_kelamin": guru.JenisKelamin,
-			"no_hp":         guru.NoHp,
-			"alamat":        guru.Alamat,
-			"image_profile": guru.ImageProfile,
-			"updated_at":    time.Now(),
+			"nama":           guru.Nama,
+			"jenis_kelamin":  guru.JenisKelamin,
+			"no_hp":          guru.NoHp,
+			"ttl":            guru.Ttl,
+			"pendidikan":     guru.Pendidikan,
+			"alamat":         guru.Alamat,
+			"image_profile":  guru.ImageProfile,
+			"status_guru_id": guru.StatusGuruId,
+			"updated_at":     time.Now(),
 		}).Error; err != nil {
 
 		c.JSON(500, gin.H{

@@ -11,9 +11,12 @@ type Guru struct {
 	Nip          int    `json:"nip"`
 	Nama         string `json:"nama"`
 	JenisKelamin string `json:"jenis_kelamin"`
+	Ttl          string `json:"ttl"`
+	Pendidikan   string `json:"pendidikan"`
 	NoHp         string `json:"no_hp"`
 	Alamat       string `json:"alamat"`
 	ImageProfile string `json:"image_profile"`
+	StatusGuruId int    `json:"status_guru_id"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    gorm.DeletedAt `gorm:"index"`

@@ -10,12 +10,15 @@ import (
 type UpdateGuruValidation struct {
 	// Menambahkan binding:"omitempty" agar tidak wajib diisi semua saat update
 	Nama         string                `form:"nama" binding:"omitempty"`
+	Ttl          string                `form:"ttl" binding:"omitempty"`
+	Pendidikan   string                `form:"pendidikan" binding:"omitempty"`
 	JenisKelamin string                `form:"jenis_kelamin" binding:"omitempty,oneof=Laki-laki Perempuan"`
 	NoHp         string                `form:"no_hp" binding:"omitempty,numeric"`
 	Alamat       string                `form:"alamat" binding:"omitempty"`
 	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"omitempty"`
 	Email        string                `form:"email" binding:"omitempty"`
-	StatusId     int                `form:"status_id" binding:"omitempty"`
+	StatusId     int                   `form:"status_id" binding:"omitempty"`
+	StatusGuruId int                   `form:"status_guru_id" binding:"omitempty"`
 }
 
 var updateGuruMessages = map[string]string{
