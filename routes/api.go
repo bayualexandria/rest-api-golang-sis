@@ -110,7 +110,7 @@ func SetupRoutersAPI(app *gin.Engine) {
 
 		// Guru
 		guru := route.Group("/guru")
-		guru.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetGuru)
+		guru.GET("/", controllers.GetGuru)
 		guru.GET("/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetDataGuruByNIP)
 		guru.POST("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.AddGuru)
 		guru.PATCH("/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.UpdateGuru)

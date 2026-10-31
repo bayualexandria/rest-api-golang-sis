@@ -10,6 +10,6 @@ CREATE TABLE linked_social_accounts (
 
     CONSTRAINT `fk_linked_social_account_user`
         FOREIGN KEY (`user_id`)
-        REFERENCES `users` (`id`)
+        REFERENCES `users` (`username`)
         ON DELETE CASCADE
 )

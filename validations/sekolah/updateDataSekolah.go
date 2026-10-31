@@ -12,6 +12,7 @@ type UpdateDataSekolahValidation struct {
 	Alamat       string                `form:"alamat" binding:"omitempty"`
 	NoTelp       string                `form:"no_telp" binding:"omitempty"`
 	Akreditasi   string                `form:"akreditasi" binding:"omitempty"`
+	Email        string                `form:"email" binding:"omitempty"`
 	ImageProfile *multipart.FileHeader `form:"image_profile" binding:"omitempty"`
 }
 
@@ -20,6 +21,7 @@ var UpdateDataSekolahValidationRules = map[string]string{
 	"Alamat.required":       "omitempty",
 	"NoTelp.required":       "omitempty",
 	"Akreditasi.required":   "omitempty",
+	"Email.required":        "omitempty",
 	"ImageProfile.required": "omitempty",
 }
 

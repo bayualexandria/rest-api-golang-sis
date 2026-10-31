@@ -40,7 +40,6 @@ func LoginUserAdminSocialMedia(c *gin.Context) {
 				inputToken.TokenableID = user.Username
 				inputToken.Name = "Personal Access Token"
 				inputToken.Abilities = "*"
-				
 
 				if err := config.DB.Where("provider_id = ?", idGoogle).First(&linkedSocialAccount).Error; err != nil {
 					linkedSocialAccount.UserID = user.Username
@@ -96,6 +95,18 @@ func LoginUserSiswaSocialMedia(c *gin.Context) {
 				c.JSON(403, gin.H{"message": "Email belum terverifikasi! Silahkan verifikasi email terlebih dahulu.", "status": 403})
 				return
 			} else {
+
+				var siswa models.Siswa
+				if err := config.DB.Table("siswa").Where("nis = ?", user.Username).First(&siswa).Error; err != nil {
+					c.JSON(403, gin.H{"message": "Data siswa tidak ada!", "status": 403})
+					return
+				}
+
+				var siswaKelas models.SiswaKelas
+				if err := config.DB.Table("siswa_kelas").Where("siswa_id = ?", siswa.Id).First(&siswaKelas).Error; err != nil {
+					c.JSON(403, gin.H{"message": "Siswa belum terdaftar dalam kelas!", "status": 403})
+					return
+				}
 				var linkedSocialAccount models.LinkedSocialMediaAccount
 				token, err := utils.GenerateJWT(user.Username)
 				if err != nil {
@@ -108,7 +119,6 @@ func LoginUserSiswaSocialMedia(c *gin.Context) {
 				inputToken.TokenableID = user.Username
 				inputToken.Name = "Personal Access Token"
 				inputToken.Abilities = "*"
-				
 
 				if err := config.DB.Where("provider_id = ?", idGoogle).First(&linkedSocialAccount).Error; err != nil {
 					linkedSocialAccount.UserID = user.Username
@@ -144,4 +154,5 @@ func LoginUserSiswaSocialMedia(c *gin.Context) {
 	}
 
 }
+
 // Implementation for social media login goes here

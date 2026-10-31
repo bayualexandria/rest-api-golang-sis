@@ -1,12 +1,14 @@
 package models
 
+import "time"
+
 type LinkedSocialMediaAccount struct {
-	ID             uint   `gorm:"primaryKey" json:"id"`
-	UserID         string   `json:"user_id"`
-	ProviderName   string `json:"provider_name"`
-	ProviderID     string `json:"provider_id"`
-	CreatedAt      string `json:"created_at"`
-	UpdatedAt      string `json:"updated_at"`
+	Id           uint64 `gorm:"primaryKey;autoIncrement" json:"id"`
+	UserID       string `json:"user_id"`
+	ProviderName string `json:"provider_name"`
+	ProviderID   string `json:"provider_id"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 func (LinkedSocialMediaAccount) TableName() string {

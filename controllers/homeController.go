@@ -156,6 +156,9 @@ func UpdateProfileSekolahHandler(c *gin.Context) {
 	if input.Akreditasi != "" {
 		sekolah.Akreditasi = input.Akreditasi
 	}
+	if input.Email != "" {
+		sekolah.Email = input.Email
+	}
 
 	if err := config.DB.Save(&sekolah).Error; err != nil {
 		c.JSON(500, gin.H{

@@ -23,6 +23,8 @@ type UserAllGuru struct {
 	JenisKelamin    string `json:"jenis_kelamin"`
 	NoHp            string `json:"no_hp"`
 	Alamat          string `json:"alamat"`
+	Pendidikan      string `json:"pendidikan"`
+	Ttl             string `json:"ttl"`
 	ImageProfile    string `json:"image_profile"`
 	StatusUserName  string `json:"status_user_name"`
 	StatusGuru      string `json:"status_guru"`
@@ -47,6 +49,8 @@ func GetGuru(c *gin.Context) {
 			guru.no_hp,
 			guru.alamat,
 			guru.nama,
+			guru.ttl,
+			guru.pendidikan,
 			guru.image_profile,
 			status_user.nama_status AS status_user_name,
 			status_guru.nama_status AS status_guru

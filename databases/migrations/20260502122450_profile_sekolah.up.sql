@@ -6,6 +6,7 @@ CREATE TABLE profile_sekolah(
     alamat TEXT NOT NULL,
     no_telp VARCHAR(20) NOT NULL,
     akreditasi VARCHAR(10) NOT NULL,
+    email VARCHAR(255) NOT NULL,
     image_profile VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

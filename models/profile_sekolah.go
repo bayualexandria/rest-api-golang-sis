@@ -6,8 +6,8 @@ type ProfileSekolah struct {
 	Alamat       string `json:"alamat"`
 	NoTelp       string `json:"no_telp"`
 	Akreditasi   string `json:"akreditasi"`
+	Email        string `json:"email"`
 	ImageProfile string `json:"image_profile"`
-	
 }
 
 func (ProfileSekolah) TableName() string {

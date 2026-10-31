@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS `pendaftaran_nilai_calon_siswa`;

@@ -11,6 +11,7 @@ type ProfileSekolahSeeder struct {
 	Alamat       string
 	NoTelp       string
 	Akreditasi   string
+	Email        string
 	ImageProfile string
 }
 
@@ -24,6 +25,7 @@ func (p ProfileSekolahSeeder) Run(db *gorm.DB) {
 		Alamat:       "Jl. Raya Singosari No. 1, Singosari, Malang",
 		NoTelp:       "0341-123456",
 		Akreditasi:   "A",
+		Email:        "ujicoba@gmail.com",
 		ImageProfile: "storage/logo-pendidikan.png",
 	}
 	if err := db.Create(&profile).Error; err != nil {

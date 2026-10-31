@@ -19,6 +19,7 @@ import (
 func LoginUserAdmin(c *gin.Context) {
 	var input adminlogin.LoginAdminValidation
 
+
 	if err := c.ShouldBind(&input); err != nil {
 		msg := adminlogin.TranslateErrorLoginAdmin(err)
 		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
@@ -61,6 +62,8 @@ func LoginUserAdmin(c *gin.Context) {
 	}
 
 	config.DB.Create(&inputToken)
+
+	
 
 	/// Di dalam controller saat LOGIN BERHASIL:
 	// Gunakan properti cookie standar go untuk mengatur SameSite secara eksplisit pada localhost bukan antar IP Address

@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS `dokumen_persyaratan_calon_siswa`;
