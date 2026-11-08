@@ -432,6 +432,11 @@ func UpdateSiswa(c *gin.Context) {
 
 		return
 	}
+	// Jika Email diubah, kirim email verifikasi baru
+	if input.Email != "" {
+
+		notifications.NotificationUbahEmail(input.Email, siswa.Nama, "Selamat pergantian Email pada akun "+siswa.Nama+" telah berhasil dialihkan email ini : "+input.Email+". Sekarang anda bisa menggunakan email tersebut untuk login ke Sistem Informasi Siswa.")
+	}
 
 	// =========================================================
 	// RESPONSE

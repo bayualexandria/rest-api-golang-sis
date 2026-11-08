@@ -1,6 +1,6 @@
 CREATE TABLE `orang_tua` (
     id BIGINT(20) PRIMARY KEY NOT NULL AUTO_INCREMENT,
-   id_siswa INT UNIQUE NOT NULL,
+   id_siswa BIGINT UNIQUE NOT NULL,
    nik_ayah VARCHAR(100),
     nama_ayah VARCHAR(100),
     pekerjaan_ayah VARCHAR(50),

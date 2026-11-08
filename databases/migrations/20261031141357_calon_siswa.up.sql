@@ -1,7 +1,7 @@
 CREATE TABLE calon_siswa (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_user_calon_siswa BIGINT,
-    nisn VARCHAR(10) UNIQUE NOT NULL,
+    nisn VARCHAR(100) UNIQUE NOT NULL,
     nik VARCHAR(16) UNIQUE NOT NULL,
     nama_lengkap VARCHAR(100) NOT NULL,
     ttl VARCHAR(255) NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE calon_siswa (
   
     CONSTRAINT `fk_calon_siswa_user`
         FOREIGN KEY (`id_user_calon_siswa`)
-        REFERENCES `user_calon_siswa` (`id`)
+        REFERENCES `user_calon_siswa` (`username`)
         ON UPDATE CASCADE
         ON DELETE SET NULL
 );

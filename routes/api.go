@@ -18,6 +18,8 @@ func SetupRoutersAPI(app *gin.Engine) {
 		authRoute := route.Group("auth")
 		authRoute.POST("/login-admin", controllers.LoginUserAdmin)
 		authRoute.POST("/login", controllers.LoginUser)
+		authRoute.POST("/ppdb/login", controllers.LoginPPDB)
+		authRoute.POST("/ppdb/register", controllers.RegisterPPDB)
 		authRoute.GET("/verify/:email/:token", controllers.VerifyEmail)
 		authRoute.POST("/forgot-password", controllers.ForgotPassword)
 		authRoute.GET("/send-reset-password/:email/:token", controllers.SendResetPassword)
@@ -120,6 +122,10 @@ func SetupRoutersAPI(app *gin.Engine) {
 		semester := route.Group("/semester")
 		semester.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetSemester)
 
+		// Siswa PPDB
+		siswaPPDB := route.Group("/siswa-ppdb")
+		siswaPPDB.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetDataCalonSiswa)
+
 		// Trash Data
 		trash := route.Group("/trash")
 		trash.GET("/siswa", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetTrashSiswa)
@@ -129,8 +135,16 @@ func SetupRoutersAPI(app *gin.Engine) {
 		trash.GET("/guru/restore-all", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashAllGuru)
 		trash.GET("/guru/restore/:nip", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.RestoreDataTrashGuru)
 
+		// PPDB
+		ppdb := route.Group("/ppdb")
+		ppdb.GET("/user/:username", middleware.AuthMiddlewarePPDB(), controllers.GetUserCalonSiswaByUsername)
+		ppdb.GET("/data-siswa/:username", middleware.AuthMiddlewarePPDB(), controllers.GetDataCalonSiswaByUsername)
+		ppdb.GET("/dokumen-persyaratan/:username", middleware.AuthMiddlewarePPDB(), controllers.GetDokumenPersyaratanCalonSiswa)
+		ppdb.POST("/formulir", middleware.AuthMiddlewarePPDB(), controllers.AddDataCalonSiswa)
+
 		// Logout
 		route.POST("/logout/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(4), controllers.LogoutUserSiswa)
 		route.POST("/logout-admin", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.LogoutUserAdmin)
+		route.POST("/ppdb/logout", middleware.AuthMiddlewarePPDB(), controllers.LogoutUserPPDB)
 	}
 }

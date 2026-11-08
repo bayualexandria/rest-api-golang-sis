@@ -8,8 +8,12 @@ import (
 	"backend-api/validations"
 	adminlogin "backend-api/validations/adminLogin"
 	"backend-api/validations/siswalogin"
+	usercalonsiswa "backend-api/validations/userCalonSiswa"
+	"fmt"
+	"math/rand/v2"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +22,6 @@ import (
 
 func LoginUserAdmin(c *gin.Context) {
 	var input adminlogin.LoginAdminValidation
-
 
 	if err := c.ShouldBind(&input); err != nil {
 		msg := adminlogin.TranslateErrorLoginAdmin(err)
@@ -62,8 +65,6 @@ func LoginUserAdmin(c *gin.Context) {
 	}
 
 	config.DB.Create(&inputToken)
-
-	
 
 	/// Di dalam controller saat LOGIN BERHASIL:
 	// Gunakan properti cookie standar go untuk mengatur SameSite secara eksplisit pada localhost bukan antar IP Address
@@ -323,42 +324,6 @@ func SendResetPassword(c *gin.Context) {
 
 }
 
-// func ResetPassword(c *gin.Context) {
-// 	var input validations.ResetPasswordValidation
-// 	if err := c.ShouldBind(&input); err != nil {
-// 		msg := validations.TranslateResetPasswordError(err)
-// 		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
-// 		return
-// 	}
-// 	tokenString := c.Param("token")
-// 	email := c.Param("email")
-// 	token, err := utils.VerifyJWT(tokenString)
-// 	if err != nil || !token.Valid {
-// 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid atau sudah kedaluwarsa", "status": 401})
-// 		return
-// 	}
-// 	claims, ok := token.Claims.(jwt.MapClaims)
-// 	if !ok || claims["user_id"] == nil {
-// 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid", "status": 401})
-// 		return
-// 	}
-// 	var user models.User
-// 	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
-// 		c.JSON(403, gin.H{"message": "User tidak ditemukan", "status": 403})
-// 		return
-// 	}
-// 	hashedPassword, err := utils.HashPassword(input.Password)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal membuat hash password", "status": 500})
-// 		return
-// 	}
-// 	user.Password = hashedPassword
-// 	user.EmailVerifiedAt = time.Now().Format("2006-01-02 15:04:05")
-// 	config.DB.Where("email = ?", email).Delete(&models.PasswordResetToken{})
-// 	config.DB.Save(&user)
-// 	c.JSON(http.StatusOK, gin.H{"message": "Password berhasil direset", "status": 200})
-// }
-
 func ChangePassword(c *gin.Context) {
 	var username = c.Param("username")
 	var input validations.ChangePasswordValidation
@@ -383,4 +348,124 @@ func ChangePassword(c *gin.Context) {
 	config.DB.Model(&user).Where("username = ?", username).Update("password", user.Password)
 	c.JSON(http.StatusOK, gin.H{"message": "Password berhasil diubah", "status": 200})
 
+}
+
+func LoginPPDB(c *gin.Context) {
+	var input usercalonsiswa.LoginUserCalonSiswaValidation
+	if err := c.ShouldBind(&input); err != nil {
+		msg := usercalonsiswa.TranslateErrorLoginUserCalonSiswa(err)
+		c.JSON(http.StatusUnauthorized, gin.H{"message": msg, "status": 401})
+		return
+	}
+
+	var userCalonSiswa models.UserCalonSiswa
+
+	if err := config.DB.Where("username = ? ", input.Username).First(&userCalonSiswa).Error; err != nil {
+		c.JSON(403, gin.H{"message": "Username belum terdaftar", "status": 403})
+		return
+	}
+
+	if !utils.CheckPasswordHash(input.Password, userCalonSiswa.Password) {
+		c.JSON(403, gin.H{"message": "Password yang anda masukan salah", "status": 403})
+		return
+	}
+
+	token, err := utils.GenerateJWT(userCalonSiswa.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal memuat token", "status": 403})
+		return
+	}
+	var inputToken models.PersonalAccessToken
+	inputToken.Token = token
+	inputToken.TokenableType = "User"
+	inputToken.TokenableID = userCalonSiswa.Username
+	inputToken.Name = "Personal Access Token"
+	inputToken.Abilities = "*"
+
+	config.DB.Create(&inputToken)
+
+	// Di dalam controller saat LOGIN BERHASIL:
+	// Gunakan properti cookie standar go untuk mengatur SameSite secara eksplisit
+	c.Writer.Header().Set("Set-Cookie", "access_token="+token+"; Max-Age=86400; Path=/; SameSite=Lax; HttpOnly")
+
+	// ATAU jika menggunakan c.SetCookie bawaan Gin, pastikan parameternya seperti ini:
+	// c.SetCookie("access_token", token, 86400, "/", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"user": gin.H{"name": userCalonSiswa.NamaLengkap}, "message": "Anda berhasil login!", "status": 200})
+}
+
+func LogoutUserPPDB(c *gin.Context) {
+	// === MODIFIKASI LOGOUT DI SINI ===
+	// Ambil token langsung dari Cookie, bukan Header lagi
+	tokenString, err := c.Cookie("access_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+
+	var idToken models.PersonalAccessToken
+	if err := config.DB.Where("token = ?", tokenString).First(&idToken).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+	config.DB.Where("tokenable_id = ?", idToken.TokenableID).Delete(&models.PersonalAccessToken{})
+
+	// Hapus cookie di browser dengan mengatur MaxAge ke -1
+	c.SetCookie("access_token", "", -1, "/", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Berhasil logout"})
+}
+
+func RegisterPPDB(c *gin.Context) {
+	var input usercalonsiswa.RegisterUserCalonSiswaValidation
+
+	if err := c.ShouldBind(&input); err != nil {
+		msg := usercalonsiswa.TranslateErrorRegisterUserCalonSiswa(err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": msg, "status": 400}) // Ubah dari 401 ke 400 (Bad Request) lebih ideal untuk validasi
+		return
+	}
+
+	var userCalonSiswa models.UserCalonSiswa
+	tahun := time.Now().Year()
+	randomNum := rand.IntN(900000) + 100000
+	username := strconv.Itoa(tahun) + strconv.Itoa(randomNum)
+
+	// Lakukan proses Create
+	err := config.DB.Model(&userCalonSiswa).Create(map[string]interface{}{
+		"nama_lengkap": input.NamaLengkap,
+		"email":        input.Email,
+		"nomor_hp":     input.NomorHp,
+		"username":     username,
+		"password":     utils.HashPasswordUser(input.Password),
+	}).Error
+
+	if err != nil {
+		// Cek apakah errornya karena duplikat data (Duplicate entry di MySQL biasanya mengandung kode 1062)
+		// Atau Anda bisa mencetak log aslinya di terminal Go
+		fmt.Println("Error DB Create:", err.Error())
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Email atau nomor HP sudah terdaftar di sistem!",
+			"status":  400,
+		})
+		return
+	}
+
+	token, err := utils.GenerateJWT(username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal memuat token"})
+		return
+	}
+
+	var inputToken models.PersonalAccessToken
+	inputToken.Token = token
+	inputToken.TokenableType = "User"
+	inputToken.TokenableID = username
+	inputToken.Name = "Personal Access Token"
+	inputToken.Abilities = "*"
+
+	config.DB.Create(&inputToken)
+	notifications.NotificationRegisterPPDB(input.Email, input.NamaLengkap, "Selamat akun PPDB anda telah berhasil dibuat. Silahkan gunakan No registrasi dan password dibawah ini untuk masuk ke portal Login PPDB: ", input.Password, username)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Anda berhasil mendaftar! Silahkan cek email anda untuk melihat username dan password anda", "status": 200})
 }
