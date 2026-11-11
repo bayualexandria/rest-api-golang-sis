@@ -125,6 +125,8 @@ func SetupRoutersAPI(app *gin.Engine) {
 		// Siswa PPDB
 		siswaPPDB := route.Group("/siswa-ppdb")
 		siswaPPDB.GET("/", middleware.AuthMiddleware(), middleware.RoleMiddleware(1, 2, 3), controllers.GetDataCalonSiswa)
+		siswaPPDB.GET("/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetDataPPDBSiswaByUsername)
+		siswaPPDB.GET("/persyaratan/:username", middleware.AuthMiddleware(), middleware.RoleMiddleware(1), controllers.GetDokumenPersyaratanDataCalonSiswa)
 
 		// Trash Data
 		trash := route.Group("/trash")
@@ -137,10 +139,12 @@ func SetupRoutersAPI(app *gin.Engine) {
 
 		// PPDB
 		ppdb := route.Group("/ppdb")
+		// Calon Siswa
 		ppdb.GET("/user/:username", middleware.AuthMiddlewarePPDB(), controllers.GetUserCalonSiswaByUsername)
 		ppdb.GET("/data-siswa/:username", middleware.AuthMiddlewarePPDB(), controllers.GetDataCalonSiswaByUsername)
 		ppdb.GET("/dokumen-persyaratan/:username", middleware.AuthMiddlewarePPDB(), controllers.GetDokumenPersyaratanCalonSiswa)
 		ppdb.POST("/formulir", middleware.AuthMiddlewarePPDB(), controllers.AddDataCalonSiswa)
+		// Pemriksa
 
 		// Logout
 		route.POST("/logout/:nis", middleware.AuthMiddleware(), middleware.RoleMiddleware(4), controllers.LogoutUserSiswa)

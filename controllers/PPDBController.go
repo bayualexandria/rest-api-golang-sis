@@ -211,3 +211,39 @@ func GetDataCalonSiswaByUsername(c *gin.Context) {
 		},
 	})
 }
+
+func GetDataPPDBSiswaByUsername(c*gin.Context){
+	username := c.Param("username")
+	var calonSiswa models.CalonSiswa
+	var orangTua models.OrangTua
+
+	if err := config.DB.Where("id_user_calon_siswa = ?", username).First(&calonSiswa).Error; err != nil {
+		c.JSON(404, gin.H{"message": "Data calon siswa tidak ditemukan", "status": 404})
+		return
+	}
+
+	if err := config.DB.Where("id_siswa = ?", username).First(&orangTua).Error; err != nil {
+		c.JSON(404, gin.H{"message": "Data orang tua calon siswa tidak ditemukan", "status": 404})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"message": "Berhasil mendapatkan data calon siswa dan orang tua",
+		"status":  200,
+		"data": gin.H{
+			"calon_siswa": calonSiswa,
+			"orang_tua":   orangTua,
+		},
+	})
+}
+
+func GetDokumenPersyaratanDataCalonSiswa(c *gin.Context) {
+	username := c.Param("username")
+	var persyaratan []models.DokumenPersyaratanCalonSiswa
+
+	if err := config.DB.Where("id_user_calon_siswa = ?", username).Find(&persyaratan).Error; err != nil {
+		c.JSON(404, gin.H{"message": "Dokumen persyaratan calon siswa tidak ditemukan", "status": 404})
+		return
+	}
+	c.JSON(200, gin.H{"message": "Berhasil mendapatkan data dokumen persyaratan calon siswa", "status": 200, "data": persyaratan})
+}

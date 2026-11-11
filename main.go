@@ -15,9 +15,11 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+
 )
 
 func main() {
+	// 1. Load Environment Variables
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("File .env tidak ditemukan: %v", err)
@@ -26,7 +28,7 @@ func main() {
 	router := gin.Default()
 
 	// ==========================================
-	// 1. PASANG CORS DI POSISI PALING ATAS
+	// 2. PASANG CORS DI POSISI PALING ATAS
 	// ==========================================
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
@@ -57,9 +59,10 @@ func main() {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-	// 2. Koneksi ke database
+	// 3. Koneksi ke database
 	config.ConnectDatabase()
 
+	// 4. Setup HTML Views (Opsional, jika menggunakan SSR/HTML Templates)
 	var files []string
 	filepath.Walk("./views", func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(path, ".html") {
@@ -71,28 +74,29 @@ func main() {
 	router.NoRoute(func(c *gin.Context) {
 		c.HTML(404, "404.html", gin.H{"message": "Halaman tidak ditemukan", "status": 404})
 	})
-	router.LoadHTMLFiles(files...)
+
+	if len(files) > 0 {
+		router.LoadHTMLFiles(files...)
+	}
 
 	// ==========================================
-	// 3. STATIC ROUTE & ROUTER LAINNYA
+	// 5. STATIC ROUTE & ROUTER LAINNYA
 	// ==========================================
 	router.Static("/storage", "./storage")
 
-	// Setup routes web
+	// Setup routes web & API
 	routes.SetupRouters(router)
-
-	// Setup routes API
 	routes.SetupRoutersAPI(router)
 
-	// Seeders
+	// 6. Seeders Handler
 	if len(os.Args) > 1 && os.Args[1] == "seed" {
 		seeders.RunSeeders(config.DB)
+		return // Keluar setelah seeding selesai
 	}
 
+	// 7. Services & Schedulers
 	academicPeriodService := services.NewAcademicPeriodService(config.DB)
-	scheduler.StartAcademicPeriodScheduler(
-		academicPeriodService,
-	)
+	scheduler.StartAcademicPeriodScheduler(academicPeriodService)
 
 	absensiService := services.NewAbsensiService(config.DB)
 	if err := absensiService.GenerateAlpa(); err != nil {
@@ -102,5 +106,17 @@ func main() {
 	}
 
 	scheduler.StartAbsensiScheduler()
-	router.Run(os.Getenv("APP_URL"))
+
+	
+	// 9. Jalankan Server Gin
+	// Gunakan variabel APP_PORT atau default ke ":8080"
+	port := os.Getenv("APP_PORT")
+	if port == "" {
+		port = ":8080"
+	}
+
+	log.Printf("Server berjalan pada port %s", port)
+	if err := router.Run(port); err != nil {
+		log.Fatalf("Gagal menjalankan server: %v", err)
+	}
 }
