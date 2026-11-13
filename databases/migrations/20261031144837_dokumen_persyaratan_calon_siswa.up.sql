@@ -1,7 +1,7 @@
 CREATE TABLE dokumen_persyaratan_calon_siswa (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_user_calon_siswa BIGINT,
-    jenis_dokumen ENUM('Ijazah', 'Kartu Keluarga', 'Akta Lahir', 'Pas Foto', 'KTP Orang Tua') NOT NULL,
+    jenis_dokumen ENUM('Ijazah', 'Kartu Keluarga', 'Akta Lahir', 'Pas Foto', 'KTP Orang Tua','Lainnya') NOT NULL,
     nama_file VARCHAR(255) NOT NULL,
     path_file VARCHAR(255) NOT NULL,
     diunggah_pada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

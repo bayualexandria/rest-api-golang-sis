@@ -48,15 +48,17 @@ type DataCalonSiswaResponse struct {
 	NamaWali      string `json:"nama_wali"`
 	PekerjaanWali string `json:"pekerjaan_wali"`
 	NomorTelepon  string `json:"nomor_telepon"`
+	Status        string `json:"status"`
 }
 
 func GetDataCalonSiswa(c *gin.Context) {
 	var getData []DataCalonSiswaResponse
 
 	if err := config.DB.Table("user_calon_siswa").
-		Select("user_calon_siswa.nama_lengkap, user_calon_siswa.username AS no_registrasi, user_calon_siswa.email, calon_siswa.nik, calon_siswa.nisn, calon_siswa.jenis_kelamin, calon_siswa.agama, calon_siswa.ttl, calon_siswa.alamat, calon_siswa.sekolah_asal, calon_siswa.tahun_lulus, orang_tua.nik_ayah, orang_tua.nama_ayah, orang_tua.pekerjaan_ayah, orang_tua.nik_ibu, orang_tua.nama_ibu, orang_tua.pekerjaan_ibu, orang_tua.nama_wali, orang_tua.pekerjaan_wali, orang_tua.nomor_telepon").
+		Select("user_calon_siswa.nama_lengkap, user_calon_siswa.username AS no_registrasi, user_calon_siswa.email, calon_siswa.nik, calon_siswa.nisn, calon_siswa.jenis_kelamin, calon_siswa.agama, calon_siswa.ttl, calon_siswa.alamat, calon_siswa.sekolah_asal, calon_siswa.tahun_lulus, orang_tua.nik_ayah, orang_tua.nama_ayah, orang_tua.pekerjaan_ayah, orang_tua.nik_ibu, orang_tua.nama_ibu, orang_tua.pekerjaan_ibu, orang_tua.nama_wali, orang_tua.pekerjaan_wali, orang_tua.nomor_telepon, pendaftaran.status_verifikasi AS status").
 		Joins("JOIN orang_tua ON user_calon_siswa.username = orang_tua.id_siswa").
 		Joins("JOIN calon_siswa ON user_calon_siswa.username = calon_siswa.id_user_calon_siswa").
+		Joins("JOIN pendaftaran ON user_calon_siswa.username = pendaftaran.nomor_pendaftaran").
 		Scan(&getData).Error; err != nil {
 		c.JSON(500, gin.H{"message": "Gagal mendapatkan data calon siswa", "status": 500})
 		return
@@ -161,10 +163,50 @@ func AddDataCalonSiswa(c *gin.Context) {
 		return nil
 	})
 
+	var calonSiswa models.CalonSiswa
+
+	if err := config.DB.Model(&calonSiswa).Where("id_user_calon_siswa = ?", request.IdUserCalonSiswa).First(&calonSiswa).Error; err != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal menyimpan data pendaftaran dan dokumen persyaratan",
+			"error":   errTx.Error(),
+			"status":  500,
+		})
+		return
+
+	}
+
 	if errTx != nil {
 		c.JSON(500, gin.H{
 			"message": "Gagal menyimpan data pendaftaran dan dokumen persyaratan",
 			"error":   errTx.Error(),
+			"status":  500,
+		})
+		return
+	}
+
+	now := time.Now()
+
+	tanggalDB := time.Date(
+		now.Year(),
+		now.Month(),
+		now.Day(),
+		0,
+		0,
+		0,
+		0,
+		now.Location(),
+	)
+
+	if err := config.DB.Table("pendaftaran").Create(map[string]interface{}{
+		"nomor_pendaftaran":    request.IdUserCalonSiswa,
+		"id_jalur_pendaftaran": 1,
+		"tanggal_daftar":       tanggalDB,
+		"status_verifikasi":    "Pending",
+		"catatan_verifikasi":   "",
+		"status_kelulusan":     "Proses",
+	}).Error; err != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal menyimpan data pendaftaran dan dokumen persyaratan",
 			"status":  500,
 		})
 		return
@@ -212,7 +254,7 @@ func GetDataCalonSiswaByUsername(c *gin.Context) {
 	})
 }
 
-func GetDataPPDBSiswaByUsername(c*gin.Context){
+func GetDataPPDBSiswaByUsername(c *gin.Context) {
 	username := c.Param("username")
 	var calonSiswa models.CalonSiswa
 	var orangTua models.OrangTua
