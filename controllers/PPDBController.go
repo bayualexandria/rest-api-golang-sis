@@ -4,6 +4,7 @@ import (
 	"backend-api/config"
 	"backend-api/models"
 	"backend-api/validations/ppdb"
+	"backend-api/validations/ppdb/pendaftaranValidation"
 	"fmt"
 	"mime/multipart"
 	"os"
@@ -196,8 +197,31 @@ func AddDataCalonSiswa(c *gin.Context) {
 		0,
 		now.Location(),
 	)
+	var pendaftaran models.Pendaftaran
+	if err := config.DB.Model(&pendaftaran).Where("nomor_pendaftaran = ?", request.IdUserCalonSiswa).First(&pendaftaran).Error; err != nil {
+		if err := config.DB.Table("pendaftaran").Create(map[string]interface{}{
+			"nomor_pendaftaran":    request.IdUserCalonSiswa,
+			"id_jalur_pendaftaran": 1,
+			"tanggal_daftar":       tanggalDB,
+			"status_verifikasi":    "Pending",
+			"catatan_verifikasi":   "",
+			"status_kelulusan":     "Proses",
+		}).Error; err != nil {
+			c.JSON(500, gin.H{
+				"message": "Gagal menyimpan data pendaftaran dan dokumen persyaratan",
+				"status":  500,
+			})
+			return
+		}
 
-	if err := config.DB.Table("pendaftaran").Create(map[string]interface{}{
+		c.JSON(200, gin.H{
+			"message": "Data calon siswa beserta dokumen persyaratan berhasil disimpan",
+			"status":  200,
+		})
+		return
+
+	}
+	if err := config.DB.Table("pendaftaran").Where("nomor_pendaftaran = ?", request.IdUserCalonSiswa).Updates(map[string]interface{}{
 		"nomor_pendaftaran":    request.IdUserCalonSiswa,
 		"id_jalur_pendaftaran": 1,
 		"tanggal_daftar":       tanggalDB,
@@ -218,6 +242,102 @@ func AddDataCalonSiswa(c *gin.Context) {
 	})
 }
 
+func UpdateDataPendaftaran(c *gin.Context) {
+	username := c.Param("username")
+	var pendaftaran models.Pendaftaran
+	var request pendaftaranValidation.UpdatePendaftaranValidation
+	var calonSiswa models.CalonSiswa
+	var orangTua models.OrangTua
+	var persyaratanCalonSiswa models.DokumenPersyaratanCalonSiswa
+
+	if err := config.DB.Model(&pendaftaran).Where("nomor_pendaftaran = ?", username).First(&pendaftaran).Error; err != nil {
+		c.JSON(404, gin.H{"message": "Data pendaftaran tidak ditemukan", "status": 404})
+		return
+	}
+
+	if err := c.ShouldBind(&request); err != nil {
+		msg := pendaftaranValidation.TranslateUpdatePendaftaranError(err)
+
+		c.JSON(400, gin.H{
+			"message": "Anda belum merubah data!",
+			"data":    msg,
+			"status":  400,
+		})
+
+		return
+	}
+
+	if request.CatatanVerifikasi != "" {
+		pendaftaran.CatatanVerifikasi = request.CatatanVerifikasi
+	}
+
+	if request.StatusVerifikasi != "" {
+		pendaftaran.StatusVerifikasi = request.StatusVerifikasi
+	}
+
+	if request.StatusVerifikasi == "Ditolak" {
+		if err := config.DB.Model(&calonSiswa).Where("id_user_calon_siswa = ?", username).Delete(&calonSiswa).Error; err != nil {
+			c.JSON(500, gin.H{
+				"message": "Gagal menghapus data calon siswa",
+				"error":   err.Error(),
+				"status":  500,
+			})
+
+			return
+		}
+
+		if err := config.DB.Model(&orangTua).Where("id_siswa = ?", username).Delete(&orangTua).Error; err != nil {
+			c.JSON(500, gin.H{
+				"message": "Gagal menghapus data orang tua",
+				"error":   err.Error(),
+				"status":  500,
+			})
+
+			return
+		}
+
+		// Menghapus folder beserta seluruh isi di dalam folder username secara total
+		// Sesuaikan path jika letak foldernya berbeda (misal: "storage/" + username)
+		dirPath := "storage/ppdb/" + username
+		if err := os.RemoveAll(dirPath); err != nil {
+			c.JSON(500, gin.H{
+				"message": "Gagal menghapus folder beserta file user",
+				"error":   err.Error(),
+				"status":  500,
+			})
+			return
+		}
+
+		if err := config.DB.Model(&persyaratanCalonSiswa).Where("id_user_calon_siswa = ?", username).Delete(&persyaratanCalonSiswa).Error; err != nil {
+			c.JSON(500, gin.H{
+				"message": "Gagal menghapus data persyaratan siswa",
+				"error":   err.Error(),
+				"status":  500,
+			})
+
+			return
+		}
+	}
+
+	if err := config.DB.Model(&pendaftaran).Where("nomor_pendaftaran = ?", username).Updates(map[string]interface{}{
+		"catatan_verifikasi": request.CatatanVerifikasi,
+		"status_verifikasi":  request.StatusVerifikasi,
+	}).Error; err != nil {
+		c.JSON(500, gin.H{
+			"message": "Gagal mengupdate data pendaftaran",
+			"error":   err.Error(),
+			"status":  500,
+		})
+
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": true,
+		"message": "Data pendaftaran berhasil diupdate",
+		"status":  200,
+	})
+}
 func GetDokumenPersyaratanCalonSiswa(c *gin.Context) {
 	username := c.Param("username")
 	var persyaratan []models.DokumenPersyaratanCalonSiswa
@@ -252,6 +372,18 @@ func GetDataCalonSiswaByUsername(c *gin.Context) {
 			"orang_tua":   orangTua,
 		},
 	})
+}
+
+func GetDataPendaftaranByUsername(c *gin.Context) {
+	username := c.Param("username")
+	var pendaftaran models.Pendaftaran
+
+	if err := config.DB.Model(&pendaftaran).Where("nomor_pendaftaran = ?", username).First(&pendaftaran).Error; err != nil {
+		c.JSON(404, gin.H{"message": "Data pendaftaran tidak ditemukan", "status": 404})
+		return
+	}
+
+	c.JSON(200, gin.H{"message": "Berhasil menampilkan data pendaftaran", "status": 200, "data": pendaftaran})
 }
 
 func GetDataPPDBSiswaByUsername(c *gin.Context) {
